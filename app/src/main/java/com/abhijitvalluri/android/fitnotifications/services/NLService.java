@@ -1,4 +1,4 @@
-package com.abhijitvalluri.android.fitnotifications;
+package com.abhijitvalluri.android.fitnotifications.services;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -16,6 +16,10 @@ import android.support.v7.app.NotificationCompat;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import com.abhijitvalluri.android.fitnotifications.utils.AppSelectionsStore;
+import com.abhijitvalluri.android.fitnotifications.utils.Constants;
+import com.abhijitvalluri.android.fitnotifications.R;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +27,7 @@ import java.util.List;
 /**
  * Blaze Notification Service
  */
-public class NotificationListener extends NotificationListenerService {
+public class NLService extends NotificationListenerService {
 
     private static final Integer NOTIFICATION_ID = (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
     private final Handler mHandler = new Handler();
@@ -202,7 +206,7 @@ public class NotificationListener extends NotificationListenerService {
 
     // Checks if the notification comes from a selected application
     private boolean notificationFromSelectedApp(String appPackageName) {
-        return NotificationListener.mSelectedAppsPackageNames.contains(appPackageName);
+        return NLService.mSelectedAppsPackageNames.contains(appPackageName);
     }
 
     public static void setEnabled(boolean enabled) {

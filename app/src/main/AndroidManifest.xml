@@ -8,7 +8,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".FitNotifications">
+        <activity android:name=".HomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -40,15 +40,21 @@
         <activity
             android:name=".AppChoicesActivity"
             android:label="@string/app_choices_activity_title"
-            android:parentActivityName=".FitNotifications">
-        </activity>
+            android:parentActivityName=".HomeActivity" />
         <activity
             android:name=".InfoActivity"
-            android:parentActivityName=".FitNotifications">
-        </activity>
+            android:parentActivityName=".HomeActivity" />
+        <activity
+            android:name=".AppIntroActivity"
+            android:theme="@style/IntroTheme"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/settings_menu"
+            android:parentActivityName=".HomeActivity" />
 
         <service
-            android:name=".NotificationListener"
+            android:name=".services.NLService"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
             android:enabled="true">
@@ -56,12 +62,6 @@
                 <action android:name="android.service.notification.NotificationListenerService"/>
             </intent-filter>
         </service>
-
-        <activity
-            android:name=".SettingsActivity"
-            android:label="@string/settings_menu"
-            android:parentActivityName=".FitNotifications">
-        </activity>
     </application>
 
 </manifest>

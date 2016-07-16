@@ -8,8 +8,8 @@ android {
         applicationId "com.abhijitvalluri.android.fitnotifications"
         minSdkVersion 19
         targetSdkVersion 23
-        versionCode 7
-        versionName "2.2"
+        versionCode 9
+        versionName "2.3.1"
     }
     buildTypes {
         debug {
@@ -30,4 +30,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.support:recyclerview-v7:23.3.0'
     compile 'com.android.support:support-v4:23.3.0'
+    compile 'com.heinrichreimersoftware:material-intro:1.5.5'
 }

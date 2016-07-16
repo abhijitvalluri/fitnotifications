@@ -51,4 +51,13 @@
             app:maxValue="60"
             app:wrapSelectorWheel="false" />
     </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/debug_settings">
+        <SwitchPreference
+            android:title="@string/override_interactive_setup_title"
+            android:summary="@string/override_interactive_setup_disabled_summary"
+            android:key="@string/override_interactive_setup_key"
+            android:defaultValue="false" />
+    </PreferenceCategory>
 </PreferenceScreen>

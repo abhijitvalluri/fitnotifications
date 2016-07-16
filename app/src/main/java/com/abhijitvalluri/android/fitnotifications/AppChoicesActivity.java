@@ -22,6 +22,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
+import com.abhijitvalluri.android.fitnotifications.services.NLService;
+import com.abhijitvalluri.android.fitnotifications.utils.AppSelectionsStore;
+import com.abhijitvalluri.android.fitnotifications.utils.Constants;
+import com.abhijitvalluri.android.fitnotifications.utils.Func;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -137,7 +141,7 @@ public class AppChoicesActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        NotificationListener.onAppSelectionsUpdated(this);
+        NLService.onAppSelectionsUpdated(this);
     }
 
     @Override
@@ -147,11 +151,8 @@ public class AppChoicesActivity extends AppCompatActivity {
     }
 
     private Void appListTask() {
-        Intent startupIntent = new Intent(Intent.ACTION_MAIN);
-        startupIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-
-        List<ResolveInfo> activities = mPackageManager.queryIntentActivities(startupIntent, 0);
-        Collections.sort(activities, new Comparator<ResolveInfo>() {
+        List<ResolveInfo> packages = Func.getInstalledPackages(mPackageManager);
+        Collections.sort(packages, new Comparator<ResolveInfo>() {
             @Override
             public int compare(ResolveInfo lhs, ResolveInfo rhs) {
                 return String.CASE_INSENSITIVE_ORDER.compare(
@@ -163,7 +164,7 @@ public class AppChoicesActivity extends AppCompatActivity {
         // getAppSelectionsSubList is also needed for the subsequent calls to contains()
         List<AppSelection> appSelections = mAppSelectionsStore.getAppSelections();
 
-        for (ResolveInfo info : activities) {
+        for (ResolveInfo info : packages) {
             String appPackageName = info.activityInfo.packageName;
             String appName = info.loadLabel(mPackageManager).toString();
 
@@ -174,7 +175,7 @@ public class AppChoicesActivity extends AppCompatActivity {
 
         // Remove uninstalled apps from the database.
         for (AppSelection appSelection : appSelections) {
-            if (isUninstalled(appSelection.getAppPackageName(), activities)) {
+            if (isUninstalled(appSelection.getAppPackageName(), packages)) {
                 mAppSelectionsStore.deleteAppSelection(appSelection);
             }
         }

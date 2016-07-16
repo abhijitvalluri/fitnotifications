@@ -1,34 +1,97 @@
 <resources>
+    <!-- General App strings -->
     <string name="app_name">Fit Notifications</string>
     <string name="app_icon">Fit Notifications App Icon</string>
     <string name="other_app_icon">App icon of an installed app</string>
-    <string name="about_app">About Fit Notifications</string>
-    <string name="app_info">Fit Notifications Menu:</string>
-    <string name="instructions">Instructions</string>
-    <string name="instructions_heading">Before you begin:</string>
+    <string name="about_app">About App</string>
+    <string name="app_info">Fit Notifications Menu</string>
+    <string name="instructions">Start interactive setup</string>
+    <string name="instructions_manual">Show manual setup instructions</string>
+    <string name="instructions_manual_heading">Show manual setup instructions</string>
+    <string name="instructions_heading">Setup</string>
     <string name="faqs">Frequently Asked Questions</string>
-    <string name="changelog">App Revision History</string>
+    <string name="whats_new">What\'s new</string>
     <string name="disclaimer">Disclaimer</string>
     <string name="credits">Credits</string>
     <string name="app_choices">Select Apps to Enable Notifications</string>
     <string name="app_choices_activity_title">Select Apps</string>
     <string name="enabled_apps_filter_menu">Filter Enabled Apps</string>
     <string name="notification_service_started">Fit Notifications Service started</string>
-    <string name="notification_text">Fit Notifications relayed the notification. You can dismiss this.</string>
-    <string name="demo_notification_text">You should get a demo notification on your Fitbit device.</string>
-    <string name="demo_notification">Demo Notification</string>
+    <string name="notification_text">[Relayed notification] Go to settings to enable auto-dismiss.</string>
+    <string name="test_notification_text">[Placeholder notification] Go to settings to enable auto-dismiss.</string>
+    <string name="test_notification">Test Notification</string>
+    <string name="test_notification_sent">Test notification sent</string>
     <string name="notification_access">Notification Access</string>
     <string name="enable_notification_access">Enable Notification Access</string>
+    <string name="disable_notification_access">Disable Notification Access</string>
     <string name="start_service_info_text">Starting the notification service&#8230;</string>
     <string name="start_service">Start Service</string>
     <string name="stop_service">Stop Service</string>
     <string name="search_menu">App search</string>
 
+    <!-- Intro Strings Activity -->
+    <string name="intro_get_started_button">Get started</string>
+    <string name="intro_welcome_title">Get all your notifications on your Fitbit device</string>
+    <string name="intro_welcome_desc">This app is designed for use with the Fitbit platform. It requires the official Fitbit app, and is compatible with Fitbit Alta, Blaze and Surge. We are not affiliated with Fitbit, Inc.</string>
+
+    <string name="intro_enable_access_title">First, enable notification access</string>
+    <string name="intro_enable_access_desc">You must enable notification access for this app and the official Fitbit app. Click the button below, and then enable access for both apps in the next screen.</string>
+
+    <string name="intro_enable_access_update_title">Notification access enabled</string>
+    <string name="intro_enable_access_update_desc">Nice, We now have notification access! Let\'s move on to the next step.</string>
+
+    <string name="intro_enable_access_success_title">Great, you already enabled notification access!</string>
+    <string name="intro_enable_access_success_desc">This app requires notification access to work. And looks like you have already enabled it! Move on to the next step!</string>
+
+    <string name="intro_get_fitbit_title">Install the official Fitbit app!</string>
+    <string name="intro_get_fitbit_desc">Looks like you don\'t have the official Fitbit app installed. We\'ll need that, so let\'s install it by clicking the button below.</string>
+    <string name="intro_get_fitbit_button">Install Fitbit app</string>
+
+    <string name="intro_setup_fitbit_title1">Setup notifications in Fitbit app: Step 1</string>
+    <string name="intro_setup_fitbit_title2">Setup notifications in Fitbit app: Step 2</string>
+    <string name="intro_setup_fitbit_title3">Setup notifications in Fitbit app: Step 3</string>
+    <string name="intro_setup_fitbit_desc1">First, go into device settings by clicking the device icon in the Fitbit app.</string>
+    <string name="intro_setup_fitbit_toast_text1">Only Fitbit Alta, Blaze and Surge models are compatible!</string>
+    <string name="intro_setup_fitbit_toast_button">Compatible Fitbit devices</string>
+
+    <string name="intro_setup_fitbit_desc2">Select \'Call and Text Notifications\' under \'General\'. Then, Select \'Text Notifications\' under \'Settings\'.</string>
+    <string name="intro_setup_fitbit_desc3">Choose \'Fit Notifications\'. Then, sync your Fitbit device within the Fitbit app. Do not choose this app for Call/Calendar Notifications, otherwise you will NOT get any notifications.</string>
+    <string name="intro_setup_fitbit_button3">Open Fitbit app</string>
+    <string name="intro_get_fitbit_toast_text3">Fitbit app not found! Go back and install the official Fitbit app!</string>
+
+    <string name="intro_select_apps_title">Choose the apps you want notifications for</string>
+    <string name="intro_select_apps_desc">You can now choose the apps whose notifications you want to receive on your Fitbit device. They will appear like Text Notifications on the device and will have the app name for clarity.</string>
+
+    <string name="intro_start_service_title">Start the notification listening service</string>
+    <string name="intro_start_service_desc">This service will try to stay in the background. If you stop receiving notifications, restart the service from this app. Don\'t use task killer apps, as they can disable the service.</string>
+
+    <string name="intro_dnd_mode_title">Do not disturb mode on Android 6.0+ (Marshmallow)</string>
+    <string name="intro_dnd_mode_desc">If you enable do not disturb mode, then no notifications will be forwarded to your Fitbit device, by default. To change that, you need to follow specific instructions by clicking below.</string>
+    <string name="intro_dnd_mode_button">Extra Instructions</string>
+    <string name="intro_dnd_mode_message">
+    Click on configure below. In the next screen, choose \"Notifications\" and enable \"Treat as priority\".\n\n
+    Now, when you use silent mode, enable \"Priority Only\". Doing so will allow you to get notifications via the app on your Fitbit device, but it will not
+    make any notification sound on the phone as this app doesn\'t cause notification sounds or vibrations anyway.
+    </string>
+
+    <string name="intro_done_title">Done! Test your setup now!</string>
+    <string name="intro_done_desc">Click the button below to send a test notification. You will see it on your device if the setup was successful! That\'s the basics! Check out the settings page for additional features!</string>
+
+
+    <!-- First launch -->
+    <string name="done_first_launch_key">FirstLaunch</string>
+    <string name="version_key">AppVersion</string>
+    <string name="setup_incomplete">Setup is incomplete! Please review the interactive setup once, even if you successfully configured a previous version of the app. </string>
+    <string name="setup_incomplete_title">Incomplete Setup</string>
+
+    <!-- Settings Menu -->
+    <!-- Settings Menu headings -->
     <string name="settings_menu">Settings</string>
     <string name="save_settings">Save Settings</string>
     <string name="placeholder_notif_settings">Placeholder Notification Settings</string>
     <string name="relayed_notif_settings">Relayed Notification Settings</string>
     <string name="limit_notif_settings">Notification Limit Settings</string>
+    <string name="debug_settings">Troubleshooting Settings</string>
 
     <string name="dismiss_placeholder_notif">Dismiss Placeholder Notification</string>
     <string name="dismiss_placeholder_notif_summary">Enable this to automatically dismiss the placeholder notification from the Fit Notifications app, after a delay</string>
@@ -66,11 +129,17 @@
     </plurals>
     <string name="relayed_dismiss_delay_key">RelayedDismissDelay</string>
 
+    <string name="override_interactive_setup_key">overrideInteractiveSetupKey</string>
+    <string name="override_interactive_setup_enabled_summary">Override it. Interactive setup is disabled and will show original manual setup instructions instead.</string>
+    <string name="override_interactive_setup_disabled_summary">Do not override. Interactive setup is enabled.</string>
+    <string name="override_interactive_setup_title">Override Interactive Setup</string>
+
+    <!-- App Choice Activity -->
     <string name="app_list_loading_text">Loading app list&#8230;</string>
     <string name="app_list_empty_search">No apps fit your search criteria.</string>
     <string name="search_query_hint">Type app name&#8230;</string>
 
-
+    <!-- HTML Information -->
     <string name="about_app_text"><![CDATA[
     <p>Fit Notifications is a third party application that allows you to send notifications from any of the apps installed on your phone to your compatible Fitbit device.
        In order to properly setup this application, please follow the provided instructions.</p>
@@ -147,46 +216,15 @@
        email to inform us the name of the application (including Google Play Store link) for which you are missing notifications.
        We will attempt to resolve this issue in an update.</p>
     ]]></string>
-    <string name="changelog_text"><![CDATA[
-    <p>Version 2.2:</p>
+    <string name="whats_new_text"><![CDATA[
+    <p>You just updated to Fit Notifications <b>version 2.3.1</b>! The following changes are made in this version:</p>
     <ul>
-        <li>Added new settings:</li>
-        <ul>
-            <li>Auto-dismiss placeholder notification from Fit Notifications, after a delay</li>
-            <li>Auto-dismiss relayed notification from other apps, after a delay</li>
-            <li>Limit the number of notifications relayed from each enabled app</li>
-        </ul>
-        <li>Addressed bug reported by some users where an app may send multiple notifications in a short duration. Use the new \'Notifications Limit Settings\' to fix this issue.</li>
-        <li>Updated instructions and FAQs with additional information to help setup the app successfully.</li>
+        <li>New troubleshooting settings option: \"Override Interactive Setup\" <br /><br />
+        Use this feature if you have issues with the new (BETA) interactive setup mode, or simply prefer the original, manual setup! Let us know of any issues with the interactive mode, and give detailed information about your setup to help us debug and fix it.
+        <br /><br /></li>
+        <li>General user interface improvements and maintenance fixes</li>
     </ul>
-    <p>Version 2.1:</p>
-    <ul>
-        <li>Bug fixes: fixed bug where Fit Notifications continues to send notifications for apps that were disabled,
-          corrected behavior of \'Stop Service\' button to properly disable notification relay service.</li>
-        <li>Improved overall responsiveness of the Fit Notifications app.</li>
-        <li>NEW FEATURE! You can now search for apps and filter enabled apps in the \'Select Apps\' screen.</li>
-        <li>Improved Fit Notifications Menu layout in landscape mode.</li>
-    </ul>
-    <p>Version 2.0:</p>
-    <ul>
-        <li>Major update! This app is now compatible from Android 4.4 (KitKat).</li>
-        <li>Big UI change! All the information is displayed in helpful menu items.</li>
-        <li>New layout for landscape mode.</li>
-        <li>New animations to make the app feel more smooth!</li>
-        <li>NEW FEATURE! You can now choose specific apps for which you want to get notifications!</li>
-        <li>Overall bug fixes and stability improvements.</li>
-    </ul>
-    <p>Version 1.0.1:</p>
-    <ul>
-        <li>Small update to clarify the instructions and provided some FAQs in the app.</li>
-        <li>Modified behavior of \'Enable Notification Access\' pop-up dialog. Now, it is triggered by pressing
-            \'Notification Access\' button.</li>
-        <li>Fixed app UI in landscape mode.</li>
-    </ul>
-    <p>Version 1.0:</p>
-    <ul>
-        <li>First release of Fit Notifications.</li>
-    </ul>
+
     ]]></string>
     <string name="disclaimer_text"><![CDATA[
     <p>Fitbit is a registered trademark and service mark of Fitbit, Inc.

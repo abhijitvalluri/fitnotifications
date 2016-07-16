@@ -5,7 +5,6 @@ package com.abhijitvalluri.android.fitnotifications.models;
  */
 public class AppSelection {
 
-
     private String mAppPackageName;
     private String mAppName;
     private boolean mIsSelected;

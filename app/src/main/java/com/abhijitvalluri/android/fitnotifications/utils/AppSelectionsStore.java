@@ -1,4 +1,4 @@
-package com.abhijitvalluri.android.fitnotifications;
+package com.abhijitvalluri.android.fitnotifications.utils;
 
 import android.content.ContentValues;
 import android.content.Context;
