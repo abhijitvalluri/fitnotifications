@@ -2,13 +2,16 @@ package com.abhijitvalluri.android.fitnotifications.services;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -16,6 +19,7 @@ import android.support.v7.app.NotificationCompat;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import com.abhijitvalluri.android.fitnotifications.SettingsActivity;
 import com.abhijitvalluri.android.fitnotifications.utils.AppSelectionsStore;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
 import com.abhijitvalluri.android.fitnotifications.R;
@@ -110,6 +114,20 @@ public class NLService extends NotificationListenerService {
             return;
         }
 
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        boolean isScreenOn;
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+            // API >= 20
+            isScreenOn = pm.isInteractive();
+        } else {
+            // API <= 19, use deprecated
+            isScreenOn = pm.isScreenOn();
+        }
+
+        if (isScreenOn) {
+            return;
+        }
+
         Notification notification = sbn.getNotification();
         final String appPackageName = sbn.getPackageName();
 
@@ -168,6 +186,25 @@ public class NLService extends NotificationListenerService {
                 .setContentText(sb.toString())
                 .setContentTitle(extras.getCharSequence(Notification.EXTRA_TITLE))
                 .setContent(contentView);
+
+        // Creates an explicit intent for the SettingsActivity in the app
+        Intent settingsIntent = new Intent(this, SettingsActivity.class);
+
+        // The stack builder object will contain an artificial back stack for the
+        // started Activity.
+        // This ensures that navigating backward from the Activity leads out of
+        // the application to the Home screen.
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        // Adds the back stack for the Intent (but not the Intent itself)
+        stackBuilder.addParentStack(SettingsActivity.class);
+        // Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(settingsIntent);
+        PendingIntent settingsPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
 
         mNotificationManager.notify(NOTIFICATION_ID, builder.build());
 

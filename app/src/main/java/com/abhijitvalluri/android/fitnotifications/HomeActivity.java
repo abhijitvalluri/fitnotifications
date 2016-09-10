@@ -3,6 +3,8 @@ package com.abhijitvalluri.android.fitnotifications;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -253,12 +255,31 @@ public class HomeActivity extends AppCompatActivity
                 }
 
                 RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.custom_notification);
-                contentView.setTextViewText(R.id.customNotificationText, getString(R.string.test_notification_text));
+                contentView.setTextViewText(R.id.customNotificationText, getString(R.string.placeholder_notification_text));
                 builder.setSmallIcon(R.mipmap.ic_launcher)
                         .setContentText(sb.toString())
                         .setExtras(newExtra)
                         .setContentTitle("Sample Notification Title")
                         .setContent(contentView);
+
+                // Creates an explicit intent for the SettingsActivity in the app
+                Intent settingsIntent = new Intent(HomeActivity.this, SettingsActivity.class);
+
+                // The stack builder object will contain an artificial back stack for the
+                // started Activity.
+                // This ensures that navigating backward from the Activity leads out of
+                // the application to the Home screen.
+                TaskStackBuilder stackBuilder = TaskStackBuilder.create(HomeActivity.this);
+                // Adds the back stack for the Intent (but not the Intent itself)
+                stackBuilder.addParentStack(SettingsActivity.class);
+                // Adds the Intent that starts the Activity to the top of the stack
+                stackBuilder.addNextIntent(settingsIntent);
+                PendingIntent settingsPendingIntent =
+                        stackBuilder.getPendingIntent(
+                                0,
+                                PendingIntent.FLAG_UPDATE_CURRENT
+                        );
+                builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
 
                 ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
                         .notify(NOTIFICATION_ID, builder.build());

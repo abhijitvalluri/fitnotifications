@@ -2,6 +2,8 @@ package com.abhijitvalluri.android.fitnotifications;
 
 import android.app.ActivityOptions;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -253,12 +255,31 @@ public class AppIntroActivity extends IntroActivity {
                         }
 
                         RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.custom_notification);
-                        contentView.setTextViewText(R.id.customNotificationText, getString(R.string.test_notification_text));
+                        contentView.setTextViewText(R.id.customNotificationText, getString(R.string.placeholder_notification_text));
                         builder.setSmallIcon(R.mipmap.ic_launcher)
                                 .setContentText(sb.toString())
                                 .setExtras(newExtra)
                                 .setContentTitle("Sample Notification Title")
                                 .setContent(contentView);
+
+                        // Creates an explicit intent for the SettingsActivity in the app
+                        Intent settingsIntent = new Intent(AppIntroActivity.this, SettingsActivity.class);
+
+                        // The stack builder object will contain an artificial back stack for the
+                        // started Activity.
+                        // This ensures that navigating backward from the Activity leads out of
+                        // the application to the Home screen.
+                        TaskStackBuilder stackBuilder = TaskStackBuilder.create(AppIntroActivity.this);
+                        // Adds the back stack for the Intent (but not the Intent itself)
+                        stackBuilder.addParentStack(SettingsActivity.class);
+                        // Adds the Intent that starts the Activity to the top of the stack
+                        stackBuilder.addNextIntent(settingsIntent);
+                        PendingIntent settingsPendingIntent =
+                                stackBuilder.getPendingIntent(
+                                        0,
+                                        PendingIntent.FLAG_UPDATE_CURRENT
+                                );
+                        builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
 
                         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
                                 .notify(NOTIFICATION_ID, builder.build());
@@ -283,15 +304,6 @@ public class AppIntroActivity extends IntroActivity {
         setButtonBackFunction(BUTTON_BACK_FUNCTION_BACK);
         setButtonNextVisible(true);
         setButtonNextFunction(BUTTON_NEXT_FUNCTION_NEXT_FINISH);
-
-        /**
-         * Custom fragment slide
-         */
-       /* addSlide(new FragmentSlide.Builder()
-                .background(R.color.background_2)
-                .backgroundDark(R.color.background_dark_2)
-                .fragment(R.layout.fragment_2, R.style.FragmentTheme)
-                .build());*/
     }
 
     @Override

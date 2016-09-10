@@ -17,8 +17,8 @@
     <string name="app_choices_activity_title">Select Apps</string>
     <string name="enabled_apps_filter_menu">Filter Enabled Apps</string>
     <string name="notification_service_started">Fit Notifications Service started</string>
-    <string name="notification_text">[Relayed notification] Go to settings to enable auto-dismiss.</string>
-    <string name="test_notification_text">[Placeholder notification] Go to settings to enable auto-dismiss.</string>
+    <string name="placeholder_notification_text">[Placeholder notification] Click to enable auto-dismiss.</string>
+    <string name="notification_text">[Placeholder notification] Click to enable auto-dismiss. You can enable auto-dismiss for the relayed notification as well.</string>
     <string name="test_notification">Test Notification</string>
     <string name="test_notification_sent">Test notification sent</string>
     <string name="notification_access">Notification Access</string>
@@ -51,7 +51,7 @@
     <string name="intro_setup_fitbit_title2">Setup notifications in Fitbit app: Step 2</string>
     <string name="intro_setup_fitbit_title3">Setup notifications in Fitbit app: Step 3</string>
     <string name="intro_setup_fitbit_desc1">First, go into device settings by clicking the device icon in the Fitbit app.</string>
-    <string name="intro_setup_fitbit_toast_text1">Only Fitbit Alta, Blaze and Surge models are compatible!</string>
+    <string name="intro_setup_fitbit_toast_text1">Only Fitbit Alta, Blaze, Surge and Charge 2 models are compatible!</string>
     <string name="intro_setup_fitbit_toast_button">Compatible Fitbit devices</string>
 
     <string name="intro_setup_fitbit_desc2">Select \'Call and Text Notifications\' under \'General\'. Then, Select \'Text Notifications\' under \'Settings\'.</string>
@@ -94,38 +94,38 @@
     <string name="debug_settings">Troubleshooting Settings</string>
 
     <string name="dismiss_placeholder_notif">Dismiss Placeholder Notification</string>
-    <string name="dismiss_placeholder_notif_summary">Enable this to automatically dismiss the placeholder notification from the Fit Notifications app, after a delay</string>
+    <string name="dismiss_placeholder_notif_summary">Enable this to automatically dismiss the placeholder notification from the Fit Notifications app, after a delay.</string>
     <string name="dismiss_placeholder_notif_key">DismissAppNotification</string>
 
     <string name="dismiss_relayed_notif">Dismiss Relayed Notifications</string>
-    <string name="dismiss_relayed_notif_summary">Enable this to automatically dismiss the relayed notification, after a delay</string>
+    <string name="dismiss_relayed_notif_summary">Enable this to automatically dismiss the relayed notification, after a delay.</string>
     <string name="dismiss_relayed_notif_key">DismissOtherNotifications</string>
 
     <string name="limit_notif">Limit Number of Relayed Notifications</string>
-    <string name="limit_notif_summary">Enable this to limit the number of notifications relayed to your Fitbit device from each app\n\nUse this if you receive too many notifications on your device in a short duration</string>
+    <string name="limit_notif_summary">Enable this to limit the number of notifications relayed to your Fitbit device from each app.\n\nUse this if you receive too many notifications on your device in a short duration.</string>
     <string name="limit_notif_key">limitNotifications</string>
 
     <string name="notif_limit_duration">Limit Duration</string>
     <string name="notif_limit_duration_key">NotiflimitDuration</string>
     <string name="notif_limit_duration_summary0">All notifications are sent as they arrive, without limitation.</string>
     <plurals name="notif_limit_duration_summary">
-        <item quantity="one">Relay one notification every %1$d second for each enabled app\n\nAdditional notifications are discarded</item>
-        <item quantity="other">Relay one notification every %1$d seconds for each enabled app\n\nAdditional notifications are discarded</item>
+        <item quantity="one">Relay one notification every %1$d second for each enabled app. Additional notifications are discarded.</item>
+        <item quantity="other">Relay one notification every %1$d seconds for each enabled app. Additional notifications are discarded.</item>
     </plurals>
 
     <string name="placeholder_dismiss_delay">Delay</string>
     <string name="placeholder_dismiss_delay_summary0">Placeholder notification from this app will not be dismissed automatically.</string>
     <plurals name="placeholder_dismiss_delay_summary">
-        <item quantity="one">%1$d second, then dismiss placeholder notification\n\nChoose a higher delay if you don\'t get the notification on your Fitbit device</item>
-        <item quantity="other">%1$d seconds, then dismiss placeholder notification\n\nChoose a higher delay if you don\'t get the notification on your Fitbit device</item>
+        <item quantity="one">%1$d second, then dismiss placeholder notification.\n\nChoose a higher delay if you don\'t get the notification on your Fitbit device.</item>
+        <item quantity="other">%1$d seconds, then dismiss placeholder notification.\n\nChoose a higher delay if you don\'t get the notification on your Fitbit device.</item>
     </plurals>
     <string name="placeholder_dismiss_delay_key">PlaceholderDismissDelay</string>
 
     <string name="relayed_dismiss_delay">Delay</string>
     <string name="relayed_dismiss_delay_summary0">Relayed notification will not be dismissed automatically.</string>
     <plurals name="relayed_dismiss_delay_summary">
-        <item quantity="one">%1$d second, then dismiss relayed notification</item>
-        <item quantity="other">%1$d seconds, then dismiss relayed notification</item>
+        <item quantity="one">%1$d second, then dismiss relayed notification.</item>
+        <item quantity="other">%1$d seconds, then dismiss relayed notification.</item>
     </plurals>
     <string name="relayed_dismiss_delay_key">RelayedDismissDelay</string>
 
