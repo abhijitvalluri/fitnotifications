@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@drawable/rounded_rectangle">
+    <ImageButton
+        android:id="@+id/widgetToggleButton"
+        android:contentDescription="@string/widget_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="10"
+        android:layout_margin="3dp"
+        android:src="@drawable/ic_speaker_notes_white_48dp"
+        android:background="@drawable/round_rectangle_green"/>
+    <TextView
+        android:id="@+id/widgetToggleText"
+        android:text="@string/widget_on_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/green"
+        />
+
+</LinearLayout>

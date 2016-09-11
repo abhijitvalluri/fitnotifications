@@ -60,7 +60,6 @@ public class NLService extends NotificationListenerService {
         mSelectedAppsPackageNames = mAppSelectionsStore.getSelectedAppsPackageNames();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         mIsServiceEnabled = true;
-        preferences.edit().putBoolean(Constants.SERVICE_STATE, mIsServiceEnabled).apply();
 
         mDismissPlaceholderNotif = preferences.getBoolean(
                                         getString(R.string.dismiss_placeholder_notif_key), false);
@@ -248,6 +247,10 @@ public class NLService extends NotificationListenerService {
 
     public static void setEnabled(boolean enabled) {
         mIsServiceEnabled = enabled;
+    }
+
+    public static boolean isEnabled() {
+        return mIsServiceEnabled;
     }
 
 }

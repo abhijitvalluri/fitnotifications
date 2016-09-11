@@ -120,6 +120,12 @@ public class HomeActivity extends AppCompatActivity
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        initializeServiceButtons();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_settings, menu);
 
@@ -323,13 +329,13 @@ public class HomeActivity extends AppCompatActivity
     private void initializeServiceButtons() {
         mStartServiceButton.setText(R.string.start_service);
         mStopServiceButton.setText(R.string.stop_service);
-        mStartServiceButton.setEnabled(!isNLSEnabled());
-        mStopServiceButton.setEnabled(isNLSEnabled());
+        mStartServiceButton.setEnabled(!NLService.isEnabled());
+        mStopServiceButton.setEnabled(NLService.isEnabled());
         mStartServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startService(new Intent(HomeActivity.this, NLService.class));
-                setNLSEnabled(true);
+                NLService.setEnabled(true);
                 mStartServiceButton.setEnabled(false);
                 mStopServiceButton.setEnabled(true);
             }
@@ -338,20 +344,11 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 stopService(new Intent(HomeActivity.this, NLService.class));
-                setNLSEnabled(false);
+                NLService.setEnabled(false);
                 mStartServiceButton.setEnabled(true);
                 mStopServiceButton.setEnabled(false);
             }
         });
-    }
-
-    private void setNLSEnabled(boolean enabled) {
-        mPreferences.edit().putBoolean(Constants.SERVICE_STATE, enabled).apply();
-        NLService.setEnabled(enabled);
-    }
-
-    private boolean isNLSEnabled() {
-        return mPreferences.getBoolean(Constants.SERVICE_STATE, false);
     }
 
     @Override

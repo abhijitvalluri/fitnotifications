@@ -179,7 +179,7 @@ public class AppIntroActivity extends IntroActivity {
                     @Override
                     public void onClick(View v) {
                         startService(new Intent(AppIntroActivity.this, NLService.class));
-                        setNLSEnabled(true);
+                        NLService.setEnabled(true);
                         nextSlide();
                     }
                 })
@@ -416,11 +416,5 @@ public class AppIntroActivity extends IntroActivity {
                     }
                 })
                 .build();
-    }
-
-    private void setNLSEnabled(boolean enabled) {
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .edit().putBoolean(Constants.SERVICE_STATE, enabled).apply();
-        NLService.setEnabled(enabled);
     }
 }

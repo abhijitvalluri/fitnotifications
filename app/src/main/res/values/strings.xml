@@ -84,6 +84,11 @@
     <string name="setup_incomplete">Setup is incomplete! Please review the interactive setup once, even if you successfully configured a previous version of the app. </string>
     <string name="setup_incomplete_title">Incomplete Setup</string>
 
+    <!-- Widget strings -->
+    <string name="widget_button">Fit Notification Service Toggle</string>
+    <string name="widget_on_text">ON</string>
+    <string name="widget_off_text">OFF</string>
+
     <!-- Settings Menu -->
     <!-- Settings Menu headings -->
     <string name="settings_menu">Settings</string>

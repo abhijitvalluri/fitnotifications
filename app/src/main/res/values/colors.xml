@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="white">#ffffff</color>
+    <color name="black_translucent">#000000</color>
+    <color name="lightGrey_translucent">#d2424242</color>
     <color name="black">#000000</color>
     <color name="grey">#FF3D3D3D</color>
+    <color name="red">#d50000</color>
+    <color name="darkRed">#9e0707</color>
+    <color name="green">#7cb342</color>
+    <color name="darkGreen">#33691e</color>
     <color name="purple_intro">#7e57c2</color>
     <color name="purpleDark_intro">#673ab7</color>
     <color name="fitbitColor_intro">#00b0b9</color>
