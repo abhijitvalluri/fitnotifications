@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.abhijitvalluri.android.fitnotifications.services.NLService;
+import com.abhijitvalluri.android.fitnotifications.setup.AppIntroActivity;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
 
 import java.util.Date;
