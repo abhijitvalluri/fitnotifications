@@ -181,7 +181,7 @@ public class NLService extends NotificationListenerService {
         contentView.setTextViewText(
                 R.id.customNotificationText, getString(R.string.notification_text));
 
-        builder.setSmallIcon(R.mipmap.ic_launcher)
+        builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
                 .setContentText(sb.toString())
                 .setContentTitle(extras.getCharSequence(Notification.EXTRA_TITLE))
                 .setContent(contentView);

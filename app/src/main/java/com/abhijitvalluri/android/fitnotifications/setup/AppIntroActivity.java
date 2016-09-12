@@ -177,7 +177,7 @@ public class AppIntroActivity extends IntroActivity {
 
                         RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.custom_notification);
                         contentView.setTextViewText(R.id.customNotificationText, getString(R.string.placeholder_notification_text));
-                        builder.setSmallIcon(R.mipmap.ic_launcher)
+                        builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
                                 .setContentText(sb.toString())
                                 .setExtras(newExtra)
                                 .setContentTitle("Sample Notification Title")
