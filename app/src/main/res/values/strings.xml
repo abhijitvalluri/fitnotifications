@@ -65,7 +65,7 @@
     <string name="intro_start_service_title">Start the notification listening service</string>
     <string name="intro_start_service_desc">This service will try to stay in the background. If you stop receiving notifications, restart the service from this app. Don\'t use task killer apps, as they can disable the service.</string>
 
-    <string name="intro_dnd_mode_title">Do not disturb mode on Android 6.0+ (Marshmallow)</string>
+    <string name="intro_dnd_mode_title">Do not disturb mode on Android 6.0 and above</string>
     <string name="intro_dnd_mode_desc">If you enable do not disturb mode, then no notifications will be forwarded to your Fitbit device, by default. To change that, you need to follow specific instructions by clicking below.</string>
     <string name="intro_dnd_mode_button">Extra Instructions</string>
     <string name="intro_dnd_mode_message">
@@ -222,12 +222,19 @@
        We will attempt to resolve this issue in an update.</p>
     ]]></string>
     <string name="whats_new_text"><![CDATA[
-    <p>You just updated to Fit Notifications <b>version 2.3.1</b>! The following changes are made in this version:</p>
+    <p>You just updated to Fit Notifications <b>version 2.4</b>! The following changes are made in this version:</p>
     <ul>
-        <li>New troubleshooting settings option: \"Override Interactive Setup\" <br /><br />
-        Use this feature if you have issues with the new (BETA) interactive setup mode, or simply prefer the original, manual setup! Let us know of any issues with the interactive mode, and give detailed information about your setup to help us debug and fix it.
+        <li>App is now built and tested for Android 7.0 (Nougat)!
         <br /><br /></li>
-        <li>General user interface improvements and maintenance fixes</li>
+        <li><b>New Widget!</b> You can now use a home screen widget to check and toggle the state of
+        the notification listening service of the app!<br /><br /></li>
+        <li>Notifications are not relayed when the phone screen is on. This is a beta feature and may
+        not work properly if your phone is in a power-saving mode.<br /><br />
+        </li>
+        <li>Clicking on the \"Placeholder Notification\" from the app takes you to the app settings page.
+        <br /><br /></li>
+        <li>Improved layout and appearance of \"Placeholder Notification\" of the app.<br /><br /></li>
+        <li>Bug fixes for the Interactive Setup process.</li>
     </ul>
 
     ]]></string>
