@@ -29,18 +29,15 @@ import com.abhijitvalluri.android.fitnotifications.utils.Constants;
 
 import java.util.Date;
 
-public class HomeActivity extends AppCompatActivity
-        implements SettingsActivity.SettingsFragment.SetupCallback {
+public class HomeActivity extends AppCompatActivity {
 
     private static final int APP_INTRO_FIRST_LAUNCH_INTENT = 1;
 
     private static boolean mDismissPlaceholderNotif;
     private static int mPlaceholderNotifDismissDelayMillis;
-    private static boolean mInteractiveSetupEnabled;
 
     private final Integer NOTIFICATION_ID = (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
     private final Handler mHandler = new Handler();
-
 
     private Bundle LAUNCH_ACTIVITY_ANIM_BUNDLE;
 
@@ -64,11 +61,6 @@ public class HomeActivity extends AppCompatActivity
     public static void onPlaceholderNotifSettingUpdated(boolean dismissNotif, int delaySeconds) {
         mDismissPlaceholderNotif = dismissNotif;
         mPlaceholderNotifDismissDelayMillis = delaySeconds*1000;
-    }
-
-    public void onOverrideInteractiveSetup(boolean enabled) {
-        mInteractiveSetupEnabled = enabled;
-        updateSetup();
     }
 
     @Override
@@ -124,6 +116,7 @@ public class HomeActivity extends AppCompatActivity
     public void onResume() {
         super.onResume();
         initializeServiceButtons();
+        updateSetup();
     }
 
     @Override
@@ -153,12 +146,13 @@ public class HomeActivity extends AppCompatActivity
         mPlaceholderNotifDismissDelayMillis = mPreferences.getInt(
                 getString(R.string.placeholder_dismiss_delay_key), Constants.DEFAULT_DELAY_SECONDS)
                 *1000;
-        mInteractiveSetupEnabled = !mPreferences.getBoolean(getString(R.string.override_interactive_setup_key), false);
-
     }
 
     private void updateSetup() {
-        if (mInteractiveSetupEnabled) {
+        boolean isInteractiveSetupEnabled = mPreferences.getBoolean(
+                                    getString(R.string.override_interactive_setup_key),
+                                    false);
+        if (isInteractiveSetupEnabled) {
             mInstructionTB.setText(R.string.instructions);
             mInstructionTB.setOnClickListener(new View.OnClickListener() {
                 @Override

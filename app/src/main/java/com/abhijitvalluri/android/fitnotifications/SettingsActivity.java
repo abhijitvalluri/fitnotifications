@@ -17,10 +17,7 @@ import com.abhijitvalluri.android.fitnotifications.utils.Constants;
  */
 public class SettingsActivity extends AppCompatActivity {
 
-    private static Context sHomeActivityContext;
-
     public static Intent newIntent(Context packageContext) {
-        sHomeActivityContext = packageContext;
         return new Intent(packageContext, SettingsActivity.class);
     }
 
@@ -37,19 +34,11 @@ public class SettingsActivity extends AppCompatActivity {
     public static class SettingsFragment extends PreferenceFragment
             implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-        // Callback interface to let HomeActivity update the setup menu
-        public interface SetupCallback {
-            void onOverrideInteractiveSetup(boolean enabled);
-        }
-
         private SharedPreferences mPreferences;
-        private SetupCallback mSetupCallback;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-
-            mSetupCallback = (SetupCallback) sHomeActivityContext;
 
             addPreferencesFromResource(R.xml.main_settings);
             mPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -144,7 +133,6 @@ public class SettingsActivity extends AppCompatActivity {
                 NLService.onLimitNotificationSettingUpdated(limitNotif, durationSeconds);
             } else if (key.equals(getString(R.string.override_interactive_setup_key))) {
                 updateInteractiveSetupSummary(key);
-                mSetupCallback.onOverrideInteractiveSetup(!mPreferences.getBoolean(key, false));
             }
         }
 
