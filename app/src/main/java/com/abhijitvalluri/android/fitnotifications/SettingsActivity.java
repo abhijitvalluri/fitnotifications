@@ -67,6 +67,10 @@ public class SettingsActivity extends AppCompatActivity {
 
             key = getString(R.string.override_interactive_setup_key);
             updateInteractiveSetupSummary(key);
+
+            key = getString(R.string.disable_forward_screen_on_key);
+            updateDisableWhenScreenOnSummary(key,
+                                             mPreferences.getBoolean(key, false));
         }
 
         private void updateInteractiveSetupSummary(String summaryKey) {
@@ -74,6 +78,14 @@ public class SettingsActivity extends AppCompatActivity {
                 findPreference(summaryKey).setSummary(getResources().getString(R.string.override_interactive_setup_enabled_summary));
             } else {
                 findPreference(summaryKey).setSummary(getResources().getString(R.string.override_interactive_setup_disabled_summary));
+            }
+        }
+
+        private void updateDisableWhenScreenOnSummary(String summaryKey, boolean disable) {
+            if (disable) {
+                findPreference(summaryKey).setSummary(getResources().getString(R.string.disable_forward_screen_on_summary));
+            } else {
+                findPreference(summaryKey).setSummary(getResources().getString(R.string.enable_forward_screen_on_summary));
             }
         }
 
@@ -133,6 +145,10 @@ public class SettingsActivity extends AppCompatActivity {
                 NLService.onLimitNotificationSettingUpdated(limitNotif, durationSeconds);
             } else if (key.equals(getString(R.string.override_interactive_setup_key))) {
                 updateInteractiveSetupSummary(key);
+            } else if (key.equals(getString(R.string.disable_forward_screen_on_key))) {
+                boolean disable = mPreferences.getBoolean(key, false);
+                updateDisableWhenScreenOnSummary(key, disable);
+                NLService.onDisableWhenScreenOnUpdated(disable);
             }
         }
 

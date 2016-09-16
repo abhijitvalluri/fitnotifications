@@ -245,7 +245,19 @@ public class AppIntroActivity extends IntroActivity {
     }
 
     private void addDNDModeSlide() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.N) {
+            addSlide(new SimpleSlide.Builder() // FIXME: Remove hard coding
+                    .layout(R.layout.fragment_intro)
+                    .title("Do not disturb mode on Android 7.0")
+                    .description("Note that, if you enable do not disturb mode on Android 7.0, " +
+                                 "then no notifications will be forwarded to your Fitbit device. " +
+                                 "There is no way to change this behavior in the latest Android version.")
+                    .image(R.drawable.intro_dnd_mode_info)
+                    .background(R.color.black)
+                    .backgroundDark(R.color.grey)
+                    .build());
+
+        } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M) {
             addSlide(new SimpleSlide.Builder()
                     .layout(R.layout.fragment_intro)
                     .title(R.string.intro_dnd_mode_title)

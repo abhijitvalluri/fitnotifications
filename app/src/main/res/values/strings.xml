@@ -12,6 +12,7 @@
     <string name="faqs">Frequently Asked Questions</string>
     <string name="whats_new">What\'s new</string>
     <string name="disclaimer">Disclaimer</string>
+    <string name="opensource">Open source licenses</string>
     <string name="credits">Credits</string>
     <string name="app_choices">Select Apps to Enable Notifications</string>
     <string name="app_choices_activity_title">Select Apps</string>
@@ -65,7 +66,7 @@
     <string name="intro_start_service_title">Start the notification listening service</string>
     <string name="intro_start_service_desc">This service will try to stay in the background. If you stop receiving notifications, restart the service from this app. Don\'t use task killer apps, as they can disable the service.</string>
 
-    <string name="intro_dnd_mode_title">Do not disturb mode on Android 6.0 and above</string>
+    <string name="intro_dnd_mode_title">Do not disturb mode on Android 6.0</string>
     <string name="intro_dnd_mode_desc">If you enable do not disturb mode, then no notifications will be forwarded to your Fitbit device, by default. To change that, you need to follow specific instructions by clicking below.</string>
     <string name="intro_dnd_mode_button">Extra Instructions</string>
     <string name="intro_dnd_mode_message">
@@ -92,6 +93,8 @@
     <!-- Settings Menu - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
     <!-- Misc. -->
     <string name="dismiss_after">after</string>
+    <string name="one_notification">1 notification every</string>
+    <string name="second">second</string>
     <string name="seconds">seconds</string>
 
     <!-- Settings Menu headings -->
@@ -101,15 +104,33 @@
     <string name="relayed_notif_settings">Relayed Notification Settings</string>
     <string name="limit_notif_settings">Notification Limit Settings</string>
     <string name="debug_settings">Troubleshooting Settings</string>
+    <string name="notification_service_settings">Notification Service Settings</string>
 
+    <!-- Placeholder Notification Settings -->
     <string name="dismiss_placeholder_notif">Dismiss placeholder notification</string>
     <string name="dismiss_placeholder_notif_summary">Automatically dismiss placeholder notification</string>
     <string name="dismiss_placeholder_notif_key">DismissAppNotification</string>
 
+    <string name="placeholder_dismiss_delay">Dismiss</string>
+    <string name="placeholder_dismiss_delay_summary0">Never</string>
+    <plurals name="placeholder_dismiss_delay_summary">
+        <item quantity="other">After a %1$d second delay</item>
+    </plurals>
+    <string name="placeholder_dismiss_delay_key">PlaceholderDismissDelay</string>
+
+    <!-- Relayed Notification Settings -->
     <string name="dismiss_relayed_notif">Dismiss relayed notifications</string>
     <string name="dismiss_relayed_notif_summary">Automatically clear relayed notifications from other apps</string>
     <string name="dismiss_relayed_notif_key">DismissOtherNotifications</string>
 
+    <string name="relayed_dismiss_delay">Dismiss</string>
+    <string name="relayed_dismiss_delay_summary0">Never</string>
+    <plurals name="relayed_dismiss_delay_summary">
+        <item quantity="other">After a %1$d second delay</item>
+    </plurals>
+    <string name="relayed_dismiss_delay_key">RelayedDismissDelay</string>
+
+    <!-- Limit Notification Settings -->
     <string name="limit_notif">Limit number of relayed notifications</string>
     <string name="limit_notif_summary">Set number of notifications each app can send to your Fitbit device.\n\nUse this if you receive too many notifications on your device in a short duration.</string>
     <string name="limit_notif_key">limitNotifications</string>
@@ -122,20 +143,14 @@
         <item quantity="other">One notification relayed every %1$d seconds for each enabled app. Additional notifications are discarded.</item>
     </plurals>
 
-    <string name="placeholder_dismiss_delay">Dismiss</string>
-    <string name="placeholder_dismiss_delay_summary0">Never</string>
-    <plurals name="placeholder_dismiss_delay_summary">
-        <item quantity="other">After a %1$d second delay</item>
-    </plurals>
-    <string name="placeholder_dismiss_delay_key">PlaceholderDismissDelay</string>
+    <!-- Notification Service Settings -->
+    <string name="disable_forward_screen_on_title">Disable notifications when screen on</string>
+    <string name="enable_forward_screen_on_summary">Send notifications to Fitbit device even if screen is on</string>
+    <string name="disable_forward_screen_on_summary">Do not send notifications to Fitbit device if screen is on</string>
+    <string name="disable_forward_screen_on_key">disableWhenScreenOn</string>
 
-    <string name="relayed_dismiss_delay">Dismiss</string>
-    <string name="relayed_dismiss_delay_summary0">Never</string>
-    <plurals name="relayed_dismiss_delay_summary">
-        <item quantity="other">After a %1$d second delay</item>
-    </plurals>
-    <string name="relayed_dismiss_delay_key">RelayedDismissDelay</string>
 
+    <!-- Troubleshooting settings -->
     <string name="override_interactive_setup_key">overrideInteractiveSetupKey</string>
     <string name="override_interactive_setup_enabled_summary">Manual setup enabled</string>
     <string name="override_interactive_setup_disabled_summary">Interactive setup enabled</string>
@@ -224,19 +239,16 @@
        We will attempt to resolve this issue in an update.</p>
     ]]></string>
     <string name="whats_new_text"><![CDATA[
-    <p>You just updated to Fit Notifications <b>version 2.4</b>! The following changes are made in this version:</p>
+    <p>You just updated to Fit Notifications <b>version 2.4.1</b>! The following changes are made in this version:</p>
     <ul>
-        <li>App is now built and tested for Android 7.0 (Nougat)!
-        <br /><br /></li>
+        <li>App is now built and tested for Android 7.0 (Nougat)!<br /></li>
         <li><b>New Widget!</b> You can now use a home screen widget to check and toggle the state of
-        the notification listening service of the app!<br /><br /></li>
-        <li>Notifications are not relayed when the phone screen is on. This is a beta feature and may
-        not work properly if your phone is in a power-saving mode.<br /><br />
-        </li>
-        <li>Clicking on the \"Placeholder Notification\" from the app takes you to the app settings page.
-        <br /><br /></li>
-        <li>Improved layout and appearance of \"Placeholder Notification\" of the app.<br /><br /></li>
-        <li>Bug fixes for the Interactive Setup process.</li>
+        the notification listening service of the app!<br /></li>
+        <li><b>New Setting!</b>Disable notification relaying when screen is on. This is a beta feature and may
+        not work properly if your phone is in a power-saving mode.<br /></li>
+        <li>Clicking on the \"Placeholder Notification\" from the app takes you to the app settings page.<br /></li>
+        <li>Improved layout and appearance of \"Placeholder Notification\" of the app.<br /></li>
+        <li>Various bug-fixes.</li>
     </ul>
 
     ]]></string>
@@ -245,6 +257,52 @@
        \'Fit Notifications\' is designed for use with the Fitbit platform. This application
        is not put out by Fitbit, and Fitbit does not service or warrant the functionality of this application.</p>
     ]]></string>
+    <string name="opensource_text"><![CDATA[
+    <p>This software contains portions of the following libraries, subject to the below licenses.</p>
+    <p><b>Library: </b><a href=\"https://github.com/HeinrichReimer/material-intro\">HeinrichReimer/material-intro</a></p>
+    <p>
+        Copyright &#169; 2016 Heinrich Reimer<br /><br />
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at<br /><br />
+
+        &nbsp;&nbsp;&nbsp; http://www.apache.org/licenses/LICENSE-2.0 <br /><br />
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+    </p>
+    <hr />
+    <p><b>Library: </b><a href=\"https://github.com/Alobar/AndroidPreferenceTest\">Alobar/AndroidPreferenceTest</a></p>
+    <p>
+        The MIT License (MIT)<br /><br />
+
+        Copyright &#169; 2016 Alobar<br /><br />
+
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:<br /><br />
+
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.<br /><br />
+
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+    </p>
+    ]]>
+
+    </string>
     <string name="credits_text"><![CDATA[
     <p>Developed by Smart Dinosaurs Entertainment</p>
     <p>Lead Software Engineer: <a href=\"https://abhijitvalluri.com\">Abhijit Kiran Valluri</a></p>

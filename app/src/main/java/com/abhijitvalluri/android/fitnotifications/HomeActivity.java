@@ -47,6 +47,7 @@ public class HomeActivity extends AppCompatActivity {
     private TextView mFAQsTB;
     private TextView mChangelogTB;
     private TextView mDisclaimerTB;
+    private TextView mOpenSourceTB;
     private TextView mCreditsTB;
 
     private Button mStartServiceButton;
@@ -82,6 +83,7 @@ public class HomeActivity extends AppCompatActivity {
         mFAQsTB = (TextView) findViewById(R.id.faqsTB);
         mChangelogTB = (TextView) findViewById(R.id.changelogTB);
         mDisclaimerTB = (TextView) findViewById(R.id.disclaimerTB);
+        mOpenSourceTB = (TextView) findViewById(R.id.openSourceTB);
         mCreditsTB = (TextView) findViewById(R.id.creditsTB);
 
         mStartServiceButton = (Button) findViewById(R.id.leftButton);
@@ -149,10 +151,10 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void updateSetup() {
-        boolean isInteractiveSetupEnabled = mPreferences.getBoolean(
+        boolean isInteractiveSetupDisabled = mPreferences.getBoolean(
                                     getString(R.string.override_interactive_setup_key),
                                     false);
-        if (isInteractiveSetupEnabled) {
+        if (!isInteractiveSetupDisabled) {
             mInstructionTB.setText(R.string.instructions);
             mInstructionTB.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -210,6 +212,14 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = InfoActivity.newIntent(HomeActivity.this, getString(R.string.disclaimer), getString(R.string.disclaimer_text));
+                startActivity(intent, LAUNCH_ACTIVITY_ANIM_BUNDLE);
+            }
+        });
+
+        mOpenSourceTB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = InfoActivity.newIntent(HomeActivity.this, getString(R.string.opensource), getString(R.string.opensource_text));
                 startActivity(intent, LAUNCH_ACTIVITY_ANIM_BUNDLE);
             }
         });

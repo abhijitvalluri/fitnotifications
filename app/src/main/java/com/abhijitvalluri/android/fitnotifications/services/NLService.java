@@ -42,6 +42,7 @@ public class NLService extends NotificationListenerService {
     private static boolean mDismissPlaceholderNotif;
     private static boolean mDismissRelayedNotif;
     private static boolean mLimitNotifications;
+    private static boolean mDisableWhenScreenOn;
     private static int mPlaceholderNotifDismissDelayMillis;
     private static int mRelayedNotifDismissDelayMillis;
     private static int mNotifLimitDurationMillis;
@@ -77,6 +78,8 @@ public class NLService extends NotificationListenerService {
         mNotifLimitDurationMillis = preferences.getInt(
                 getString(R.string.notif_limit_duration_key), Constants.DEFAULT_DELAY_SECONDS)
                 *1000;
+        mDisableWhenScreenOn = preferences.getBoolean(
+                getString(R.string.disable_forward_screen_on_key), false);
 
         Toast.makeText(this, getString(R.string.notification_service_started), Toast.LENGTH_LONG).show();
     }
@@ -104,6 +107,10 @@ public class NLService extends NotificationListenerService {
         mRelayedNotifDismissDelayMillis = delaySeconds*1000;
     }
 
+    public static void onDisableWhenScreenOnUpdated(boolean disableWhenScreenOn) {
+        mDisableWhenScreenOn = disableWhenScreenOn;
+    }
+
     @Override
     public void onNotificationPosted(final StatusBarNotification sbn) {
         // TODO(abhijitvalluri): Think about monetization options for advanced features,
@@ -113,18 +120,20 @@ public class NLService extends NotificationListenerService {
             return;
         }
 
-        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        boolean isScreenOn;
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            // API >= 20
-            isScreenOn = pm.isInteractive();
-        } else {
-            // API <= 19, use deprecated
-            isScreenOn = pm.isScreenOn();
-        }
+        if (mDisableWhenScreenOn) {
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            boolean isScreenOn;
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                // API >= 20
+                isScreenOn = pm.isInteractive();
+            } else {
+                // API <= 19, use deprecated
+                isScreenOn = pm.isScreenOn();
+            }
 
-        if (isScreenOn) {
-            return;
+            if (isScreenOn) {
+                return;
+            }
         }
 
         Notification notification = sbn.getNotification();
