@@ -98,46 +98,44 @@
     <string name="limit_notif_settings">Notification Limit Settings</string>
     <string name="debug_settings">Troubleshooting Settings</string>
 
-    <string name="dismiss_placeholder_notif">Dismiss Placeholder Notification</string>
-    <string name="dismiss_placeholder_notif_summary">Enable this to automatically dismiss the placeholder notification from the Fit Notifications app, after a delay.</string>
+    <string name="dismiss_placeholder_notif">Dismiss placeholder notification</string>
+    <string name="dismiss_placeholder_notif_summary">Automatically dismiss placeholder notification</string>
     <string name="dismiss_placeholder_notif_key">DismissAppNotification</string>
 
-    <string name="dismiss_relayed_notif">Dismiss Relayed Notifications</string>
-    <string name="dismiss_relayed_notif_summary">Enable this to automatically dismiss the relayed notification, after a delay.</string>
+    <string name="dismiss_relayed_notif">Dismiss relayed notifications</string>
+    <string name="dismiss_relayed_notif_summary">Automatically clear relayed notifications from other apps</string>
     <string name="dismiss_relayed_notif_key">DismissOtherNotifications</string>
 
-    <string name="limit_notif">Limit Number of Relayed Notifications</string>
-    <string name="limit_notif_summary">Enable this to limit the number of notifications relayed to your Fitbit device from each app.\n\nUse this if you receive too many notifications on your device in a short duration.</string>
+    <string name="limit_notif">Limit number of relayed notifications</string>
+    <string name="limit_notif_summary">Set number of notifications each app can send to your Fitbit device.\n\nUse this if you receive too many notifications on your device in a short duration.</string>
     <string name="limit_notif_key">limitNotifications</string>
 
     <string name="notif_limit_duration">Limit Duration</string>
     <string name="notif_limit_duration_key">NotiflimitDuration</string>
     <string name="notif_limit_duration_summary0">All notifications are sent as they arrive, without limitation.</string>
     <plurals name="notif_limit_duration_summary">
-        <item quantity="one">Relay one notification every %1$d second for each enabled app. Additional notifications are discarded.</item>
-        <item quantity="other">Relay one notification every %1$d seconds for each enabled app. Additional notifications are discarded.</item>
+        <item quantity="one">One notification relayed every %1$d second for each enabled app. Additional notifications are discarded.</item>
+        <item quantity="other">One notification relayed every %1$d seconds for each enabled app. Additional notifications are discarded.</item>
     </plurals>
 
-    <string name="placeholder_dismiss_delay">Delay</string>
-    <string name="placeholder_dismiss_delay_summary0">Placeholder notification from this app will not be dismissed automatically.</string>
+    <string name="placeholder_dismiss_delay">Dismiss</string>
+    <string name="placeholder_dismiss_delay_summary0">Never</string>
     <plurals name="placeholder_dismiss_delay_summary">
-        <item quantity="one">%1$d second, then dismiss placeholder notification.\n\nChoose a higher delay if you don\'t get the notification on your Fitbit device.</item>
-        <item quantity="other">%1$d seconds, then dismiss placeholder notification.\n\nChoose a higher delay if you don\'t get the notification on your Fitbit device.</item>
+        <item quantity="other">After a %1$d second delay</item>
     </plurals>
     <string name="placeholder_dismiss_delay_key">PlaceholderDismissDelay</string>
 
-    <string name="relayed_dismiss_delay">Delay</string>
-    <string name="relayed_dismiss_delay_summary0">Relayed notification will not be dismissed automatically.</string>
+    <string name="relayed_dismiss_delay">Dismiss</string>
+    <string name="relayed_dismiss_delay_summary0">Never</string>
     <plurals name="relayed_dismiss_delay_summary">
-        <item quantity="one">%1$d second, then dismiss relayed notification.</item>
-        <item quantity="other">%1$d seconds, then dismiss relayed notification.</item>
+        <item quantity="other">After a %1$d second delay</item>
     </plurals>
     <string name="relayed_dismiss_delay_key">RelayedDismissDelay</string>
 
     <string name="override_interactive_setup_key">overrideInteractiveSetupKey</string>
-    <string name="override_interactive_setup_enabled_summary">Override it. Interactive setup is disabled and will show original manual setup instructions instead.</string>
-    <string name="override_interactive_setup_disabled_summary">Do not override. Interactive setup is enabled.</string>
-    <string name="override_interactive_setup_title">Override Interactive Setup</string>
+    <string name="override_interactive_setup_enabled_summary">Manual setup enabled</string>
+    <string name="override_interactive_setup_disabled_summary">Interactive setup enabled</string>
+    <string name="override_interactive_setup_title">Disable Interactive Setup</string>
 
     <!-- App Choice Activity -->
     <string name="app_list_loading_text">Loading app list&#8230;</string>
