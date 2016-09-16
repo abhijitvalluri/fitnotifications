@@ -4,5 +4,7 @@
         <attr name="minValue" format="integer|reference"/>
         <attr name="maxValue" format="integer|reference"/>
         <attr name="wrapSelectorWheel" format="boolean"/>
+        <attr name="beforeText" format="string" />
+        <attr name="afterText" format="string" />
     </declare-styleable>
 </resources>

@@ -2,13 +2,16 @@ package com.abhijitvalluri.android.fitnotifications.alobar.preference;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Typeface;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 
 import com.abhijitvalluri.android.fitnotifications.R;
 
@@ -26,6 +29,8 @@ public class NumberPickerPreference extends DialogPreference {
     private final boolean wrapSelectorWheel;
 
     private NumberPicker picker;
+    private TextView beforeTV, afterTV;
+    private String beforeText, afterText;
     private int value;
 
     public NumberPickerPreference(Context context, AttributeSet attrs) {
@@ -38,20 +43,44 @@ public class NumberPickerPreference extends DialogPreference {
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.NumberPickerPreference);
         minValue = a.getInteger(R.styleable.NumberPickerPreference_minValue, DEFAULT_MIN_VALUE);
         maxValue = a.getInteger(R.styleable.NumberPickerPreference_maxValue, DEFAULT_MAX_VALUE);
+        beforeText = a.getString(R.styleable.NumberPickerPreference_beforeText);
+        afterText = a.getString(R.styleable.NumberPickerPreference_afterText);
         wrapSelectorWheel = a.getBoolean(R.styleable.NumberPickerPreference_wrapSelectorWheel, DEFAULT_WRAP_SELECTOR_WHEEL);
         a.recycle();
     }
 
     @Override
     protected View onCreateDialogView() {
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         layoutParams.gravity = Gravity.CENTER;
+        layoutParams.weight = 1;
 
         picker = new NumberPicker(getContext());
         picker.setLayoutParams(layoutParams);
 
-        FrameLayout dialogView = new FrameLayout(getContext());
+        beforeTV = new TextView(getContext());
+        beforeTV.setText(beforeText);
+        beforeTV.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18.0f);
+        beforeTV.setPadding(0,20,0,0);
+        beforeTV.setGravity(Gravity.END);
+        beforeTV.setTypeface(Typeface.DEFAULT_BOLD);
+
+        afterTV = new TextView(getContext());
+        afterTV.setText(afterText);
+        afterTV.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18.0f);
+        afterTV.setPadding(0,0,0,20);
+        afterTV.setGravity(Gravity.START);
+        afterTV.setTypeface(Typeface.DEFAULT_BOLD);
+
+        layoutParams.weight = 5;
+        beforeTV.setLayoutParams(layoutParams);
+        afterTV.setLayoutParams(layoutParams);
+
+        LinearLayout dialogView = new LinearLayout(getContext());
+        dialogView.setOrientation(LinearLayout.VERTICAL);
+        dialogView.addView(beforeTV);
         dialogView.addView(picker);
+        dialogView.addView(afterTV);
 
         return dialogView;
     }

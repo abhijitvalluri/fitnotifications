@@ -15,6 +15,8 @@
             android:defaultValue="5"
             app:minValue="5"
             app:maxValue="60"
+            app:beforeText="@string/dismiss_after"
+            app:afterText="@string/seconds"
             app:wrapSelectorWheel="false" />
     </PreferenceCategory>
 
@@ -32,6 +34,8 @@
             android:defaultValue="5"
             app:minValue="5"
             app:maxValue="60"
+            app:beforeText="@string/dismiss_after"
+            app:afterText="@string/seconds"
             app:wrapSelectorWheel="false" />
     </PreferenceCategory>
 
@@ -49,7 +53,18 @@
             android:defaultValue="1"
             app:minValue="1"
             app:maxValue="60"
+            app:beforeText="@string/one_notification"
+            app:afterText="@string/seconds"
             app:wrapSelectorWheel="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/notification_service_settings">
+        <SwitchPreference
+            android:title="@string/disable_forward_screen_on_title"
+            android:summary="@string/disable_forward_screen_on_summary"
+            android:key="@string/disable_forward_screen_on_key"
+            android:defaultValue="false" />
     </PreferenceCategory>
 
     <PreferenceCategory
