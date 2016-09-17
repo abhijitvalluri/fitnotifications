@@ -45,25 +45,32 @@ public class SettingsActivity extends AppCompatActivity {
 
             // Initialize delay summaries
             String key = getString(R.string.placeholder_dismiss_delay_key);
+            boolean prefValue = mPreferences.getBoolean(getString(R.string.dismiss_placeholder_notif_key), false);
             updateDelaySummary(key,
                     mPreferences.getInt(key, Constants.DEFAULT_DELAY_SECONDS),
                     R.plurals.placeholder_dismiss_delay_summary,
                     R.string.placeholder_dismiss_delay_summary0,
-                    mPreferences.getBoolean(getString(R.string.dismiss_placeholder_notif_key), false));
+                    prefValue);
+            findPreference(key).setEnabled(prefValue);
+
 
             key = getString(R.string.relayed_dismiss_delay_key);
+            prefValue = mPreferences.getBoolean(getString(R.string.dismiss_relayed_notif_key), false);
             updateDelaySummary(key,
                     mPreferences.getInt(key, Constants.DEFAULT_DELAY_SECONDS),
                     R.plurals.relayed_dismiss_delay_summary,
                     R.string.relayed_dismiss_delay_summary0,
-                    mPreferences.getBoolean(getString(R.string.dismiss_relayed_notif_key), false));
+                    prefValue);
+            findPreference(key).setEnabled(prefValue);
 
             key = getString(R.string.notif_limit_duration_key);
+            prefValue = mPreferences.getBoolean(getString(R.string.limit_notif_key), false);
             updateDelaySummary(key,
                     mPreferences.getInt(key, Constants.DEFAULT_DELAY_SECONDS),
                     R.plurals.notif_limit_duration_summary,
                     R.string.notif_limit_duration_summary0,
-                    mPreferences.getBoolean(getString(R.string.limit_notif_key), false));
+                    prefValue);
+            findPreference(key).setEnabled(prefValue);
 
             key = getString(R.string.override_interactive_setup_key);
             updateInteractiveSetupSummary(key);
@@ -71,6 +78,7 @@ public class SettingsActivity extends AppCompatActivity {
             key = getString(R.string.disable_forward_screen_on_key);
             updateDisableWhenScreenOnSummary(key,
                                              mPreferences.getBoolean(key, false));
+
         }
 
         private void updateInteractiveSetupSummary(String summaryKey) {
@@ -105,6 +113,7 @@ public class SettingsActivity extends AppCompatActivity {
                     || key.equals(getString(R.string.placeholder_dismiss_delay_key))) {
                 boolean dismissNotif = mPreferences.getBoolean(
                         getString(R.string.dismiss_placeholder_notif_key), false);
+                findPreference(getString(R.string.placeholder_dismiss_delay_key)).setEnabled(dismissNotif);
                 int delaySeconds = mPreferences.getInt(
                         getString(R.string.placeholder_dismiss_delay_key), 
                         Constants.DEFAULT_DELAY_SECONDS);
@@ -120,6 +129,7 @@ public class SettingsActivity extends AppCompatActivity {
                     || key.equals(getString(R.string.relayed_dismiss_delay_key))) {
                 boolean dismissNotif = mPreferences.getBoolean(
                         getString(R.string.dismiss_relayed_notif_key), false);
+                findPreference(getString(R.string.relayed_dismiss_delay_key)).setEnabled(dismissNotif);
                 int delaySeconds = mPreferences.getInt(
                         getString(R.string.relayed_dismiss_delay_key),
                         Constants.DEFAULT_DELAY_SECONDS);
@@ -134,6 +144,7 @@ public class SettingsActivity extends AppCompatActivity {
                     || key.equals(getString(R.string.notif_limit_duration_key))) {
                 boolean limitNotif = mPreferences.getBoolean(
                         getString(R.string.limit_notif_key), false);
+                findPreference(getString(R.string.notif_limit_duration_key)).setEnabled(limitNotif);
                 int durationSeconds = mPreferences.getInt(
                         getString(R.string.notif_limit_duration_key),
                         Constants.DEFAULT_DELAY_SECONDS);

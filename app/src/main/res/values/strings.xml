@@ -120,7 +120,7 @@
 
     <!-- Relayed Notification Settings -->
     <string name="dismiss_relayed_notif">Dismiss relayed notifications</string>
-    <string name="dismiss_relayed_notif_summary">Automatically clear relayed notifications from other apps</string>
+    <string name="dismiss_relayed_notif_summary">Automatically dismiss relayed notifications from other apps</string>
     <string name="dismiss_relayed_notif_key">DismissOtherNotifications</string>
 
     <string name="relayed_dismiss_delay">Dismiss</string>
@@ -244,9 +244,9 @@
         <li>App is now built and tested for Android 7.0 (Nougat)!<br /></li>
         <li><b>New Widget!</b> You can now use a home screen widget to check and toggle the state of
         the notification listening service of the app!<br /></li>
-        <li><b>New Setting!</b>Disable notification relaying when screen is on. This is a beta feature and may
+        <li><b>New Setting!</b> Disable notification relaying when screen is on. This is a beta feature and may
         not work properly if your phone is in a power-saving mode.<br /></li>
-        <li>Clicking on the \"Placeholder Notification\" from the app takes you to the app settings page.<br /></li>
+        <li>Clicking on the \"Placeholder Notification\" in the notification shade takes you to the app settings page.<br /></li>
         <li>Improved layout and appearance of \"Placeholder Notification\" of the app.<br /></li>
         <li>Various bug-fixes.</li>
     </ul>
