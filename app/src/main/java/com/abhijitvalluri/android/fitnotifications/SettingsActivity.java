@@ -79,6 +79,18 @@ public class SettingsActivity extends AppCompatActivity {
             updateDisableWhenScreenOnSummary(key,
                                              mPreferences.getBoolean(key, false));
 
+            key = getString(R.string.transliterate_notification_key);
+            updateTransliterateNotificationSummary(key,
+                                                   mPreferences.getBoolean(key, true));
+
+        }
+
+        private void updateTransliterateNotificationSummary(String summaryKey, boolean enable) {
+            if (enable) {
+                findPreference(summaryKey).setSummary(getResources().getString(R.string.transliterate_notification_summary_enabled));
+            } else {
+                findPreference(summaryKey).setSummary(getResources().getString(R.string.transliterate_notification_summary_disabled));
+            }
         }
 
         private void updateInteractiveSetupSummary(String summaryKey) {
@@ -160,6 +172,10 @@ public class SettingsActivity extends AppCompatActivity {
                 boolean disable = mPreferences.getBoolean(key, false);
                 updateDisableWhenScreenOnSummary(key, disable);
                 NLService.onDisableWhenScreenOnUpdated(disable);
+            } else if (key.equals(getString(R.string.transliterate_notification_key))) {
+                boolean enable = mPreferences.getBoolean(key, true);
+                updateTransliterateNotificationSummary(key, enable);
+                NLService.onTransliterateNotificationUpdated(enable);
             }
         }
 

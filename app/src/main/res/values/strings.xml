@@ -143,12 +143,17 @@
         <item quantity="other">One notification relayed every %1$d seconds for each enabled app. Additional notifications are discarded.</item>
     </plurals>
 
-    <!-- Notification Service Settings -->
+    <!-- Notification Service Settings - - - - - - - - - -->
     <string name="disable_forward_screen_on_title">Disable notifications when screen on</string>
     <string name="enable_forward_screen_on_summary">Send notifications to Fitbit device even if screen is on</string>
     <string name="disable_forward_screen_on_summary">Do not send notifications to Fitbit device if screen is on</string>
     <string name="disable_forward_screen_on_key">disableWhenScreenOn</string>
 
+    <!-- Transliteration settings -->
+    <string name="transliterate_notification_title">Transliterate notifications to Latin</string>
+    <string name="transliterate_notification_summary_enabled">Russian, Greek and Japanese characters will be converted to Latin</string>
+    <string name="transliterate_notification_summary_disabled">Non-Latin characters will not be transliterated</string>
+    <string name="transliterate_notification_key">transliterateNotifications</string>
 
     <!-- Troubleshooting settings -->
     <string name="override_interactive_setup_key">overrideInteractiveSetupKey</string>
@@ -156,12 +161,12 @@
     <string name="override_interactive_setup_disabled_summary">Interactive setup enabled</string>
     <string name="override_interactive_setup_title">Disable Interactive Setup</string>
 
-    <!-- App Choice Activity -->
+    <!-- App Choice Activity - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
     <string name="app_list_loading_text">Loading app list&#8230;</string>
     <string name="app_list_empty_search">No apps fit your search criteria.</string>
     <string name="search_query_hint">Type app name&#8230;</string>
 
-    <!-- HTML Information -->
+    <!-- HTML Information - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <string name="about_app_text"><![CDATA[
     <p>Fit Notifications is a third party application that allows you to send notifications from any of the apps installed on your phone to your compatible Fitbit device.
        In order to properly setup this application, please follow the provided instructions.</p>

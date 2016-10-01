@@ -24,11 +24,11 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-
     compile 'com.android.support:appcompat-v7:24.2.0'
     compile 'com.android.support:recyclerview-v7:24.2.0'
     compile 'com.android.support:support-v4:24.2.0'
-    compile 'com.heinrichreimersoftware:material-intro:c68005f'
+    compile 'com.heinrichreimersoftware:material-intro:1.6'
+    compile files('libs/icu4j-57.1.jar')
 }

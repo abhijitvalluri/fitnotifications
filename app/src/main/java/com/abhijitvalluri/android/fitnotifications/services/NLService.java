@@ -23,6 +23,7 @@ import com.abhijitvalluri.android.fitnotifications.SettingsActivity;
 import com.abhijitvalluri.android.fitnotifications.utils.AppSelectionsStore;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
 import com.abhijitvalluri.android.fitnotifications.R;
+import com.ibm.icu.text.Transliterator;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -43,6 +44,7 @@ public class NLService extends NotificationListenerService {
     private static boolean mDismissRelayedNotif;
     private static boolean mLimitNotifications;
     private static boolean mDisableWhenScreenOn;
+    private static boolean mTransliterateNotif;
     private static int mPlaceholderNotifDismissDelayMillis;
     private static int mRelayedNotifDismissDelayMillis;
     private static int mNotifLimitDurationMillis;
@@ -80,6 +82,8 @@ public class NLService extends NotificationListenerService {
                 *1000;
         mDisableWhenScreenOn = preferences.getBoolean(
                 getString(R.string.disable_forward_screen_on_key), false);
+        mTransliterateNotif = preferences.getBoolean(
+                getString(R.string.transliterate_notification_key), true);
 
         Toast.makeText(this, getString(R.string.notification_service_started), Toast.LENGTH_LONG).show();
     }
@@ -109,6 +113,10 @@ public class NLService extends NotificationListenerService {
 
     public static void onDisableWhenScreenOnUpdated(boolean disableWhenScreenOn) {
         mDisableWhenScreenOn = disableWhenScreenOn;
+    }
+
+    public static void onTransliterateNotificationUpdated(boolean enableTransliteration) {
+        mTransliterateNotif = enableTransliteration;
     }
 
     @Override
@@ -161,13 +169,23 @@ public class NLService extends NotificationListenerService {
         String notificationText, notificationBigText;
 
         try {
-            notificationText = extras.getCharSequence(Notification.EXTRA_TEXT).toString();
+            if (mTransliterateNotif) {
+                notificationText = Transliterator.getInstance("Any-Latin")
+                        .transform(extras.getCharSequence(Notification.EXTRA_TEXT).toString());
+            } else {
+                notificationText = extras.getCharSequence(Notification.EXTRA_TEXT).toString();
+            }
         } catch (NullPointerException e) {
             notificationText = "";
         }
 
         try {
-            notificationBigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString();
+            if (mTransliterateNotif) {
+                notificationBigText = Transliterator.getInstance("Any-Latin")
+                        .transform(extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString());
+            } else {
+                notificationBigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString();
+            }
         } catch (NullPointerException e) {
             notificationBigText = "";
         }
