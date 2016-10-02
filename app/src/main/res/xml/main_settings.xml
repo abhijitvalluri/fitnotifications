@@ -71,6 +71,33 @@
             android:summary="@string/transliterate_notification_summary_enabled"
             android:key="@string/transliterate_notification_key"
             android:defaultValue="true" />
+
+        <SwitchPreference
+            android:title="@string/split_notification_title"
+            android:summary="@string/split_notification_summary"
+            android:key="@string/split_notification_key"
+            android:defaultValue="false" />
+
+        <com.abhijitvalluri.android.fitnotifications.alobar.preference.NumberPickerPreference
+            android:title="@string/notification_text_limit_title"
+            android:key="@string/notification_text_limit_key"
+            android:defaultValue="100"
+            app:minValue="10"
+            app:maxValue="500"
+            app:beforeText="@string/notification_text_limit_before"
+            app:afterText="@string/notification_text_limit_after"
+            app:wrapSelectorWheel="false" />
+
+        <com.abhijitvalluri.android.fitnotifications.alobar.preference.NumberPickerPreference
+            android:title="@string/num_split_notifications_title"
+            android:key="@string/num_split_notifications_key"
+            android:defaultValue="3"
+            app:minValue="1"
+            app:maxValue="7"
+            app:beforeText="@string/num_split_notifications_before"
+            app:afterText="@string/num_split_notifications_after"
+            app:wrapSelectorWheel="false" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

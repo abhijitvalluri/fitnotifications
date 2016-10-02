@@ -155,6 +155,30 @@
     <string name="transliterate_notification_summary_disabled">Non-Latin characters will not be transliterated</string>
     <string name="transliterate_notification_key">transliterateNotifications</string>
 
+    <!-- Split notification setting -->
+    <string name="split_notification_title">Split long notifications</string>
+    <string name="split_notification_summary">Split long notifications into smaller ones to display on your Fitbit device without truncation</string>
+    <string name="split_notification_key">splitNotifications</string>
+
+    <string name="notification_text_limit_title">Character limit of Fitbit device</string>
+    <string name="notification_text_limit_key">characterLimit</string>
+    <string name="notification_text_limit_summary_disabled">Disabled</string>
+    <plurals name="notification_text_limit_summary_enabled">
+        <item quantity="other">%1$d characters maximum</item>
+    </plurals>
+    <string name="notification_text_limit_before">Fitbit device can show</string>
+    <string name="notification_text_limit_after">characters at most</string>
+
+    <string name="num_split_notifications_title">Number of split notifications</string>
+    <string name="num_split_notifications_key">Number of split notifications</string>
+    <string name="num_split_notifications_summary_disabled">Disabled</string>
+    <plurals name="num_split_notifications_summary_enabled">
+        <item quantity="one">Split into 1 notification</item>
+        <item quantity="other">Split into %1$d notifications</item>
+    </plurals>
+    <string name="num_split_notifications_before">Split into</string>
+    <string name="num_split_notifications_after">smaller notifications</string>
+
     <!-- Troubleshooting settings -->
     <string name="override_interactive_setup_key">overrideInteractiveSetupKey</string>
     <string name="override_interactive_setup_enabled_summary">Manual setup enabled</string>

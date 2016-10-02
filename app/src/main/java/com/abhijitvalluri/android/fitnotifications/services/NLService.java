@@ -45,6 +45,9 @@ public class NLService extends NotificationListenerService {
     private static boolean mLimitNotifications;
     private static boolean mDisableWhenScreenOn;
     private static boolean mTransliterateNotif;
+    private static boolean mSplitNotification;
+    private static int mFitbitNotifCharLimit;
+    private static int mNumSplitNotifications;
     private static int mPlaceholderNotifDismissDelayMillis;
     private static int mRelayedNotifDismissDelayMillis;
     private static int mNotifLimitDurationMillis;
@@ -84,6 +87,12 @@ public class NLService extends NotificationListenerService {
                 getString(R.string.disable_forward_screen_on_key), false);
         mTransliterateNotif = preferences.getBoolean(
                 getString(R.string.transliterate_notification_key), true);
+        mSplitNotification = preferences.getBoolean(
+                getString(R.string.split_notification_key), false);
+        mFitbitNotifCharLimit = preferences.getInt(
+                getString(R.string.notification_text_limit_key), Constants.DEFAULT_NOTIF_CHAR_LIMIT);
+        mNumSplitNotifications = preferences.getInt(
+                getString(R.string.num_split_notifications_key), Constants.DEFAULT_NUM_NOTIF);
 
         Toast.makeText(this, getString(R.string.notification_service_started), Toast.LENGTH_LONG).show();
     }
@@ -99,6 +108,14 @@ public class NLService extends NotificationListenerService {
     public static void onPlaceholderNotifSettingUpdated(boolean dismissNotif, int delaySeconds) {
         mDismissPlaceholderNotif = dismissNotif;
         mPlaceholderNotifDismissDelayMillis = delaySeconds*1000;
+    }
+
+    public static void onSplitNotificationSettingUpdated(boolean enabled,
+                                                         int charLimit,
+                                                         int numSplitNotifs) {
+        mSplitNotification = enabled;
+        mFitbitNotifCharLimit = charLimit;
+        mNumSplitNotifications = numSplitNotifs;
     }
 
     public static void onLimitNotificationSettingUpdated(boolean limitNotif, int durationSeconds) {
@@ -209,17 +226,15 @@ public class NLService extends NotificationListenerService {
                 R.id.customNotificationText, getString(R.string.notification_text));
 
         builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
-                .setContentText(sb.toString())
                 .setContentTitle(extras.getCharSequence(Notification.EXTRA_TITLE))
                 .setContent(contentView);
 
         // Creates an explicit intent for the SettingsActivity in the app
         Intent settingsIntent = new Intent(this, SettingsActivity.class);
 
-        // The stack builder object will contain an artificial back stack for the
-        // started Activity.
-        // This ensures that navigating backward from the Activity leads out of
-        // the application to the Home screen.
+        // The stack builder object will contain an artificial back stack for the started Activity.
+        // This ensures that navigating backward from the Activity leads out of the application to
+        // the Home screen.
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         // Adds the back stack for the Intent (but not the Intent itself)
         stackBuilder.addParentStack(SettingsActivity.class);
@@ -232,7 +247,53 @@ public class NLService extends NotificationListenerService {
                 );
         builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
 
-        mNotificationManager.notify(NOTIFICATION_ID, builder.build());
+        StringBuilder notifStrB = new StringBuilder(sb.toString().trim().replaceAll("\\s+", " "));
+
+        if (mSplitNotification && notifStrB.length() > mFitbitNotifCharLimit) {
+            int notifCount = 1; // start from 1 to send one less within the while loop
+
+            int charLimit = mFitbitNotifCharLimit - 7; // 7 chars for "... [1]" with changing number
+            while (notifCount < mNumSplitNotifications && notifStrB.length() > mFitbitNotifCharLimit) {
+                String partialText;
+                int whiteSpaceIndex = notifStrB.lastIndexOf(" ", charLimit);
+
+                if (whiteSpaceIndex > 0) {
+                    partialText = notifStrB.substring(0, whiteSpaceIndex);
+                    notifStrB.delete(0, whiteSpaceIndex+1);
+                } else {
+                    partialText = notifStrB.substring(0, charLimit);
+                    notifStrB.delete(0, charLimit);
+                }
+
+                partialText = partialText.concat("... [" + notifCount + "]");
+
+                builder.setContentText(partialText);
+                final Notification notif = builder.build();
+
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mNotificationManager.notify(NOTIFICATION_ID, notif);
+                    }
+                }, 500*notifCount);
+
+                notifCount++;
+            }
+
+            if (notifStrB.length() > 0) {
+                builder.setContentText(notifStrB.toString());
+                final Notification notif = builder.build();
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mNotificationManager.notify(NOTIFICATION_ID, notif);
+                    }
+                }, 500*notifCount);
+            }
+        } else { // Do not split the notification
+            builder.setContentText(sb.toString());
+            mNotificationManager.notify(NOTIFICATION_ID, builder.build());
+        }
 
         if (mDismissPlaceholderNotif) {
             mHandler.postDelayed(new Runnable() {

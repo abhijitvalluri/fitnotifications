@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.annotation.PluralsRes;
+import android.support.annotation.StringRes;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
@@ -46,26 +48,23 @@ public class SettingsActivity extends AppCompatActivity {
             // Initialize delay summaries
             String key = getString(R.string.placeholder_dismiss_delay_key);
             boolean prefValue = mPreferences.getBoolean(getString(R.string.dismiss_placeholder_notif_key), false);
-            updateDelaySummary(key,
+            updateSummaryWithPlurals(key,
                     mPreferences.getInt(key, Constants.DEFAULT_DELAY_SECONDS),
                     R.plurals.placeholder_dismiss_delay_summary,
                     R.string.placeholder_dismiss_delay_summary0,
                     prefValue);
-            findPreference(key).setEnabled(prefValue);
-
 
             key = getString(R.string.relayed_dismiss_delay_key);
             prefValue = mPreferences.getBoolean(getString(R.string.dismiss_relayed_notif_key), false);
-            updateDelaySummary(key,
+            updateSummaryWithPlurals(key,
                     mPreferences.getInt(key, Constants.DEFAULT_DELAY_SECONDS),
                     R.plurals.relayed_dismiss_delay_summary,
                     R.string.relayed_dismiss_delay_summary0,
                     prefValue);
-            findPreference(key).setEnabled(prefValue);
 
             key = getString(R.string.notif_limit_duration_key);
             prefValue = mPreferences.getBoolean(getString(R.string.limit_notif_key), false);
-            updateDelaySummary(key,
+            updateSummaryWithPlurals(key,
                     mPreferences.getInt(key, Constants.DEFAULT_DELAY_SECONDS),
                     R.plurals.notif_limit_duration_summary,
                     R.string.notif_limit_duration_summary0,
@@ -83,6 +82,20 @@ public class SettingsActivity extends AppCompatActivity {
             updateTransliterateNotificationSummary(key,
                                                    mPreferences.getBoolean(key, true));
 
+            prefValue = mPreferences.getBoolean(getString(R.string.split_notification_key), false);
+            key = getString(R.string.notification_text_limit_key);
+            updateSummaryWithPlurals(key,
+                                     mPreferences.getInt(key, Constants.DEFAULT_NOTIF_CHAR_LIMIT),
+                                     R.plurals.notification_text_limit_summary_enabled,
+                                     R.string.notification_text_limit_summary_disabled,
+                                     prefValue);
+
+            key = getString(R.string.num_split_notifications_key);
+            updateSummaryWithPlurals(key,
+                                     mPreferences.getInt(key, Constants.DEFAULT_NUM_NOTIF),
+                                     R.plurals.num_split_notifications_summary_enabled,
+                                     R.string.num_split_notifications_summary_disabled,
+                                     prefValue);
         }
 
         private void updateTransliterateNotificationSummary(String summaryKey, boolean enable) {
@@ -109,14 +122,19 @@ public class SettingsActivity extends AppCompatActivity {
             }
         }
 
-        private void updateDelaySummary(
-                String summaryKey, int delaySeconds, int pluralsId, int stringId, boolean enabled) {
+        private void updateSummaryWithPlurals(String summaryKey,
+                                              int value,
+                                              @PluralsRes int pluralsId,
+                                              @StringRes int stringId,
+                                              boolean enabled) {
             if (enabled) {
                 findPreference(summaryKey).setSummary(getResources()
-                        .getQuantityString(pluralsId, delaySeconds, delaySeconds));
+                        .getQuantityString(pluralsId, value, value));
             } else {
                 findPreference(summaryKey).setSummary(getString(stringId));
             }
+
+            findPreference(summaryKey).setEnabled(enabled);
         }
 
         @Override
@@ -125,11 +143,10 @@ public class SettingsActivity extends AppCompatActivity {
                     || key.equals(getString(R.string.placeholder_dismiss_delay_key))) {
                 boolean dismissNotif = mPreferences.getBoolean(
                         getString(R.string.dismiss_placeholder_notif_key), false);
-                findPreference(getString(R.string.placeholder_dismiss_delay_key)).setEnabled(dismissNotif);
                 int delaySeconds = mPreferences.getInt(
                         getString(R.string.placeholder_dismiss_delay_key), 
                         Constants.DEFAULT_DELAY_SECONDS);
-                updateDelaySummary(getString(R.string.placeholder_dismiss_delay_key),
+                updateSummaryWithPlurals(getString(R.string.placeholder_dismiss_delay_key),
                               delaySeconds,
                               R.plurals.placeholder_dismiss_delay_summary,
                               R.string.placeholder_dismiss_delay_summary0,
@@ -141,11 +158,10 @@ public class SettingsActivity extends AppCompatActivity {
                     || key.equals(getString(R.string.relayed_dismiss_delay_key))) {
                 boolean dismissNotif = mPreferences.getBoolean(
                         getString(R.string.dismiss_relayed_notif_key), false);
-                findPreference(getString(R.string.relayed_dismiss_delay_key)).setEnabled(dismissNotif);
                 int delaySeconds = mPreferences.getInt(
                         getString(R.string.relayed_dismiss_delay_key),
                         Constants.DEFAULT_DELAY_SECONDS);
-                updateDelaySummary(getString(R.string.relayed_dismiss_delay_key),
+                updateSummaryWithPlurals(getString(R.string.relayed_dismiss_delay_key),
                               delaySeconds,
                               R.plurals.relayed_dismiss_delay_summary,
                               R.string.relayed_dismiss_delay_summary0,
@@ -156,11 +172,10 @@ public class SettingsActivity extends AppCompatActivity {
                     || key.equals(getString(R.string.notif_limit_duration_key))) {
                 boolean limitNotif = mPreferences.getBoolean(
                         getString(R.string.limit_notif_key), false);
-                findPreference(getString(R.string.notif_limit_duration_key)).setEnabled(limitNotif);
                 int durationSeconds = mPreferences.getInt(
                         getString(R.string.notif_limit_duration_key),
                         Constants.DEFAULT_DELAY_SECONDS);
-                updateDelaySummary(getString(R.string.notif_limit_duration_key),
+                updateSummaryWithPlurals(getString(R.string.notif_limit_duration_key),
                               durationSeconds,
                               R.plurals.notif_limit_duration_summary,
                               R.string.notif_limit_duration_summary0,
@@ -176,6 +191,33 @@ public class SettingsActivity extends AppCompatActivity {
                 boolean enable = mPreferences.getBoolean(key, true);
                 updateTransliterateNotificationSummary(key, enable);
                 NLService.onTransliterateNotificationUpdated(enable);
+            } else if (key.equals(getString(R.string.split_notification_key))
+                    || key.equals(getString(R.string.notification_text_limit_key))
+                    || key.equals(getString(R.string.num_split_notifications_key))) {
+                boolean enable = mPreferences.getBoolean(getString(R.string.split_notification_key),
+                                                         false);
+                int notifCharLimit = mPreferences.getInt(
+                        getString(R.string.notification_text_limit_key),
+                        Constants.DEFAULT_NOTIF_CHAR_LIMIT);
+                int numSplitNotif = mPreferences.getInt(
+                        getString(R.string.num_split_notifications_key),
+                        Constants.DEFAULT_NUM_NOTIF);
+
+                updateSummaryWithPlurals(
+                        getString(R.string.notification_text_limit_key),
+                        notifCharLimit,
+                        R.plurals.notification_text_limit_summary_enabled,
+                        R.string.notification_text_limit_summary_disabled,
+                        enable);
+
+                updateSummaryWithPlurals(
+                        getString(R.string.num_split_notifications_key),
+                        numSplitNotif,
+                        R.plurals.num_split_notifications_summary_enabled,
+                        R.string.num_split_notifications_summary_disabled,
+                        enable);
+
+                NLService.onSplitNotificationSettingUpdated(enable, notifCharLimit, numSplitNotif);
             }
         }
 
