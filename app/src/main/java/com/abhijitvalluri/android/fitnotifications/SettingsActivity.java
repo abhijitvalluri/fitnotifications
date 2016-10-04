@@ -96,6 +96,17 @@ public class SettingsActivity extends AppCompatActivity {
                                      R.plurals.num_split_notifications_summary_enabled,
                                      R.string.num_split_notifications_summary_disabled,
                                      prefValue);
+
+            key = getString(R.string.display_app_name_key);
+            updateDisplayAppNameSummary(key, mPreferences.getBoolean(key, true));
+        }
+
+        private void updateDisplayAppNameSummary(String summaryKey, boolean enable) {
+            if (enable) {
+                findPreference(summaryKey).setSummary(getResources().getString(R.string.display_app_name_summary_enabled));
+            } else {
+                findPreference(summaryKey).setSummary(getResources().getString(R.string.display_app_name_summary_disabled));
+            }
         }
 
         private void updateTransliterateNotificationSummary(String summaryKey, boolean enable) {
@@ -218,6 +229,10 @@ public class SettingsActivity extends AppCompatActivity {
                         enable);
 
                 NLService.onSplitNotificationSettingUpdated(enable, notifCharLimit, numSplitNotif);
+            } else if (key.equals(getString(R.string.display_app_name_key))) {
+                boolean enable = mPreferences.getBoolean(key, true);
+                updateDisplayAppNameSummary(key, enable);
+                NLService.onDisplayAppNameUpdated(enable);
             }
         }
 

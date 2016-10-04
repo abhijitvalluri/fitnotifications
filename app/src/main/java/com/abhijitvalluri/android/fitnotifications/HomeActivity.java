@@ -257,7 +257,6 @@ public class HomeActivity extends AppCompatActivity {
                 String notificationText = "Sample notification subject";
                 String notificationBigText = "Sample notification body. This is where the details of the notification will be shown.";
 
-
                 StringBuilder sb = new StringBuilder();
                 sb.append("[").append("example").append("] ");
                 sb.append(notificationText);

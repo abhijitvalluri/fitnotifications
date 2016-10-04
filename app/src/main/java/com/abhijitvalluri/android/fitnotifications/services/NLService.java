@@ -46,6 +46,7 @@ public class NLService extends NotificationListenerService {
     private static boolean mDisableWhenScreenOn;
     private static boolean mTransliterateNotif;
     private static boolean mSplitNotification;
+    private static boolean mDisplayAppName;
     private static int mFitbitNotifCharLimit;
     private static int mNumSplitNotifications;
     private static int mPlaceholderNotifDismissDelayMillis;
@@ -93,6 +94,7 @@ public class NLService extends NotificationListenerService {
                 getString(R.string.notification_text_limit_key), Constants.DEFAULT_NOTIF_CHAR_LIMIT);
         mNumSplitNotifications = preferences.getInt(
                 getString(R.string.num_split_notifications_key), Constants.DEFAULT_NUM_NOTIF);
+        mDisplayAppName = preferences.getBoolean(getString(R.string.display_app_name_key), true);
 
         Toast.makeText(this, getString(R.string.notification_service_started), Toast.LENGTH_LONG).show();
     }
@@ -136,6 +138,10 @@ public class NLService extends NotificationListenerService {
         mTransliterateNotif = enableTransliteration;
     }
 
+    public static void onDisplayAppNameUpdated(boolean displayAppName) {
+        mDisplayAppName = displayAppName;
+    }
+
     @Override
     public void onNotificationPosted(final StatusBarNotification sbn) {
         // TODO(abhijitvalluri): Think about monetization options for advanced features,
@@ -166,6 +172,23 @@ public class NLService extends NotificationListenerService {
 
         Bundle extras = notification.extras;
 
+        // DISREGARD SPAMMY NOTIFICATIONS
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+            if ((notification.flags & Notification.FLAG_LOCAL_ONLY) > 0 ||
+                (notification.flags & Notification.FLAG_GROUP_SUMMARY) > 0 ||
+                (notification.flags & Notification.FLAG_ONGOING_EVENT) > 0) {
+                // Do not process notification if it is spammy
+                return;
+            }
+        } else {
+            if ((notification.flags & Notification.FLAG_ONGOING_EVENT) > 0) {
+                // For API 19, this fixes Facebook messenger but NOT Gmail. But that is good,
+                // as Gmail does not send a notification with non-empty text anyway when it is
+                // notifying about multiple email. Dig deeper and get extra info somehow? TODO
+                return;
+            }
+        }
+
         if (!notificationFromSelectedApp(appPackageName)) {
             return;
         }
@@ -180,7 +203,6 @@ public class NLService extends NotificationListenerService {
                 mLastNotificationTimeMap.put(appPackageName, currentTimeMillis);
             }
         }
-
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         String notificationText, notificationBigText;
@@ -199,7 +221,7 @@ public class NLService extends NotificationListenerService {
         try {
             if (mTransliterateNotif) {
                 notificationBigText = Transliterator.getInstance("Any-Latin")
-                        .transform(extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString());
+                        .transform(extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString()); // TODO: Apparently need minimum API 21 to use EXTRA_BIG_TEXT
             } else {
                 notificationBigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString();
             }
@@ -212,10 +234,13 @@ public class NLService extends NotificationListenerService {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("[")
-          .append(mAppSelectionsStore.getAppName(appPackageName))
-          .append("] ")
-          .append(notificationText);
+        if (mDisplayAppName) {
+            sb.append("[")
+              .append(mAppSelectionsStore.getAppName(appPackageName))
+              .append("] ");
+        }
+
+        sb.append(notificationText);
 
         if (notificationBigText.length() > 0) {
             sb.append(" -- ").append(notificationBigText);
@@ -226,8 +251,18 @@ public class NLService extends NotificationListenerService {
                 R.id.customNotificationText, getString(R.string.notification_text));
 
         builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
-                .setContentTitle(extras.getCharSequence(Notification.EXTRA_TITLE))
                 .setContent(contentView);
+
+        if (mTransliterateNotif) {
+            try {
+                builder.setContentTitle(Transliterator.getInstance("Any-Latin")
+                        .transform(extras.getCharSequence(Notification.EXTRA_TITLE).toString()));
+            } catch (NullPointerException e) {
+                builder.setContentTitle(extras.getCharSequence(Notification.EXTRA_TITLE));
+            }
+        } else {
+            builder.setContentTitle(extras.getCharSequence(Notification.EXTRA_TITLE));
+        }
 
         // Creates an explicit intent for the SettingsActivity in the app
         Intent settingsIntent = new Intent(this, SettingsActivity.class);

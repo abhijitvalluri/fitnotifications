@@ -67,6 +67,12 @@
             android:defaultValue="false" />
 
         <SwitchPreference
+            android:title="@string/display_app_name_title"
+            android:summary="@string/display_app_name_summary_enabled"
+            android:key="@string/display_app_name_key"
+            android:defaultValue="true" />
+
+        <SwitchPreference
             android:title="@string/transliterate_notification_title"
             android:summary="@string/transliterate_notification_summary_enabled"
             android:key="@string/transliterate_notification_key"

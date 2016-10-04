@@ -30,5 +30,4 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:24.2.0'
     compile 'com.android.support:support-v4:24.2.0'
     compile 'com.heinrichreimersoftware:material-intro:1.6'
-    compile files('libs/icu4j-57.1.jar')
 }

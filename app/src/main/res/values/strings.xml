@@ -149,9 +149,15 @@
     <string name="disable_forward_screen_on_summary">Do not send notifications to Fitbit device if screen is on</string>
     <string name="disable_forward_screen_on_key">disableWhenScreenOn</string>
 
+    <!-- Display app name setting -->
+    <string name="display_app_name_title">Display app name</string>
+    <string name="display_app_name_summary_enabled">App name is displayed in notification sent to Fitbit tracker</string>
+    <string name="display_app_name_summary_disabled">App name is not displayed in notification sent to Fitbit tracker</string>
+    <string name="display_app_name_key">displayAppName</string>
+
     <!-- Transliteration settings -->
     <string name="transliterate_notification_title">Transliterate notifications to Latin</string>
-    <string name="transliterate_notification_summary_enabled">Russian, Greek and Japanese characters will be converted to Latin</string>
+    <string name="transliterate_notification_summary_enabled">Non-Latin characters will be converted to Latin</string>
     <string name="transliterate_notification_summary_disabled">Non-Latin characters will not be transliterated</string>
     <string name="transliterate_notification_key">transliterateNotifications</string>
 
@@ -268,10 +274,12 @@
        We will attempt to resolve this issue in an update.</p>
     ]]></string>
     <string name="whats_new_text"><![CDATA[
-    <p>You just updated to Fit Notifications <b>version 2.5</b>! The following changes are made in this version:</p>
+    <p>You just updated to Fit Notifications <b>version 2.6</b>! The following changes are made in this version:</p>
     <ul>
-        <li><b>New Setting!</b> Transliterate notification text from Russian, Greek and Japanese characters to Latin characters.<br /><br /></li>
+        <li><b>New Setting!</b> (Experimental) Transliterate non-Latin characters in notification text to Latin characters.<br /><br /></li>
         <li><b>New Setting!</b> Split long notifications into multiple smaller messages so that the entire text can be displayed on your Fitbit device without cutting it short.<br /><br /></li>
+        <li><b>New Setting!</b> You can choose not to display app name in notification to save space<br /><br /></li>
+        <li>The notification service now automatically filters out some uninformative messages based on the notification type<br /><br /></li>
         <li>Bug fixes for Android 7.0.</li>
     </ul>
 
