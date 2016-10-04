@@ -274,13 +274,12 @@
        We will attempt to resolve this issue in an update.</p>
     ]]></string>
     <string name="whats_new_text"><![CDATA[
-    <p>You just updated to Fit Notifications <b>version 2.6</b>! The following changes are made in this version:</p>
+    <p>New in Fit Notifications <b>version 2.5.1</b>:</p>
     <ul>
-        <li><b>New Setting!</b> (Experimental) Transliterate non-Latin characters in notification text to Latin characters.<br /><br /></li>
+        <li><b>New Setting!</b> (Experimental) Transliterate non-Latin characters in notification text to Latin characters. Not all characters are properly displayed.<br /><br /></li>
         <li><b>New Setting!</b> Split long notifications into multiple smaller messages so that the entire text can be displayed on your Fitbit device without cutting it short.<br /><br /></li>
         <li><b>New Setting!</b> You can choose not to display app name in notification to save space<br /><br /></li>
-        <li>The notification service now automatically filters out some uninformative messages based on the notification type<br /><br /></li>
-        <li>Bug fixes for Android 7.0.</li>
+        <li>The notification service now automatically filters out some uninformative messages based on the notification type.</li>
     </ul>
 
     ]]></string>
