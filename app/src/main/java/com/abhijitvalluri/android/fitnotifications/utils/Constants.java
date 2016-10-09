@@ -2,6 +2,8 @@ package com.abhijitvalluri.android.fitnotifications.utils;
 
 import com.abhijitvalluri.android.fitnotifications.BuildConfig;
 
+import java.util.Date;
+
 /**
  * List of all constants used in the app
  */
@@ -11,6 +13,7 @@ public class Constants {
     public static final String FITBIT_PACKAGE_NAME = "com.fitbit.FitbitMobile";
     public static final String SERVICE_STATE = "serviceState";
     public static final int DEFAULT_NOTIF_CHAR_LIMIT = 100;
+    public static final Integer NOTIFICATION_ID = (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
     public static final int DEFAULT_NUM_NOTIF = 100;
     public static final int DEFAULT_DELAY_SECONDS = 5;
 }

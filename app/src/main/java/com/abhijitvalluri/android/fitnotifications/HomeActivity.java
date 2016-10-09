@@ -2,72 +2,48 @@ package com.abhijitvalluri.android.fitnotifications;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
+import android.content.res.Configuration;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.app.NotificationCompat;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.RemoteViews;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.abhijitvalluri.android.fitnotifications.services.NLService;
 import com.abhijitvalluri.android.fitnotifications.setup.AppIntroActivity;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
-
-import java.util.Date;
 
 public class HomeActivity extends AppCompatActivity {
 
     private static final int APP_INTRO_FIRST_LAUNCH_INTENT = 1;
 
-    private static boolean mDismissPlaceholderNotif;
-    private static int mPlaceholderNotifDismissDelayMillis;
-
-    private final Integer NOTIFICATION_ID = (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
-    private final Handler mHandler = new Handler();
-
     private Bundle LAUNCH_ACTIVITY_ANIM_BUNDLE;
-
-    private TextView mInstructionTB;
-    private TextView mAppSelectionTB;
-    private TextView mAboutAppTB;
-    private TextView mFAQsTB;
-    private TextView mChangelogTB;
-    private TextView mDisclaimerTB;
-    private TextView mOpenSourceTB;
-    private TextView mCreditsTB;
-
-    private Button mStartServiceButton;
-    private Button mStopServiceButton;
-    private Button mDemoButton;
-    private Button mEnableNotificationsButton;
-
+    private DrawerLayout mDrawerLayout;
+    private SmoothDrawerToggle mDrawerToggle;
+    private Toolbar mToolbar;
+    private NavigationView mNavDrawer;
     private SharedPreferences mPreferences;
-
-    // TODO: implement proper callbacks where possible
-    //TODO: use Google Analytics! HIGH PRIORITY!
-    public static void onPlaceholderNotifSettingUpdated(boolean dismissNotif, int delaySeconds) {
-        mDismissPlaceholderNotif = dismissNotif;
-        mPlaceholderNotifDismissDelayMillis = delaySeconds*1000;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        // Set a Toolbar to replace the ActionBar.
+        mToolbar = (Toolbar) findViewById(R.id.home_toolbar);
+        setSupportActionBar(mToolbar);
 
         LAUNCH_ACTIVITY_ANIM_BUNDLE = ActivityOptions.
                 makeCustomAnimation(HomeActivity.this,
@@ -75,24 +51,18 @@ public class HomeActivity extends AppCompatActivity {
                         R.transition.left_out).toBundle();
 
         // Initialize settings to defaults
-        initializeSettings();
 
-        mInstructionTB = (TextView) findViewById(R.id.instructionsTB);
-        mAppSelectionTB = (TextView) findViewById(R.id.appSelectionTB);
-        mAboutAppTB = (TextView) findViewById(R.id.aboutAppTB);
-        mFAQsTB = (TextView) findViewById(R.id.faqsTB);
-        mChangelogTB = (TextView) findViewById(R.id.changelogTB);
-        mDisclaimerTB = (TextView) findViewById(R.id.disclaimerTB);
-        mOpenSourceTB = (TextView) findViewById(R.id.openSourceTB);
-        mCreditsTB = (TextView) findViewById(R.id.creditsTB);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerToggle = new SmoothDrawerToggle(this, mDrawerLayout, mToolbar, R.string.drawer_open,  R.string.drawer_close);
 
-        mStartServiceButton = (Button) findViewById(R.id.leftButton);
-        mStopServiceButton = (Button) findViewById(R.id.rightButton);
-        mDemoButton = (Button) findViewById(R.id.demoNotificationButton);
-        mEnableNotificationsButton = (Button) findViewById(R.id.enableNotificationAccessButton);
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
 
-        activateTextViewLinks();
-        initializeButtons();
+        mNavDrawer = (NavigationView) findViewById(R.id.navDrawer);
+        setupDrawerContent(mNavDrawer);
+
+
+        PreferenceManager.setDefaultValues(this, R.xml.main_settings, false);
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         if (mPreferences.getInt(getString(R.string.version_key), 0) < Constants.VERSION_CODE
             && mPreferences.getInt(getString(R.string.version_key), 0) > 0) {
@@ -112,13 +82,126 @@ public class HomeActivity extends AppCompatActivity {
                     APP_INTRO_FIRST_LAUNCH_INTENT,
                     LAUNCH_ACTIVITY_ANIM_BUNDLE);
         }
+
+        Fragment frag = new HomeFragment();
+
+        // Add a new fragment to the appropriate view element
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        if (fragmentManager.findFragmentById(R.id.flContent) == null) {
+            fragmentManager.beginTransaction().add(R.id.flContent, frag).commit();
+        }
+
+    }
+
+    private void setupDrawerContent(NavigationView navigationView) {
+        navigationView.setNavigationItemSelectedListener(
+            new NavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(MenuItem menuItem) {
+                    selectDrawerItem(menuItem);
+                    return true;
+                }
+            });
+    }
+
+    private void selectDrawerItem(MenuItem menuItem) {
+        // Create a new fragment and specify the fragment to show based on nav item clicked
+        final Fragment frag;
+        Fragment currFrag = getSupportFragmentManager().findFragmentById(R.id.flContent);
+        boolean isInfoFragment = false;
+
+        if (currFrag instanceof InfoFragment) {
+            isInfoFragment = true;
+        }
+
+        switch (menuItem.getItemId()) {
+            case R.id.nav_home:
+                frag = new HomeFragment();
+                menuItem.setTitle(R.string.app_name);
+                break;
+            case R.id.nav_about_app:
+                if (isInfoFragment) {
+                    ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.about_app_text));
+                    frag = null;
+                } else {
+                    frag = InfoFragment.newInstance(getString(R.string.about_app_text));
+                }
+                break;
+            case R.id.nav_whats_new:
+                if (isInfoFragment) {
+                    ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.whats_new_text));
+                    frag = null;
+                } else {
+                    frag = InfoFragment.newInstance(getString(R.string.whats_new_text));
+                }
+                break;
+            case R.id.nav_faqs:
+                if (isInfoFragment) {
+                    ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.faqs_text));
+                    frag = null;
+                } else {
+                    frag = InfoFragment.newInstance(getString(R.string.faqs_text));
+                }
+                break;
+            case R.id.nav_manual_setup:
+                if (isInfoFragment) {
+                    ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.instructions_text));
+                    frag = null;
+                } else {
+                    frag = InfoFragment.newInstance(getString(R.string.instructions_text));
+                }
+                break;
+            case R.id.nav_opensource:
+                if (isInfoFragment) {
+                    ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.opensource_text));
+                    frag = null;
+                } else {
+                    frag = InfoFragment.newInstance(getString(R.string.opensource_text));
+                }
+                break;
+            case R.id.nav_contact:
+                if (isInfoFragment) {
+                    ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.contact_us_text));
+                    frag = null;
+                } else {
+                    frag = InfoFragment.newInstance(getString(R.string.contact_us_text));
+                }
+                break;
+            default:
+                // something unexpected has happened Log it may be?
+                return;
+        }
+
+        // Highlight the selected item has been done by NavigationView
+        menuItem.setChecked(true);
+        // Set action bar title
+        setTitle(menuItem.getTitle());
+        if (frag != null) {
+            mDrawerToggle.runWhenIdle(new Runnable() {
+                @Override
+                public void run() {
+                    // Insert the fragment by replacing any existing fragment
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    fragmentManager.beginTransaction().replace(R.id.flContent, frag).commit();
+                }
+            });
+        }
+
+        // Close the navigation drawer
+        mDrawerLayout.closeDrawers();
+    }
+
+        @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        mDrawerToggle.syncState();
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        initializeServiceButtons();
-        updateSetup();
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Pass any configuration change to the drawer toggles
+        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -130,6 +213,11 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
         switch (item.getItemId()) {
             case R.id.menu_main_settings:
                 startActivity(SettingsActivity.newIntent(this), LAUNCH_ACTIVITY_ANIM_BUNDLE);
@@ -137,222 +225,6 @@ public class HomeActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
-
-    }
-
-    private void initializeSettings() {
-        PreferenceManager.setDefaultValues(this, R.xml.main_settings, false);
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        mDismissPlaceholderNotif = mPreferences.getBoolean(
-                getString(R.string.dismiss_placeholder_notif_key), false);
-        mPlaceholderNotifDismissDelayMillis = mPreferences.getInt(
-                getString(R.string.placeholder_dismiss_delay_key), Constants.DEFAULT_DELAY_SECONDS)
-                *1000;
-    }
-
-    private void updateSetup() {
-        boolean isInteractiveSetupDisabled = mPreferences.getBoolean(
-                                    getString(R.string.override_interactive_setup_key),
-                                    false);
-        if (!isInteractiveSetupDisabled) {
-            mInstructionTB.setText(R.string.instructions);
-            mInstructionTB.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startActivity(AppIntroActivity.newIntent(HomeActivity.this), LAUNCH_ACTIVITY_ANIM_BUNDLE);
-                }
-            });
-        } else {
-            mInstructionTB.setText(R.string.instructions_manual);
-            mInstructionTB.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = InfoActivity.newIntent(HomeActivity.this, getString(R.string.instructions_manual_heading), getString(R.string.instructions_text));
-                    startActivity(intent, LAUNCH_ACTIVITY_ANIM_BUNDLE);
-                }
-            });
-        }
-    }
-
-    private void activateTextViewLinks() {
-        updateSetup();
-
-        mAppSelectionTB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(AppChoicesActivity.newIntent(HomeActivity.this), LAUNCH_ACTIVITY_ANIM_BUNDLE);
-            }
-        });
-
-        mAboutAppTB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = InfoActivity.newIntent(HomeActivity.this, getString(R.string.about_app), getString(R.string.about_app_text));
-                startActivity(intent, LAUNCH_ACTIVITY_ANIM_BUNDLE);
-            }
-        });
-
-        mFAQsTB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = InfoActivity.newIntent(HomeActivity.this, getString(R.string.faqs), getString(R.string.faqs_text));
-                startActivity(intent, LAUNCH_ACTIVITY_ANIM_BUNDLE);
-            }
-        });
-
-        mChangelogTB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = InfoActivity.newIntent(HomeActivity.this, getString(R.string.whats_new), getString(R.string.whats_new_text));
-                startActivity(intent, LAUNCH_ACTIVITY_ANIM_BUNDLE);
-            }
-        });
-
-        mDisclaimerTB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = InfoActivity.newIntent(HomeActivity.this, getString(R.string.disclaimer), getString(R.string.disclaimer_text));
-                startActivity(intent, LAUNCH_ACTIVITY_ANIM_BUNDLE);
-            }
-        });
-
-        mOpenSourceTB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = InfoActivity.newIntent(HomeActivity.this, getString(R.string.opensource), getString(R.string.opensource_text));
-                startActivity(intent, LAUNCH_ACTIVITY_ANIM_BUNDLE);
-            }
-        });
-
-        mCreditsTB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = InfoActivity.newIntent(HomeActivity.this, getString(R.string.credits), getString(R.string.credits_text));
-                startActivity(intent, LAUNCH_ACTIVITY_ANIM_BUNDLE);
-            }
-        });
-    }
-
-    private void initializeButtons() {
-        initializeServiceButtons();
-        initializeDemoButton();
-        initializeEnableNotificationButton();
-    }
-
-    private void initializeEnableNotificationButton() {
-        mEnableNotificationsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                enableNotificationAccess();
-            }
-        });
-    }
-    private void initializeDemoButton() {
-        mDemoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Bundle newExtra = new Bundle();
-
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(HomeActivity.this);
-                String notificationText = "Sample notification subject";
-                String notificationBigText = "Sample notification body. This is where the details of the notification will be shown.";
-
-                StringBuilder sb = new StringBuilder();
-                sb.append("[").append("example").append("] ");
-                sb.append(notificationText);
-                if (notificationBigText.length() > 0) {
-                    sb.append(" -- ").append(notificationBigText);
-                }
-
-                RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.custom_notification);
-                contentView.setTextViewText(R.id.customNotificationText, getString(R.string.placeholder_notification_text));
-                builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
-                        .setContentText(sb.toString())
-                        .setExtras(newExtra)
-                        .setContentTitle("Sample Notification Title")
-                        .setContent(contentView);
-
-                // Creates an explicit intent for the SettingsActivity in the app
-                Intent settingsIntent = new Intent(HomeActivity.this, SettingsActivity.class);
-
-                // The stack builder object will contain an artificial back stack for the
-                // started Activity.
-                // This ensures that navigating backward from the Activity leads out of
-                // the application to the Home screen.
-                TaskStackBuilder stackBuilder = TaskStackBuilder.create(HomeActivity.this);
-                // Adds the back stack for the Intent (but not the Intent itself)
-                stackBuilder.addParentStack(SettingsActivity.class);
-                // Adds the Intent that starts the Activity to the top of the stack
-                stackBuilder.addNextIntent(settingsIntent);
-                PendingIntent settingsPendingIntent =
-                        stackBuilder.getPendingIntent(
-                                0,
-                                PendingIntent.FLAG_UPDATE_CURRENT
-                        );
-                builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
-
-                ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
-                        .notify(NOTIFICATION_ID, builder.build());
-
-                Toast.makeText(HomeActivity.this, getString(R.string.test_notification_sent), Toast.LENGTH_LONG)
-                        .show();
-
-                if (mDismissPlaceholderNotif) {
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
-                                    .cancel(NOTIFICATION_ID);
-                        }
-                    }, mPlaceholderNotifDismissDelayMillis);
-                }
-            }
-        });
-    }
-
-    private void enableNotificationAccess() {
-        String message = "You must enable notification access in order for this app to work.\n\n" +
-                "To enable notification access, allow access for " + getString(R.string.app_name) +
-                " on the next screen.";
-
-        new AlertDialog.Builder(HomeActivity.this)
-                .setMessage(message)
-                .setTitle(getString(R.string.enable_notification_access))
-                .setPositiveButton("ENABLE", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        startActivity(new
-                                Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
-                    }
-                })
-                .setNegativeButton("CANCEL", null)
-                .create()
-                .show();
-    }
-
-    private void initializeServiceButtons() {
-        mStartServiceButton.setText(R.string.start_service);
-        mStopServiceButton.setText(R.string.stop_service);
-        mStartServiceButton.setEnabled(!NLService.isEnabled());
-        mStopServiceButton.setEnabled(NLService.isEnabled());
-        mStartServiceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startService(new Intent(HomeActivity.this, NLService.class));
-                NLService.setEnabled(true);
-                mStartServiceButton.setEnabled(false);
-                mStopServiceButton.setEnabled(true);
-            }
-        });
-        mStopServiceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopService(new Intent(HomeActivity.this, NLService.class));
-                NLService.setEnabled(false);
-                mStartServiceButton.setEnabled(true);
-                mStopServiceButton.setEnabled(false);
-            }
-        });
     }
 
     @Override
@@ -383,6 +255,37 @@ public class HomeActivity extends AppCompatActivity {
                 }
                 return;
             default:
+        }
+    }
+
+    private class SmoothDrawerToggle extends ActionBarDrawerToggle {
+        private Runnable runnable;
+
+        public SmoothDrawerToggle(Activity activity, DrawerLayout drawerLayout, Toolbar toolbar, int openDrawerContentDescRes, int closeDrawerContentDescRes) {
+            super(activity, drawerLayout, toolbar, openDrawerContentDescRes, closeDrawerContentDescRes);
+        }
+
+        @Override
+        public void onDrawerOpened(View drawerView) {
+            super.onDrawerOpened(drawerView);
+            invalidateOptionsMenu();
+        }
+        @Override
+        public void onDrawerClosed(View view) {
+            super.onDrawerClosed(view);
+            invalidateOptionsMenu();
+        }
+        @Override
+        public void onDrawerStateChanged(int newState) {
+            super.onDrawerStateChanged(newState);
+            if (runnable != null && newState == DrawerLayout.STATE_SETTLING) {
+                runnable.run();
+                runnable = null;
+            }
+        }
+
+        public void runWhenIdle(Runnable runnable) {
+            this.runnable = runnable;
         }
     }
 }

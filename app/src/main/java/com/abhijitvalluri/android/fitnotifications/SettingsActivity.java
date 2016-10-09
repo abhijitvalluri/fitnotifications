@@ -71,9 +71,6 @@ public class SettingsActivity extends AppCompatActivity {
                     prefValue);
             findPreference(key).setEnabled(prefValue);
 
-            key = getString(R.string.override_interactive_setup_key);
-            updateInteractiveSetupSummary(key);
-
             key = getString(R.string.disable_forward_screen_on_key);
             updateDisableWhenScreenOnSummary(key,
                                              mPreferences.getBoolean(key, false));
@@ -117,14 +114,6 @@ public class SettingsActivity extends AppCompatActivity {
             }
         }
 
-        private void updateInteractiveSetupSummary(String summaryKey) {
-            if (mPreferences.getBoolean(summaryKey, false)) {
-                findPreference(summaryKey).setSummary(getResources().getString(R.string.override_interactive_setup_enabled_summary));
-            } else {
-                findPreference(summaryKey).setSummary(getResources().getString(R.string.override_interactive_setup_disabled_summary));
-            }
-        }
-
         private void updateDisableWhenScreenOnSummary(String summaryKey, boolean disable) {
             if (disable) {
                 findPreference(summaryKey).setSummary(getResources().getString(R.string.disable_forward_screen_on_summary));
@@ -162,7 +151,7 @@ public class SettingsActivity extends AppCompatActivity {
                               R.plurals.placeholder_dismiss_delay_summary,
                               R.string.placeholder_dismiss_delay_summary0,
                               dismissNotif);
-                HomeActivity.onPlaceholderNotifSettingUpdated(dismissNotif, delaySeconds);
+                HomeFragment.onPlaceholderNotifSettingUpdated(dismissNotif, delaySeconds);
                 NLService.onPlaceholderNotifSettingUpdated(dismissNotif, delaySeconds);
 
             } else if (key.equals(getString(R.string.dismiss_relayed_notif_key))
@@ -192,8 +181,6 @@ public class SettingsActivity extends AppCompatActivity {
                               R.string.notif_limit_duration_summary0,
                               limitNotif);
                 NLService.onLimitNotificationSettingUpdated(limitNotif, durationSeconds);
-            } else if (key.equals(getString(R.string.override_interactive_setup_key))) {
-                updateInteractiveSetupSummary(key);
             } else if (key.equals(getString(R.string.disable_forward_screen_on_key))) {
                 boolean disable = mPreferences.getBoolean(key, false);
                 updateDisableWhenScreenOnSummary(key, disable);

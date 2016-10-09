@@ -3,13 +3,13 @@
     <string name="app_name">Fit Notifications</string>
     <string name="app_icon">Fit Notifications App Icon</string>
     <string name="other_app_icon">App icon of an installed app</string>
-    <string name="about_app">About App</string>
+    <string name="about_app">About app</string>
     <string name="app_info">Fit Notifications Menu</string>
     <string name="instructions">Start interactive setup</string>
-    <string name="instructions_manual">Show manual setup instructions</string>
-    <string name="instructions_manual_heading">Show manual setup instructions</string>
     <string name="instructions_heading">Setup</string>
-    <string name="faqs">Frequently Asked Questions</string>
+    <string name="manual_setup_instructions">Setup Instructions</string>
+    <string name="faqs">Frequently asked questions</string>
+    <string name="contact_us">Contact us</string>
     <string name="whats_new">What\'s new</string>
     <string name="disclaimer">Disclaimer</string>
     <string name="opensource">Open source licenses</string>
@@ -22,13 +22,19 @@
     <string name="notification_text">[Placeholder notification] Click to enable auto-dismiss. You can enable auto-dismiss for the relayed notification as well.</string>
     <string name="test_notification">Test Notification</string>
     <string name="test_notification_sent">Test notification sent</string>
-    <string name="notification_access">Notification Access</string>
+    <string name="notification_access_enable_textView">Enable Notification Access</string>
+    <string name="notification_access_disable_textView">Disable Notification Access</string>
     <string name="enable_notification_access">Enable Notification Access</string>
     <string name="disable_notification_access">Disable Notification Access</string>
     <string name="start_service_info_text">Starting the notification service&#8230;</string>
-    <string name="start_service">Start Service</string>
-    <string name="stop_service">Stop Service</string>
+    <string name="start_service">TURN ON</string>
+    <string name="stop_service">TURN OFF</string>
+    <string name="service_on">ON</string>
+    <string name="service_off">OFF</string>
     <string name="search_menu">App search</string>
+
+    <!-- Home screen -->
+    <string name="service_state">Notification service state: </string>
 
     <!-- Intro Strings Activity -->
     <string name="intro_get_started_button">Get started</string>
@@ -78,6 +84,9 @@
     <string name="intro_done_title">Done! Test your setup now!</string>
     <string name="intro_done_desc">Click the button below to send a test notification. You will see it on your device if the setup was successful! That\'s the basics! Check out the settings page for additional features!</string>
 
+    <!-- Side bar -->
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
 
     <!-- First launch -->
     <string name="done_first_launch_key">FirstLaunch</string>
@@ -185,12 +194,6 @@
     <string name="num_split_notifications_before">Split into</string>
     <string name="num_split_notifications_after">smaller notifications</string>
 
-    <!-- Troubleshooting settings -->
-    <string name="override_interactive_setup_key">overrideInteractiveSetupKey</string>
-    <string name="override_interactive_setup_enabled_summary">Manual setup enabled</string>
-    <string name="override_interactive_setup_disabled_summary">Interactive setup enabled</string>
-    <string name="override_interactive_setup_title">Disable Interactive Setup</string>
-
     <!-- App Choice Activity - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
     <string name="app_list_loading_text">Loading app list&#8230;</string>
     <string name="app_list_empty_search">No apps fit your search criteria.</string>
@@ -201,6 +204,10 @@
     <p>Fit Notifications is a third party application that allows you to send notifications from any of the apps installed on your phone to your compatible Fitbit device.
        In order to properly setup this application, please follow the provided instructions.</p>
 	<p>Please note that neither \'Fit Notifications\' nor \'Smart Dinosaurs Entertainment\' is affiliated with Fitbit, Inc. in anyway.</p>
+	<h2>Disclaimer</h2>
+	<p>Fitbit is a registered trademark and service mark of Fitbit, Inc.
+       \'Fit Notifications\' is designed for use with the Fitbit platform. This application
+       is not put out by Fitbit, and Fitbit does not service or warrant the functionality of this application.</p>
     ]]></string>
     <string name="instructions_text"><![CDATA[
     <p>To properly set up this application, please follow the instructions below:</p>
@@ -282,11 +289,6 @@
         <li>The notification service now automatically filters out some uninformative messages based on the notification type.</li>
     </ul>
 
-    ]]></string>
-    <string name="disclaimer_text"><![CDATA[
-    <p>Fitbit is a registered trademark and service mark of Fitbit, Inc.
-       \'Fit Notifications\' is designed for use with the Fitbit platform. This application
-       is not put out by Fitbit, and Fitbit does not service or warrant the functionality of this application.</p>
     ]]></string>
     <string name="opensource_text"><![CDATA[
     <p>This software contains portions of the following libraries, subject to the below licenses.</p>
@@ -681,7 +683,7 @@ Except as contained in this notice, the name of a copyright holder shall not be 
     ]]>
 
     </string>
-    <string name="credits_text"><![CDATA[
+    <string name="contact_us_text"><![CDATA[
     <p>Developed by Smart Dinosaurs Entertainment</p>
     <p>Lead Software Engineer: <a href=\"https://abhijitvalluri.com\">Abhijit Kiran Valluri</a></p>
     <h4>Contact Information:</h4>

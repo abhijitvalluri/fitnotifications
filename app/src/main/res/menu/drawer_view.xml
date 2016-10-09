@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_home_white_24dp"
+            android:title="Home"
+            android:checked="true"/>
+
+        <item android:title="App Information">
+            <menu>
+                <group android:checkableBehavior="single">
+                    <item
+                        android:id="@+id/nav_about_app"
+                        android:icon="@drawable/ic_info_outline_white_24dp"
+                        android:title="@string/about_app" />
+                    <item
+                        android:id="@+id/nav_whats_new"
+                        android:icon="@drawable/ic_new_releases_white_24dp"
+                        android:title="@string/whats_new" />
+                </group>
+            </menu>
+        </item>
+
+        <item android:title="Troubleshooting">
+            <menu>
+                <group android:checkableBehavior="single">
+                    <item
+                        android:id="@+id/nav_faqs"
+                        android:icon="@drawable/ic_question_answer_white_24dp"
+                        android:title="@string/faqs" />
+                    <item
+                        android:id="@+id/nav_manual_setup"
+                        android:icon="@drawable/ic_help_outline_white_24dp"
+                        android:title="@string/manual_setup_instructions" />
+                </group>
+            </menu>
+        </item>
+
+        <item android:title="@string/credits">
+            <menu>
+                <group android:checkableBehavior="single">
+                    <item
+                        android:id="@+id/nav_opensource"
+                        android:icon="@drawable/ic_copyright_white_24dp"
+                        android:title="@string/opensource" />
+                    <item
+                        android:id="@+id/nav_contact"
+                        android:icon="@drawable/ic_public_white_24dp"
+                        android:title="@string/contact_us" />
+                </group>
+            </menu>
+        </item>
+
+    </group>
+</menu>
