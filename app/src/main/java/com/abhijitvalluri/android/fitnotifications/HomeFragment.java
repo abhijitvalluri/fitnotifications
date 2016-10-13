@@ -211,7 +211,7 @@ public class HomeFragment extends Fragment {
         boolean serviceEnabled = NLService.isEnabled();
 
         if(serviceEnabled) {
-            mServiceButton.setText(R.string.stop_service);
+            mServiceButton.setText(R.string.turn_off_service);
             mServiceStateTV.setText(R.string.service_on);
             mServiceStateTV.setTextColor(ContextCompat.getColor(getContext(), R.color.brightGreen));
             mServiceButton.setOnClickListener(new View.OnClickListener() {
@@ -223,7 +223,7 @@ public class HomeFragment extends Fragment {
                 }
             });
         } else {
-            mServiceButton.setText(R.string.start_service);
+            mServiceButton.setText(R.string.turn_on_service);
             mServiceStateTV.setText(R.string.service_off);
             mServiceStateTV.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
             mServiceButton.setOnClickListener(new View.OnClickListener() {

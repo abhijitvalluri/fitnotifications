@@ -114,10 +114,12 @@ public class HomeActivity extends AppCompatActivity {
             isInfoFragment = true;
         }
 
+        setTitle(menuItem.getTitle());
+
         switch (menuItem.getItemId()) {
             case R.id.nav_home:
+                setTitle(R.string.app_name);
                 frag = new HomeFragment();
-                menuItem.setTitle(R.string.app_name);
                 break;
             case R.id.nav_about_app:
                 if (isInfoFragment) {
@@ -160,6 +162,7 @@ public class HomeActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.nav_contact:
+                setTitle(menuItem.getTitle());
                 if (isInfoFragment) {
                     ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.contact_us_text));
                     frag = null;
@@ -175,7 +178,6 @@ public class HomeActivity extends AppCompatActivity {
         // Highlight the selected item has been done by NavigationView
         menuItem.setChecked(true);
         // Set action bar title
-        setTitle(menuItem.getTitle());
         if (frag != null) {
             mDrawerToggle.runWhenIdle(new Runnable() {
                 @Override

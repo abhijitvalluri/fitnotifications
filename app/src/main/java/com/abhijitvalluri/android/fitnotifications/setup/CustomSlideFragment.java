@@ -14,7 +14,7 @@ import com.abhijitvalluri.android.fitnotifications.R;
 import com.heinrichreimersoftware.materialintro.app.SlideFragment;
 
 /**
- * Created by Abhijit Valluri on 9/11/2016.
+ * Custom Slide Fragment for the app intro.
  */
 public class CustomSlideFragment extends SlideFragment {
 
@@ -64,12 +64,14 @@ public class CustomSlideFragment extends SlideFragment {
 
         if (mTitleResId != 0) {
             mTitleTV.setText(mTitleResId);
-            mTitleTV.setTextColor(ContextCompat.getColor(getActivity(), R.color.white));
+            mTitleTV.setTextColor(ContextCompat.getColor(this.getContext(),
+                    com.heinrichreimersoftware.materialintro.R.color.mi_text_color_primary_dark));
         }
 
         if (mDescResId != 0) {
             mDescriptionTV.setText(mDescResId);
-            mDescriptionTV.setTextColor(ContextCompat.getColor(getActivity(), R.color.white));
+            mDescriptionTV.setTextColor(ContextCompat.getColor(this.getContext(),
+                    com.heinrichreimersoftware.materialintro.R.color.mi_text_color_secondary_dark));
         }
     }
 
