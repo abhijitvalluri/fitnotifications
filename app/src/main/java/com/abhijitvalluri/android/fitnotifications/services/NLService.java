@@ -35,10 +35,10 @@ import java.util.List;
 public class NLService extends NotificationListenerService {
 
     private static final Integer NOTIFICATION_ID = (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
+
     private final Handler mHandler = new Handler();
 
     private static List<String> mSelectedAppsPackageNames;
-
     private static boolean mIsServiceEnabled;
     private static boolean mDismissPlaceholderNotif;
     private static boolean mDismissRelayedNotif;
@@ -169,24 +169,17 @@ public class NLService extends NotificationListenerService {
 
         Notification notification = sbn.getNotification();
         final String appPackageName = sbn.getPackageName();
-
         Bundle extras = notification.extras;
 
         // DISREGARD SPAMMY NOTIFICATIONS
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
-            if ((notification.flags & Notification.FLAG_LOCAL_ONLY) > 0 ||
-                (notification.flags & Notification.FLAG_GROUP_SUMMARY) > 0 ||
-                (notification.flags & Notification.FLAG_ONGOING_EVENT) > 0) {
-                // Do not process notification if it is spammy
-                return;
-            }
-        } else {
-            if ((notification.flags & Notification.FLAG_ONGOING_EVENT) > 0) {
-                // For API 19, this fixes Facebook messenger but NOT Gmail. But that is good,
-                // as Gmail does not send a notification with non-empty text anyway when it is
-                // notifying about multiple email. Dig deeper and get extra info somehow? TODO
-                return;
-            }
+        if ((notification.flags & Notification.FLAG_ONGOING_EVENT) > 0) {
+            // Discard ongoing notifications
+            // TODO: Nothing else apart from this is consistent.
+            // I tried to see InboxStyle notifications vs. not and that did not help
+            // Not all use the EXTRA_SUMMARY_GROUP correctly either
+            // Perhaps best option is to allow users to custom discard useless
+            // messages via a string match
+            return;
         }
 
         if (!notificationFromSelectedApp(appPackageName)) {
