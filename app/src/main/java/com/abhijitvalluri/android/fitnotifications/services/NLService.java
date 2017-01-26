@@ -72,6 +72,7 @@ public class NLService extends NotificationListenerService {
     private NotificationManager mNotificationManager;
     private AppSelectionsStore mAppSelectionsStore;
     private HashMap<String, Long> mLastNotificationTimeMap;
+    private HashMap<String, String> mNotificationStringMap;
 
     @Override
     public void onCreate() {
@@ -79,6 +80,7 @@ public class NLService extends NotificationListenerService {
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mAppSelectionsStore = AppSelectionsStore.get(this);
         mLastNotificationTimeMap = new HashMap<>();
+        mNotificationStringMap = new HashMap<>();
 
         mSelectedAppsPackageNames = mAppSelectionsStore.getSelectedAppsPackageNames();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -290,6 +292,16 @@ public class NLService extends NotificationListenerService {
         builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
 
         StringBuilder notifStrB = new StringBuilder(sb.toString().trim().replaceAll("\\s+", " "));
+
+        if (mNotificationStringMap.containsKey(appPackageName)) {
+            String prevNotificationString = mNotificationStringMap.get(appPackageName);
+            if (prevNotificationString.equals(notifStrB.toString())) {
+                mNotificationStringMap.remove(appPackageName);
+                return;
+            }
+        }
+
+        mNotificationStringMap.put(appPackageName, notifStrB.toString());
 
         if (mSplitNotification && notifStrB.length() > mFitbitNotifCharLimit) {
             int notifCount = 1; // start from 1 to send one less within the while loop
