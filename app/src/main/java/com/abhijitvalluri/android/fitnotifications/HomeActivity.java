@@ -84,15 +84,21 @@ public class HomeActivity extends AppCompatActivity {
         PreferenceManager.setDefaultValues(this, R.xml.main_settings, false);
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+        Fragment frag = new HomeFragment();
+
+        // Add a new fragment to the appropriate view element
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        if (fragmentManager.findFragmentById(R.id.flContent) == null) {
+            fragmentManager.beginTransaction().add(R.id.flContent, frag).commit();
+        }
+
         if (mPreferences.getInt(getString(R.string.version_key), 0) < Constants.VERSION_CODE
-            && mPreferences.getInt(getString(R.string.version_key), 0) > 0) {
-            // Updated from old version
-            new AlertDialog.Builder(HomeActivity.this)
-                    .setTitle(R.string.whats_new)
-                    .setMessage(Html.fromHtml(getString(R.string.whats_new_text)))
-                    .setPositiveButton(android.R.string.ok, null)
-                    .create()
-                    .show();
+                && mPreferences.getInt(getString(R.string.version_key), 0) > 0) {
+
+            mNavDrawer.setCheckedItem(R.id.nav_whats_new);
+            setTitle(R.string.whats_new);
+            frag = InfoFragment.newInstance(getString(R.string.whats_new_text));
+            fragmentManager.beginTransaction().replace(R.id.flContent, frag).commit();
 
             mPreferences.edit().putInt(getString(R.string.version_key), Constants.VERSION_CODE).apply();
         }
@@ -101,14 +107,6 @@ public class HomeActivity extends AppCompatActivity {
             startActivityForResult(new Intent(HomeActivity.this, AppIntroActivity.class),
                     APP_INTRO_FIRST_LAUNCH_INTENT,
                     LAUNCH_ACTIVITY_ANIM_BUNDLE);
-        }
-
-        Fragment frag = new HomeFragment();
-
-        // Add a new fragment to the appropriate view element
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        if (fragmentManager.findFragmentById(R.id.flContent) == null) {
-            fragmentManager.beginTransaction().add(R.id.flContent, frag).commit();
         }
 
     }

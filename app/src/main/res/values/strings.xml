@@ -288,8 +288,8 @@
        We will attempt to resolve this issue in an update.</p>
     ]]></string>
     <string name="whats_new_text"><![CDATA[
-    <p><b>Version 2.6.1</b> fixes a bug in ver. 2.6 that caused users to not receive some notifications.</p>
-    <p>New in Fit Notifications <b>version 2.6</b>:</p>
+    <p><b>Version 2.6.2</b>: bug fixes and improvements to setup process for Android 7.0 (Nougat)</p>
+    <p>Changes in <b>version 2.6</b>:</p>
     <ul>
         <li><b>Updated UI!</b> Drag the new navigation drawer from the left to access useful information.<br /><br /></li>
         <li><b>New Setting!</b> (Experimental) Transliterate non-Latin characters in notification text to Latin characters. Not all characters are properly displayed.<br /><br /></li>
