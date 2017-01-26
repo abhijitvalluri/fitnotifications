@@ -73,11 +73,17 @@
     <string name="intro_start_service_title">Start the notification listening service</string>
     <string name="intro_start_service_desc">This service will try to stay in the background. If you stop receiving notifications, restart the service from this app. Don\'t use task killer apps, as they can disable the service.</string>
 
-    <string name="intro_dnd_mode_title">Do not disturb mode on Android 6.0</string>
+    <string name="intro_dnd_mode_title">Do not disturb mode on Android 6.0+</string>
     <string name="intro_dnd_mode_desc">If you enable do not disturb mode, then no notifications will be forwarded to your Fitbit device, by default. To change that, you need to follow specific instructions by clicking below.</string>
     <string name="intro_dnd_mode_button">Extra Instructions</string>
     <string name="intro_dnd_mode_message">
     Click on configure below. In the next screen, choose \"Notifications\" and enable \"Treat as priority\".\n\n
+    Now, when you use silent mode, enable \"Priority Only\". Doing so will allow you to get notifications via the app on your Fitbit device, but it will not
+    make any notification sound on the phone as this app doesn\'t cause notification sounds or vibrations anyway.
+    </string>
+
+    <string name="intro_dnd_mode_nougat_message">
+    Click on configure below. In the next screen, choose \"Notifications\". Then, disable \"Show silently\" setting and enable \"Override Do Not Disturb\".\n\n
     Now, when you use silent mode, enable \"Priority Only\". Doing so will allow you to get notifications via the app on your Fitbit device, but it will not
     make any notification sound on the phone as this app doesn\'t cause notification sounds or vibrations anyway.
     </string>
