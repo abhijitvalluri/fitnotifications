@@ -31,9 +31,6 @@ import android.widget.Button;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import java.util.Calendar;
-import java.util.Date;
-
 /**
  * TimePickerFragment hosts the time picker dialog.
  */

@@ -270,6 +270,17 @@ public class NLService extends NotificationListenerService {
             notificationBigText = "";
         }
 
+        try {
+            String temp = extras.getCharSequence(Notification.EXTRA_TITLE).toString();
+            if (!filterText.isEmpty()) {
+                if (temp.contains(filterText)) { // This notification should not be sent
+                    return;
+                }
+            }
+        } catch (NullPointerException e) {
+            // Do nothing and just continue
+        }
+
         if (discardEmptyNotifications && notificationText.trim().isEmpty() && notificationBigText.trim().isEmpty()) {
             return;
         }
