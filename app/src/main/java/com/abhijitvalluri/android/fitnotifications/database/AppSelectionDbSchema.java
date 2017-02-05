@@ -27,6 +27,12 @@ public class AppSelectionDbSchema {
             public static final String APP_PACKAGE_NAME = "appPackageName";
             public static final String APP_NAME = "appName";
             public static final String SELECTION = "selection";
+            public static final String FILTER_TEXT = "filterText";
+            public static final String START_TIME_HOUR = "startTimeHour";
+            public static final String START_TIME_MINUTE = "startTimeMinute";
+            public static final String STOP_TIME_HOUR = "stopTimeHour";
+            public static final String STOP_TIME_MINUTE = "stopTimeMinute";
+            public static final String DISCARD_EMPTY_NOTIFICATIONS = "discardEmptyNotifications";
         }
     }
 }

@@ -35,12 +35,14 @@ import android.support.v7.app.NotificationCompat;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import com.abhijitvalluri.android.fitnotifications.R;
 import com.abhijitvalluri.android.fitnotifications.SettingsActivity;
+import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
 import com.abhijitvalluri.android.fitnotifications.utils.AppSelectionsStore;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
-import com.abhijitvalluri.android.fitnotifications.R;
 import com.ibm.icu.text.Transliterator;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -202,6 +204,10 @@ public class NLService extends NotificationListenerService {
             return;
         }
 
+        if (!appNotificationScheduleActive(appPackageName)) {
+            return;
+        }
+
         if (mLimitNotifications) {
             Long currentTimeMillis = System.currentTimeMillis();
             Long lastNotificationTime = mLastNotificationTimeMap.get(appPackageName);
@@ -214,9 +220,28 @@ public class NLService extends NotificationListenerService {
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        String notificationText, notificationBigText;
+        String notificationText, notificationBigText, filterText;
+        boolean discardEmptyNotifications;
+
+        {
+            AppSelection appSelection = AppSelectionsStore.get(this).getAppSelection(appPackageName);
+            if (appSelection == null) { // Should never happen. So if it does, just return false
+                filterText = "";
+                discardEmptyNotifications = false;
+            } else {
+                filterText = appSelection.getFilterText().trim();
+                discardEmptyNotifications = appSelection.isDiscardEmptyNotifications();
+            }
+        }
 
         try {
+            String temp = extras.getCharSequence(Notification.EXTRA_TEXT).toString();
+            if (!filterText.isEmpty()) {
+                if (temp.contains(filterText)) { // This notification should not be sent
+                    return;
+                }
+            }
+
             if (mTransliterateNotif) {
                 notificationText = Transliterator.getInstance("Any-Latin")
                         .transform(extras.getCharSequence(Notification.EXTRA_TEXT).toString());
@@ -228,6 +253,13 @@ public class NLService extends NotificationListenerService {
         }
 
         try {
+            String temp = extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString();
+            if (!filterText.isEmpty()) {
+                if (temp.contains(filterText)) { // This notification should not be sent
+                    return;
+                }
+            }
+
             if (mTransliterateNotif) {
                 notificationBigText = Transliterator.getInstance("Any-Latin")
                         .transform(extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString()); // TODO: Apparently need minimum API 21 to use EXTRA_BIG_TEXT
@@ -236,6 +268,10 @@ public class NLService extends NotificationListenerService {
             }
         } catch (NullPointerException e) {
             notificationBigText = "";
+        }
+
+        if (discardEmptyNotifications && notificationText.trim().isEmpty() && notificationBigText.trim().isEmpty()) {
+            return;
         }
 
         if (notificationBigText.length() > 0 && notificationBigText.startsWith(notificationText)) {
@@ -385,6 +421,27 @@ public class NLService extends NotificationListenerService {
     // Checks if the notification comes from a selected application
     private boolean notificationFromSelectedApp(String appPackageName) {
         return NLService.mSelectedAppsPackageNames.contains(appPackageName);
+    }
+
+    // Check if the schedule for the application is active
+    private boolean appNotificationScheduleActive(String appPackageName) {
+        AppSelection appSelection = AppSelectionsStore.get(this).getAppSelection(appPackageName);
+        if (appSelection == null) { // Should never happen. So if it does, just return false
+            return false;
+        }
+
+        int startTime = appSelection.getStartTime();
+        int stopTime = appSelection.getStopTime();
+        Date currDate = new Date();
+
+        // Get current time
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(currDate);
+        int hour = cal.get(Calendar.HOUR_OF_DAY);
+        int minute = cal.get(Calendar.MINUTE);
+        int currTime = hour*60 + minute;
+
+        return ((currTime >= startTime) && (currTime < stopTime));
     }
 
     public static void setEnabled(boolean enabled) {

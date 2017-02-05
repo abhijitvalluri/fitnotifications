@@ -28,6 +28,16 @@
         android:layout_weight="6"
         tools:text="App Title" />
 
+    <ImageButton
+        android:contentDescription="App Setting"
+        android:id="@+id/appSettingsIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@null"
+        android:src="@drawable/ic_settings_black_24dp"
+        android:alpha="0.5"/>
+
     <CheckBox
         android:id="@+id/appSelectCheckBox"
         android:layout_width="0dp"

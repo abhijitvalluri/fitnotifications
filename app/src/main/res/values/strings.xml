@@ -14,7 +14,7 @@
     <string name="disclaimer">Disclaimer</string>
     <string name="opensource">Open source licenses</string>
     <string name="credits">Credits</string>
-    <string name="app_choices">Select Apps to Enable Notifications</string>
+    <string name="app_choices">Setup Apps</string>
     <string name="app_choices_activity_title">Select Apps</string>
     <string name="enabled_apps_filter_menu">Filter Enabled Apps</string>
     <string name="notification_service_started">Fit Notifications Service started</string>
@@ -68,7 +68,7 @@
     <string name="intro_get_fitbit_toast_text3">Fitbit app not found! Go back and install the official Fitbit app!</string>
 
     <string name="intro_select_apps_title">Choose the apps you want notifications for</string>
-    <string name="intro_select_apps_desc">You can now choose the apps whose notifications you want to receive on your Fitbit device. They will appear like Text Notifications on the device and will have the app name for clarity.</string>
+    <string name="intro_select_apps_desc">You can now choose the apps whose notifications you want to receive on your Fitbit device. They will appear like Text Notifications on the device and will have the app name for clarity.\n\nYou can also configure additional settings using the gear icon for each app individually.</string>
 
     <string name="intro_start_service_title">Start the notification listening service</string>
     <string name="intro_start_service_desc">This service will try to stay in the background. If you stop receiving notifications, restart the service from this app. Don\'t use task killer apps, as they can disable the service.</string>
@@ -206,6 +206,15 @@
     <string name="app_list_empty_search">No apps fit your search criteria.</string>
     <string name="search_query_hint">Type app name&#8230;</string>
 
+    <!-- App Settings Activity - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
+    <string name="filter_heading">Filter Text</string>
+    <string name="filter_desc">All notifications from this app containing the specified text will be filtered out and not displayed on your Fitbit.</string>
+    <string name="discard_empty_notifications">Discard empty notifications</string>
+    <string name="schedule_heading">Notification Schedule</string>
+    <string name="schedule_desc">Notifications from this app will only be forwarded to your Fitbit from the specified start time till the specified end time.</string>
+    <string name="start_time_heading">Start from:</string>
+    <string name="stop_time_heading">End at:</string>
+
     <!-- HTML Information - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <string name="about_app_text"><![CDATA[
     <p>Fit Notifications is a third party application that allows you to send notifications from any of the apps installed on your phone to your compatible Fitbit device.
@@ -219,17 +228,18 @@
     <string name="instructions_text"><![CDATA[
     <p>To properly set up this application, please follow the instructions below:</p>
     <ol>
-        <li>Enable notification access to this application by clicking the \'Notification Access\' button.</li><br/>
+        <li>Enable notification access to this application by clicking the \'Enable Notification Access\' button on the main screen.</li><br/>
         <li>In the Fitbit app, go into your device settings by clicking the device icon*.</li><br/>
         <li>Select \'Text Notifications\' or \'Call and Text Notifications\' under \'General\'.</li><br/>
         <li>Select \'Text Notifications\' under \'Settings\'.</li><br/>
         <li>Choose \'Fit Notifications\'. Sync your Fitbit device within the Fitbit app.</li>
         <p><b>NOTE:</b> Do not choose \'Fit Notifications\' for \'Call Notifications\' or \'Calendar Notifications\' in the Fitbit app! Doing so will cause this app to not work!</p>
 
-        <li>In the \'Fit Notifications\' app, go to \'Select Apps to Enable Notifications\'. Then,
+        <li>In the \'Fit Notifications\' app, press the \'Setup Apps\' button on the main screen. Then,
             choose the apps whose notifications you would like to be sent to your compatible Fitbit device.</li><br/>
-        <li>Click the \'Start Service\' button when you want to start the notification service provided by this app.
-            Click the \'Stop Service\' button to stop the service. You must keep the Fitbit app from Fitbit, Inc.
+        <li>Click the \'Turn on\' button at the bottom of the main screen when you want to start the notification
+            service provided by this app. Once the service is running, the button says \'Turn off\' to stop the service.
+            Click the \'Turn off\' button to stop the service. You must keep the Fitbit app from Fitbit, Inc.
             installed at all times and pair your Fitbit device to the phone for this to work. Enjoy!</li><br />
         <li><b>NOTE:</b> If you use a device running Android 6.0 or above and you enable \"Do Not Disturb\" mode, also
             called silent mode, then please follow the additional instructions below.</li>
@@ -244,13 +254,15 @@
     this issue manually, you have to change the notifications priority for Fit Notifications app.</p>
 
     <p>To do so, go to \"Settings>Apps>Fit Notifications\". Note that this menu may be at a slightly different location on
-    your phone. Then, choose \"Notifications\" and enable \"Treat as priority\". Then, when you use silent mode, enable
-    \"Priority Only\". Doing so will allow you to get notifications via the app on your Fitbit device, but it will not
-    make any notification sound on the phone as this app doesn\'t cause notification sounds or vibrations anyway.</p>
+    your phone. Then, choose \"Notifications\" and enable \"Treat as priority\". Note that if your phone is running Android
+    7.0 (Nougat) or newer version, then the option is renamed to  \"Override Do Not Disturb\". Enable this option.
+    Then, when you use silent mode, enable \"Priority Only\". Doing so will allow you to get notifications via the app on
+    your Fitbit device, but it will not make any notification sound on the phone as this app doesn\'t cause notification
+    sounds or vibrations anyway.</p>
 
     <h3>Demo</h3>
-    <p>Press the demo notification button below to see this app in action! Once you have finished the setup,
-    click the demo notification button below. You should then see a notification in the status bar from this app,
+    <p>Once you finish the setup process, press the \'Test Notification\' button on the main screen to send a test
+    notification to your Fibit. You should then see a notification in the status bar from this app,
     while at the same time you should have received a sample notification on your Fitbit. Then, you have confirmed
     that the application is working correctly! Issues? Please contact us!</p>
     ]]></string>
@@ -288,14 +300,15 @@
        We will attempt to resolve this issue in an update.</p>
     ]]></string>
     <string name="whats_new_text"><![CDATA[
-    <p><b>Version 2.6.2</b>: bug fixes and improvements to setup process for Android 7.0 (Nougat)</p>
-    <p>Changes in <b>version 2.6</b>:</p>
+    <p>Changes in <b>version 2.7</b>: New per app settings!</p>
     <ul>
-        <li><b>Updated UI!</b> Drag the new navigation drawer from the left to access useful information.<br /><br /></li>
-        <li><b>New Setting!</b> (Experimental) Transliterate non-Latin characters in notification text to Latin characters. Not all characters are properly displayed.<br /><br /></li>
-        <li><b>New Setting!</b> Split long notifications into multiple smaller messages so that the entire text can be displayed on your Fitbit device without cutting it short.<br /><br /></li>
-        <li><b>New Setting!</b> You can choose not to display app name in notification to save space.</li>
+        <li>You can now filter notifications from each enabled app so that notifications that contain certain text in them will not be forwarded to your Fitbit device.<br /><br /></li>
+        <li>Apps may occasionally send you empty notifications with no content. You can now ignore such notifications so that they are not forwarded to your Fitbit device.<br /><br /></li>
+        <li>You can now setup a notification schedule for each enabled app. This means that you can specify when notifications from a particular app should be forwarded to your Fitbit device.
+            At other times, you will not be disturbed.<br /><br /></li>
     </ul>
+
+    <p>To enable these new settings, go to the \'App Setup\' option on the main screen and click the \'gear\' icon next to the app name.</p>
 
     ]]></string>
     <string name="opensource_text"><![CDATA[

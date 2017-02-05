@@ -26,7 +26,7 @@ import com.abhijitvalluri.android.fitnotifications.database.AppSelectionDbSchema
  * Helper class for the Database
  */
 public class AppSelectionDbHelper extends SQLiteOpenHelper {
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
     private static final String DATABASE_NAME = "fitNotificationAppSelection.db";
 
     public AppSelectionDbHelper(Context context) {
@@ -39,12 +39,32 @@ public class AppSelectionDbHelper extends SQLiteOpenHelper {
                 " _id integer primary key autoincrement, " +
                 AppChoiceTable.Cols.APP_PACKAGE_NAME + ", " +
                 AppChoiceTable.Cols.APP_NAME + ", " +
-                AppChoiceTable.Cols.SELECTION +
+                AppChoiceTable.Cols.SELECTION + ", " +
+                AppChoiceTable.Cols.FILTER_TEXT + ", " +
+                AppChoiceTable.Cols.START_TIME_HOUR + ", " +
+                AppChoiceTable.Cols.START_TIME_MINUTE + ", " +
+                AppChoiceTable.Cols.STOP_TIME_HOUR + ", " +
+                AppChoiceTable.Cols.STOP_TIME_MINUTE + ", " +
+                AppChoiceTable.Cols.DISCARD_EMPTY_NOTIFICATIONS +
                 ")"
         );
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        if (oldVersion == 1 && newVersion == VERSION) {
+            db.execSQL("alter table " + AppChoiceTable.NAME + " add column " +
+                    AppChoiceTable.Cols.FILTER_TEXT + " TEXT NOT NULL DEFAULT '';");
+            db.execSQL("alter table " + AppChoiceTable.NAME + " add column " +
+                    AppChoiceTable.Cols.START_TIME_HOUR + " INTEGER NOT NULL DEFAULT 0;");
+            db.execSQL("alter table " + AppChoiceTable.NAME + " add column " +
+                    AppChoiceTable.Cols.START_TIME_MINUTE + " INTEGER NOT NULL DEFAULT 0;");
+            db.execSQL("alter table " + AppChoiceTable.NAME + " add column " +
+                    AppChoiceTable.Cols.STOP_TIME_HOUR + " INTEGER NOT NULL DEFAULT 23;");
+            db.execSQL("alter table " + AppChoiceTable.NAME + " add column " +
+                    AppChoiceTable.Cols.STOP_TIME_MINUTE + " INTEGER NOT NULL DEFAULT 59;");
+            db.execSQL("alter table " + AppChoiceTable.NAME + " add column " +
+                    AppChoiceTable.Cols.DISCARD_EMPTY_NOTIFICATIONS + " INTEGER NOT NULL DEFAULT 0;");
+        }
     }
 }

@@ -16,6 +16,7 @@
 
 package com.abhijitvalluri.android.fitnotifications;
 
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -23,6 +24,7 @@ import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -34,6 +36,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -49,17 +52,22 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * AppChoicesFragment is a fragment that holds the recycler view of a list of apps and their choices.
+ * AppChoicesActivity is an activity that holds the recycler view of a list of apps and their choices.
  */
 public class AppChoicesActivity extends AppCompatActivity {
+
+    private static final int APP_SELECTIONS_REQUEST = 0;
+    private static final String STATE_APP_SELECTIONS = "appSelections";
+    private static final String STATE_RECYCLER_VIEW  = "recyclerView";
 
     private RecyclerView mRecyclerView;
     private TextView mLoadingView;
     private AppSelectionsStore mAppSelectionsStore;
-    private List<AppSelection> mAppSelections;
+    private ArrayList<AppSelection> mAppSelections;
     private PackageManager mPackageManager;
     private ActivityAdapter mAdapter;
     private boolean mShowOnlyEnabledApps = false;
+    private Bundle LAUNCH_ACTIVITY_ANIM_BUNDLE;
 
     public static Intent newIntent(Context packageContext) {
         return new Intent(packageContext, AppChoicesActivity.class);
@@ -81,17 +89,40 @@ public class AppChoicesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_selector);
 
+        LAUNCH_ACTIVITY_ANIM_BUNDLE = ActivityOptions.
+                makeCustomAnimation(AppChoicesActivity.this,
+                        R.transition.left_in,
+                        R.transition.left_out).toBundle();
+
         mPackageManager = getPackageManager();
         mAppSelectionsStore = AppSelectionsStore.get(this);
-
         mRecyclerView = (RecyclerView) findViewById(R.id.app_selections_recycler_view);
         mLoadingView = (TextView) findViewById(R.id.app_list_loading_text_view);
-        mLoadingView.setText(getString(R.string.app_list_loading_text));
-
-        mRecyclerView.setVisibility(View.GONE);
-        mLoadingView.setVisibility(View.VISIBLE);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        new AppListSetup().execute();
+
+
+        if (savedInstanceState != null) {
+            mAppSelections = savedInstanceState.getParcelableArrayList(STATE_APP_SELECTIONS);
+            Parcelable listState = savedInstanceState.getParcelable(STATE_RECYCLER_VIEW);
+
+            mAdapter = new ActivityAdapter(mAppSelections);
+            mRecyclerView.setAdapter(mAdapter);
+            mRecyclerView.getLayoutManager().onRestoreInstanceState(listState);
+        } else {
+            mLoadingView.setText(getString(R.string.app_list_loading_text));
+            mRecyclerView.setVisibility(View.GONE);
+            mLoadingView.setVisibility(View.VISIBLE);
+            new AppListSetup().execute();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putParcelableArrayList(STATE_APP_SELECTIONS, mAppSelections);
+        Parcelable listState = mRecyclerView.getLayoutManager().onSaveInstanceState();
+        savedInstanceState.putParcelable(STATE_RECYCLER_VIEW, listState);
+
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
@@ -164,6 +195,44 @@ public class AppChoicesActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         overridePendingTransition(R.transition.right_in, R.transition.right_out);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case APP_SELECTIONS_REQUEST:
+                if (resultCode == RESULT_OK) {
+                    AppSelection appSelection = data.getParcelableExtra(
+                            AppSettingsActivity.APP_SELECTION_EXTRA);
+
+                    if (appSelection != null) {
+                        mAppSelectionsStore.updateAppSelection(appSelection);
+                        updateAppSelections(appSelection);
+                    }
+                }
+                break;
+            default:
+        }
+    }
+
+    private void updateAppSelections(AppSelection appSelection) {
+        String appPackageName = appSelection.getAppPackageName();
+        for (int i = 0; i != mAppSelections.size(); i++) {
+            if (mAppSelections.get(i).getAppPackageName().equals(appPackageName)) {
+                mAppSelections.set(i, appSelection);
+                break;
+            }
+        }
+    }
+
+    private AppSelection getAppSelection(String appPackageName) {
+        for (int i = 0; i != mAppSelections.size(); i++) {
+            if (mAppSelections.get(i).getAppPackageName().equals(appPackageName)) {
+                return mAppSelections.get(i);
+            }
+        }
+
+        return null;
     }
 
     private Void appListTask() {
@@ -277,6 +346,7 @@ public class AppChoicesActivity extends AppCompatActivity {
         private AppSelection mAppSelection;
         private TextView mAppNameTB;
         private ImageView mImageView;
+        private ImageButton mSettingsIB;
         private CheckBox mAppSelectCB;
 
         public ActivityHolder(View itemView) {
@@ -285,7 +355,21 @@ public class AppChoicesActivity extends AppCompatActivity {
             mAppNameTB = (TextView) itemView.findViewById(R.id.appNameTextBox);
             mAppSelectCB = (CheckBox) itemView.findViewById(R.id.appSelectCheckBox);
             mImageView = (ImageView) itemView.findViewById(R.id.appIconImageView);
+            mSettingsIB = (ImageButton) itemView.findViewById(R.id.appSettingsIcon);
+
             mAppSelectCB.setOnClickListener(this);
+            mSettingsIB.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getApplicationContext(), AppSettingsActivity.class);
+                    AppSelection appSelection = getAppSelection(mAppSelection.getAppPackageName());
+                    if (appSelection == null) { // Never going to happen but let's cover our bases
+                        appSelection = mAppSelection;
+                    }
+                    intent.putExtra(AppSettingsActivity.APP_SELECTION_EXTRA, appSelection);
+                    startActivityForResult(intent, APP_SELECTIONS_REQUEST, LAUNCH_ACTIVITY_ANIM_BUNDLE);
+                }
+            });
         }
 
         public void bindActivity(AppSelection appSelection) {
@@ -304,8 +388,12 @@ public class AppChoicesActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             boolean isChecked = mAppSelectCB.isChecked();
-            mAppSelection.setSelected(isChecked);
-            mAppSelectionsStore.updateAppSelection(mAppSelection);
+            AppSelection appSelection = getAppSelection(mAppSelection.getAppPackageName());
+            if (appSelection == null) { // Never going to happen but let's cover our bases
+                appSelection = mAppSelection;
+            }
+            appSelection.setSelected(isChecked);
+            mAppSelectionsStore.updateAppSelection(appSelection);
         }
     }
 

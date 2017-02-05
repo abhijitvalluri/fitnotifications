@@ -21,6 +21,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -41,8 +43,15 @@ public class Func {
         Intent startupIntent = new Intent(Intent.ACTION_MAIN);
         startupIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         return pm.queryIntentActivities(startupIntent, 0);
+    }
 
+    public static Date convertHourMinute2Date(int hour, int minute) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(Constants.TODAY);
+        cal.set(Calendar.HOUR_OF_DAY, hour);
+        cal.set(Calendar.MINUTE, minute);
+        cal.set(Calendar.SECOND, 0);
 
-
+        return cal.getTime();
     }
 }

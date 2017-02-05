@@ -19,8 +19,8 @@ package com.abhijitvalluri.android.fitnotifications.database;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 
-import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
 import com.abhijitvalluri.android.fitnotifications.database.AppSelectionDbSchema.AppChoiceTable;
+import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
 
 /**
  * A wrapper for the cursor class to make accessing data from the database more convenient.
@@ -33,9 +33,23 @@ public class AppSelectionCursorWrapper extends CursorWrapper {
 
     public AppSelection getAppSelection() {
         String appPackageName = getString(getColumnIndex(AppChoiceTable.Cols.APP_PACKAGE_NAME));
-        String appName = getString(getColumnIndex(AppChoiceTable.Cols.APP_NAME));
-        Integer isSelected = getInt(getColumnIndex(AppChoiceTable.Cols.SELECTION));
+        String appName        = getString(getColumnIndex(AppChoiceTable.Cols.APP_NAME));
+        int isSelected        = getInt(getColumnIndex(AppChoiceTable.Cols.SELECTION));
+        String filterText     = getString(getColumnIndex(AppChoiceTable.Cols.FILTER_TEXT));
+        int startTimeHour     = getInt(getColumnIndex(AppChoiceTable.Cols.START_TIME_HOUR));
+        int startTimeMinute   = getInt(getColumnIndex(AppChoiceTable.Cols.START_TIME_MINUTE));
+        int stopTimeHour      = getInt(getColumnIndex(AppChoiceTable.Cols.STOP_TIME_HOUR));
+        int stopTimeMinute    = getInt(getColumnIndex(AppChoiceTable.Cols.STOP_TIME_MINUTE));
+        int discardEmptyNotif = getInt(getColumnIndex(AppChoiceTable.Cols.DISCARD_EMPTY_NOTIFICATIONS));
 
-        return new AppSelection(appPackageName, appName, isSelected != 0);
+        return new AppSelection(appPackageName,
+                                appName,
+                                isSelected != 0,
+                                filterText,
+                                startTimeHour,
+                                startTimeMinute,
+                                stopTimeHour,
+                                stopTimeMinute,
+                                discardEmptyNotif != 0);
     }
 }

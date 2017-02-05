@@ -44,9 +44,6 @@
             android:label="@string/app_choices_activity_title"
             android:parentActivityName=".HomeActivity" />
         <activity
-            android:name=".InfoFragment"
-            android:parentActivityName=".HomeActivity" />
-        <activity
             android:name=".setup.AppIntroActivity"
             android:theme="@style/IntroTheme"
             android:screenOrientation="portrait"/>
@@ -54,6 +51,9 @@
             android:name=".SettingsActivity"
             android:label="@string/settings_menu"
             android:parentActivityName=".HomeActivity" />
+        <activity
+            android:name=".AppSettingsActivity"
+            android:parentActivityName=".AppChoicesActivity" />
 
         <service
             android:name=".services.NLService"

@@ -21,8 +21,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.abhijitvalluri.android.fitnotifications.database.AppSelectionDbHelper;
 import com.abhijitvalluri.android.fitnotifications.database.AppSelectionCursorWrapper;
+import com.abhijitvalluri.android.fitnotifications.database.AppSelectionDbHelper;
 import com.abhijitvalluri.android.fitnotifications.database.AppSelectionDbSchema.AppChoiceTable;
 import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
 
@@ -52,8 +52,8 @@ public class AppSelectionsStore {
         mDatabase = new AppSelectionDbHelper(c).getWritableDatabase();
     }
 
-    public List<AppSelection> getAppSelections() {
-        List<AppSelection> appSelections = new ArrayList<>();
+    public ArrayList<AppSelection> getAppSelections() {
+        ArrayList<AppSelection> appSelections = new ArrayList<>();
         mPackageToAppName = new HashMap<>();
         mSelectedAppsPackageNames = new ArrayList<>();
 
@@ -156,6 +156,12 @@ public class AppSelectionsStore {
         values.put(AppChoiceTable.Cols.APP_PACKAGE_NAME, appSelection.getAppPackageName());
         values.put(AppChoiceTable.Cols.APP_NAME, appSelection.getAppName());
         values.put(AppChoiceTable.Cols.SELECTION, appSelection.isSelected() ? 1 : 0);
+        values.put(AppChoiceTable.Cols.FILTER_TEXT, appSelection.getFilterText());
+        values.put(AppChoiceTable.Cols.START_TIME_HOUR, appSelection.getStartTimeHour());
+        values.put(AppChoiceTable.Cols.START_TIME_MINUTE, appSelection.getStartTimeMinute());
+        values.put(AppChoiceTable.Cols.STOP_TIME_HOUR, appSelection.getStopTimeHour());
+        values.put(AppChoiceTable.Cols.STOP_TIME_MINUTE, appSelection.getStopTimeMinute());
+        values.put(AppChoiceTable.Cols.DISCARD_EMPTY_NOTIFICATIONS, appSelection.isDiscardEmptyNotifications() ? 1 : 0);
 
         return values;
     }
