@@ -371,6 +371,12 @@ public class AppIntroActivity extends IntroActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.transition.right_in, R.transition.right_out);
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
             case ENABLE_NOTIFICATION_ACCESS_INTENT: {

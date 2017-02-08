@@ -96,7 +96,7 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         if (mPreferences.getInt(getString(R.string.version_key), 0) < Constants.VERSION_CODE
-                && mPreferences.getInt(getString(R.string.version_key), 0) > 0) {
+                && mPreferences.getBoolean(getString(R.string.done_first_launch_key), false)) {
             // App has been updated
             AppSelectionsStore store = AppSelectionsStore.get(this);
             List<AppSelection> appSelections = store.getAppSelections();

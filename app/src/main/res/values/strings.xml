@@ -300,6 +300,10 @@
        We will attempt to resolve this issue in an update.</p>
     ]]></string>
     <string name="whats_new_text"><![CDATA[
+    <p>Bug fixes in <b>version 2.7.1:</b></p>
+    <ul>
+        <li>Fixed bugs in Notification Schedule app setting and other general bug fixes and UI improvements.</li>
+    </ul>
     <p>Changes in <b>version 2.7</b>: New per app settings!</p>
     <ul>
         <li>You can now filter notifications from each enabled app so that notifications that contain certain text in them will not be forwarded to your Fitbit device.<br /><br /></li>
@@ -308,7 +312,7 @@
             At other times, you will not be disturbed.<br /><br /></li>
     </ul>
 
-    <p>To enable these new settings, go to the \'App Setup\' option on the main screen and click the \'gear\' icon next to the app name.</p>
+    <p>To enable these new settings, go to the \'Setup Apps\' option on the main screen and click the \'gear\' icon next to the app name.</p>
 
     ]]></string>
     <string name="opensource_text"><![CDATA[

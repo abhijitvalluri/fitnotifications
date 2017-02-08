@@ -84,6 +84,7 @@ public class AppChoicesActivity extends AppCompatActivity {
             setupAdapter();
         }
     }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -237,14 +238,6 @@ public class AppChoicesActivity extends AppCompatActivity {
 
     private Void appListTask() {
         List<ResolveInfo> packages = Func.getInstalledPackages(mPackageManager);
-        Collections.sort(packages, new Comparator<ResolveInfo>() {
-            @Override
-            public int compare(ResolveInfo lhs, ResolveInfo rhs) {
-                return String.CASE_INSENSITIVE_ORDER.compare(
-                        lhs.loadLabel(mPackageManager).toString(),
-                        rhs.loadLabel(mPackageManager).toString());
-            }
-        });
 
         // getAppSelectionsSubList is also needed for the subsequent calls to contains()
         List<AppSelection> appSelections = mAppSelectionsStore.getAppSelections();
@@ -402,6 +395,12 @@ public class AppChoicesActivity extends AppCompatActivity {
 
         public ActivityAdapter(List<AppSelection> appSelectionsSubList) {
             mAppSelectionsSubList = appSelectionsSubList;
+            Collections.sort(mAppSelectionsSubList, new Comparator<AppSelection>() {
+                @Override
+                public int compare(AppSelection lhs, AppSelection rhs) {
+                    return String.CASE_INSENSITIVE_ORDER.compare(lhs.getAppName(), rhs.getAppName());
+                }
+            });
         }
 
         @Override
