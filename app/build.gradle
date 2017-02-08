@@ -8,8 +8,8 @@ android {
         applicationId "com.abhijitvalluri.android.fitnotifications"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 19
-        versionName "2.7"
+        versionCode 20
+        versionName "2.7.1"
     }
     buildTypes {
         debug {

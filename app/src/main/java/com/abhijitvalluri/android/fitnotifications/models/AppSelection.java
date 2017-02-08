@@ -38,6 +38,10 @@ public class AppSelection implements Parcelable {
         mAppPackageName = appPackageName;
         mAppName = appName;
         mFilterText = "";
+        mStartTimeHour = 0;
+        mStartTimeMinute = 0;
+        mStopTimeHour = 23;
+        mStopTimeMinute = 59;
     }
 
     public AppSelection(String appPackageName,

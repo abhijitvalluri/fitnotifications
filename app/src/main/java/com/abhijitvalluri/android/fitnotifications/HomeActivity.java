@@ -37,8 +37,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
 import com.abhijitvalluri.android.fitnotifications.setup.AppIntroActivity;
+import com.abhijitvalluri.android.fitnotifications.utils.AppSelectionsStore;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
+
+import java.util.List;
 
 /**
  * Main activity for the app
@@ -93,6 +97,18 @@ public class HomeActivity extends AppCompatActivity {
 
         if (mPreferences.getInt(getString(R.string.version_key), 0) < Constants.VERSION_CODE
                 && mPreferences.getInt(getString(R.string.version_key), 0) > 0) {
+            // App has been updated
+            AppSelectionsStore store = AppSelectionsStore.get(this);
+            List<AppSelection> appSelections = store.getAppSelections();
+
+            for (AppSelection selection : appSelections) {
+                if (selection.getStopTime() == 0) {
+                    // invalid stop time due to a bug. Fix it.
+                    selection.setStopTimeHour(23);
+                    selection.setStopTimeMinute(59);
+                    store.updateAppSelection(selection);
+                }
+            }
 
             mNavDrawer.setCheckedItem(R.id.nav_whats_new);
             setTitle(R.string.whats_new);
