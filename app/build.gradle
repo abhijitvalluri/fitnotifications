@@ -11,6 +11,9 @@ android {
         versionCode 20
         versionName "2.7.1"
     }
+    compileOptions {
+        encoding "UTF-8"
+    }
     buildTypes {
         debug {
             applicationIdSuffix ".debug"
@@ -20,6 +23,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    lintOptions {
+        abortOnError false
     }
 }
 
