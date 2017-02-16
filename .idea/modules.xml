@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/FitNotifications.iml" filepath="$PROJECT_DIR$/FitNotifications.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/icu4j/icu4j.iml" filepath="$PROJECT_DIR$/icu4j/icu4j.iml" />
     </modules>
   </component>
 </project>
