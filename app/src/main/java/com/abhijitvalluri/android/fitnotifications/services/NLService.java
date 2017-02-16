@@ -47,6 +47,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Fit Notification Service
@@ -450,7 +451,7 @@ public class NLService extends NotificationListenerService {
 
         int notifCount = 1;
 
-        int charLimit = mFitbitNotifCharLimit - 7; // 7 chars for "... [1]" with changing number
+        int charLimit = mFitbitNotifCharLimit - 6;      // 6 chars for " (2/3)" with changing numbers
         while (notifCount < mNumSplitNotifications && notificationString.length() > mFitbitNotifCharLimit) {
             String partialText;
             int whitespacePos = notificationString.lastIndexOf(" ", charLimit);
@@ -464,12 +465,18 @@ public class NLService extends NotificationListenerService {
                 notificationString = notificationString.substring(charLimit);
             }
 
-            slices.add(partialText + "... [" + notifCount + "]");
+            slices.add(partialText);
             notifCount++;
         }
 
         if (notificationString.length() > 0) {
             slices.add(notificationString);
+        }
+
+        // add " (2/3)" suffixes to all but the last piece
+        for (int i = 0; i < slices.size() - 1; i++) {
+            slices.set(i,
+                    String.format(Locale.ENGLISH, "%s (%d/%d)", slices.get(i), i + 1, slices.size()));
         }
 
         return slices;
