@@ -42,6 +42,7 @@ import com.abhijitvalluri.android.fitnotifications.utils.AppSelectionsStore;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
 import com.ibm.icu.text.Transliterator;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -55,6 +56,8 @@ public class NLService extends NotificationListenerService {
     private static final Integer NOTIFICATION_ID = (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
 
     private final Handler mHandler = new Handler();
+
+    private final Transliterator transliterator = Transliterator.getInstance("Any-Latin");
 
     private static List<String> mSelectedAppsPackageNames;
     private static boolean mIsServiceEnabled;
@@ -169,20 +172,8 @@ public class NLService extends NotificationListenerService {
             return;
         }
 
-        if (mDisableWhenScreenOn) {
-            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-            boolean isScreenOn;
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                // API >= 20
-                isScreenOn = pm.isInteractive();
-            } else {
-                // API <= 19, use deprecated
-                isScreenOn = pm.isScreenOn();
-            }
-
-            if (isScreenOn) {
-                return;
-            }
+        if (mDisableWhenScreenOn && isScreenOn()) {
+            return;
         }
 
         Notification notification = sbn.getNotification();
@@ -214,79 +205,41 @@ public class NLService extends NotificationListenerService {
             if (lastNotificationTime != null
                     && currentTimeMillis < lastNotificationTime + mNotifLimitDurationMillis) {
                 return;
-            } else {
-                mLastNotificationTimeMap.put(appPackageName, currentTimeMillis);
             }
+            mLastNotificationTimeMap.put(appPackageName, currentTimeMillis);
         }
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        String notificationText, notificationBigText, filterText;
+        String filter;
         boolean discardEmptyNotifications;
 
-        {
-            AppSelection appSelection = AppSelectionsStore.get(this).getAppSelection(appPackageName);
-            if (appSelection == null) { // Should never happen. So if it does, just return false
-                filterText = "";
-                discardEmptyNotifications = false;
-            } else {
-                filterText = appSelection.getFilterText().trim();
-                discardEmptyNotifications = appSelection.isDiscardEmptyNotifications();
-            }
+        AppSelection appSelection = AppSelectionsStore.get(this).getAppSelection(appPackageName);
+        if (appSelection == null) { // Should never happen. So if it does, just return false
+            filter = "";
+            discardEmptyNotifications = false;
+        } else {
+            filter = appSelection.getFilterText().trim();
+            discardEmptyNotifications = appSelection.isDiscardEmptyNotifications();
         }
 
-        try {
-            String temp = extras.getCharSequence(Notification.EXTRA_TEXT).toString();
-            if (!filterText.isEmpty()) {
-                if (temp.contains(filterText)) { // This notification should not be sent
-                    return;
-                }
-            }
+        CharSequence title = extras.getCharSequence(Notification.EXTRA_TITLE);
+        CharSequence notificationText = extras.getCharSequence(Notification.EXTRA_TEXT);
 
-            if (mTransliterateNotif) {
-                notificationText = Transliterator.getInstance("Any-Latin")
-                        .transform(extras.getCharSequence(Notification.EXTRA_TEXT).toString());
-            } else {
-                notificationText = extras.getCharSequence(Notification.EXTRA_TEXT).toString();
-            }
-        } catch (NullPointerException e) {
-            notificationText = "";
+        CharSequence notificationBigText = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            notificationBigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
         }
 
-        try {
-            String temp = extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString();
-            if (!filterText.isEmpty()) {
-                if (temp.contains(filterText)) { // This notification should not be sent
-                    return;
-                }
-            }
-
-            if (mTransliterateNotif) {
-                notificationBigText = Transliterator.getInstance("Any-Latin")
-                        .transform(extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString()); // TODO: Apparently need minimum API 21 to use EXTRA_BIG_TEXT
-            } else {
-                notificationBigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString();
-            }
-        } catch (NullPointerException e) {
-            notificationBigText = "";
-        }
-
-        try {
-            String temp = extras.getCharSequence(Notification.EXTRA_TITLE).toString();
-            if (!filterText.isEmpty()) {
-                if (temp.contains(filterText)) { // This notification should not be sent
-                    return;
-                }
-            }
-        } catch (NullPointerException e) {
-            // Do nothing and just continue
-        }
-
-        if (discardEmptyNotifications && notificationText.trim().isEmpty() && notificationBigText.trim().isEmpty()) {
+        if (discardEmptyNotifications && isBlank(notificationText) && isBlank(notificationBigText)) {
             return;
         }
 
-        if (notificationBigText.length() > 0 && notificationBigText.startsWith(notificationText)) {
-            notificationBigText = notificationBigText.substring(notificationText.length());
+        if (anyMatchesFilter(filter, title, notificationText, notificationBigText)) {
+            return;
+        }
+
+        if (isNotEmpty(notificationBigText) && isNotEmpty(notificationText)
+                && notificationBigText.subSequence(0, notificationText.length()).equals(notificationText)) {
+            notificationBigText = notificationBigText.subSequence(notificationText.length(), notificationBigText.length());
         }
 
         StringBuilder sb = new StringBuilder();
@@ -296,9 +249,15 @@ public class NLService extends NotificationListenerService {
               .append("] ");
         }
 
+        if (mTransliterateNotif) {
+            title = transliterate(title);
+            notificationText = transliterate(notificationText);
+            notificationBigText = transliterate(notificationBigText);
+        }
+
         sb.append(notificationText);
 
-        if (notificationBigText.length() > 0) {
+        if (!isBlank(notificationBigText)) {
             sb.append(" -- ").append(notificationBigText);
         }
 
@@ -306,19 +265,10 @@ public class NLService extends NotificationListenerService {
         contentView.setTextViewText(
                 R.id.customNotificationText, getString(R.string.notification_text));
 
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
-                .setContent(contentView);
-
-        if (mTransliterateNotif) {
-            try {
-                builder.setContentTitle(Transliterator.getInstance("Any-Latin")
-                        .transform(extras.getCharSequence(Notification.EXTRA_TITLE).toString()));
-            } catch (NullPointerException e) {
-                builder.setContentTitle(extras.getCharSequence(Notification.EXTRA_TITLE));
-            }
-        } else {
-            builder.setContentTitle(extras.getCharSequence(Notification.EXTRA_TITLE));
-        }
+                .setContent(contentView)
+                .setContentTitle(title);
 
         // Creates an explicit intent for the SettingsActivity in the app
         Intent settingsIntent = new Intent(this, SettingsActivity.class);
@@ -331,65 +281,28 @@ public class NLService extends NotificationListenerService {
         stackBuilder.addParentStack(SettingsActivity.class);
         // Adds the Intent that starts the Activity to the top of the stack
         stackBuilder.addNextIntent(settingsIntent);
-        PendingIntent settingsPendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
+        PendingIntent settingsPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
 
-        StringBuilder notifStrB = new StringBuilder(sb.toString().trim().replaceAll("\\s+", " "));
+        String notificationString = sb.toString().trim().replaceAll("\\s+", " ");
 
-        if (mNotificationStringMap.containsKey(appPackageName)) {
-            String prevNotificationString = mNotificationStringMap.get(appPackageName);
-            if (prevNotificationString.equals(notifStrB.toString())) {
-                mNotificationStringMap.remove(appPackageName);
-                return;
-            }
+        String prevNotificationString = mNotificationStringMap.put(appPackageName, notificationString);
+        if (notificationString.equals(prevNotificationString)) {
+            // do not repeat the same notification
+            return;
         }
 
-        mNotificationStringMap.put(appPackageName, notifStrB.toString());
-
-        if (mSplitNotification && notifStrB.length() > mFitbitNotifCharLimit) {
-            int notifCount = 1; // start from 1 to send one less within the while loop
-
-            int charLimit = mFitbitNotifCharLimit - 7; // 7 chars for "... [1]" with changing number
-            while (notifCount < mNumSplitNotifications && notifStrB.length() > mFitbitNotifCharLimit) {
-                String partialText;
-                int whiteSpaceIndex = notifStrB.lastIndexOf(" ", charLimit);
-
-                if (whiteSpaceIndex > 0) {
-                    partialText = notifStrB.substring(0, whiteSpaceIndex);
-                    notifStrB.delete(0, whiteSpaceIndex+1);
-                } else {
-                    partialText = notifStrB.substring(0, charLimit);
-                    notifStrB.delete(0, charLimit);
-                }
-
-                partialText = partialText.concat("... [" + notifCount + "]");
-
-                builder.setContentText(partialText);
-                final Notification notif = builder.build();
-
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mNotificationManager.notify(NOTIFICATION_ID, notif);
-                    }
-                }, 500*notifCount);
-
-                notifCount++;
-            }
-
-            if (notifStrB.length() > 0) {
-                builder.setContentText(notifStrB.toString());
+        if (mSplitNotification && notificationString.length() > mFitbitNotifCharLimit) {
+            List<String> slices = sliceNotificationText(notificationString);
+            for (int i = 0; i < slices.size(); i++) {
+                builder.setContentText(slices.get(i));
                 final Notification notif = builder.build();
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         mNotificationManager.notify(NOTIFICATION_ID, notif);
                     }
-                }, 500*notifCount);
+                }, 500 * (i + 1));
             }
         } else { // Do not split the notification
             builder.setContentText(sb.toString());
@@ -412,6 +325,7 @@ public class NLService extends NotificationListenerService {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         cancelNotification(sbn.getKey());
                     } else {
+                        //noinspection deprecation
                         cancelNotification(appPackageName, sbn.getTag(), sbn.getId());
                     }
                 }
@@ -424,17 +338,22 @@ public class NLService extends NotificationListenerService {
                                      NotificationListenerService.RankingMap rankingMap) {
         onNotificationPosted(sbn);
     }
+
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
         super.onNotificationRemoved(sbn);
     }
 
-    // Checks if the notification comes from a selected application
+    /**
+     * Checks if the notification comes from a selected application
+     */
     private boolean notificationFromSelectedApp(String appPackageName) {
-        return NLService.mSelectedAppsPackageNames.contains(appPackageName);
+        return mSelectedAppsPackageNames.contains(appPackageName);
     }
 
-    // Check if the schedule for the application is active
+    /**
+     * Checks if the schedule for the application is active
+     */
     private boolean appNotificationScheduleActive(String appPackageName) {
         AppSelection appSelection = AppSelectionsStore.get(this).getAppSelection(appPackageName);
         if (appSelection == null) { // Should never happen. So if it does, just return false
@@ -443,16 +362,100 @@ public class NLService extends NotificationListenerService {
 
         int startTime = appSelection.getStartTime();
         int stopTime = appSelection.getStopTime();
-        Date currDate = new Date();
 
         // Get current time
         Calendar cal = Calendar.getInstance();
-        cal.setTime(currDate);
         int hour = cal.get(Calendar.HOUR_OF_DAY);
         int minute = cal.get(Calendar.MINUTE);
-        int currTime = hour*60 + minute;
+        int currTime = hour * 60 + minute;
 
-        return ((currTime >= startTime) && (currTime < stopTime));
+        return ((currTime >= startTime) && (currTime <= stopTime));
+    }
+
+    private boolean isScreenOn() {
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+            // API >= 20
+            return pm.isInteractive();
+        }
+
+        // API <= 19, use deprecated
+        //noinspection deprecation
+        return pm.isScreenOn();
+    }
+
+    /**
+     * Checks if any of the <code>CharSequence</code> items contains the provided <code>filter</code>
+     * text.
+     */
+    private static boolean anyMatchesFilter(String filter, CharSequence ... items) {
+        if (filter != null && !filter.isEmpty()) {
+            for (CharSequence item : items) {
+                if (item != null && item.toString().contains(filter)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private String transliterate(CharSequence text) {
+        try {
+            return text == null ? null : transliterator.transform(text.toString());
+        } catch (Exception e) {
+            return text.toString();
+        }
+    }
+
+    private static boolean isNotEmpty(CharSequence text) {
+        return text != null && text.length() > 0;
+    }
+
+    private static boolean isBlank(CharSequence text) {
+        if (text != null && text.length() > 0) {
+            for (int i = 0; i < text.length(); i++) {
+                // FIXME: isWhitespace() does not recognize some characters (e.g. non-breaking space)
+                if (!Character.isWhitespace(text.charAt(i))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Slices the text into up to <code>mNumSplitNotifications + 1</code> pieces each not longer than
+     * <code>mFitbitNotifCharLimit</code> (except for the last piece which contains the all remaining text)
+     */
+    private static List<String> sliceNotificationText(String notificationString) {
+        List<String> slices = new ArrayList<>(mNumSplitNotifications + 1);
+
+        int notifCount = 1;
+
+        int charLimit = mFitbitNotifCharLimit - 7; // 7 chars for "... [1]" with changing number
+        while (notifCount < mNumSplitNotifications && notificationString.length() > mFitbitNotifCharLimit) {
+            String partialText;
+            int whitespacePos = notificationString.lastIndexOf(" ", charLimit);
+
+            // TODO: check that partialText is not very short (whitespacePos > charLimit / 2 ?)
+            if (whitespacePos > 0) {
+                partialText = notificationString.substring(0, whitespacePos);
+                notificationString = notificationString.substring(whitespacePos + 1);
+            } else {
+                partialText = notificationString.substring(0, charLimit);
+                notificationString = notificationString.substring(charLimit);
+            }
+
+            slices.add(partialText + "... [" + notifCount + "]");
+            notifCount++;
+        }
+
+        if (notificationString.length() > 0) {
+            slices.add(notificationString);
+        }
+
+        return slices;
     }
 
     public static void setEnabled(boolean enabled) {
@@ -462,5 +465,4 @@ public class NLService extends NotificationListenerService {
     public static boolean isEnabled() {
         return mIsServiceEnabled;
     }
-
 }
