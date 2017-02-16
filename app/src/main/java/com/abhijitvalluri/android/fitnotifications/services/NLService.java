@@ -268,7 +268,17 @@ public class NLService extends NotificationListenerService {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
                 .setContent(contentView)
-                .setContentTitle(title);
+                .setContentTitle(title)
+                .setLocalOnly(true);        // avoid bridging this notification to other devices
+
+        // use minimal priority for placeholder notifications
+        builder.setPriority(NotificationCompat.PRIORITY_MIN);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // prevent notification from appearing on the lock screen
+            // (also avoid revealing sensitive data)
+            builder.setVisibility(Notification.VISIBILITY_SECRET);
+        }
 
         // Creates an explicit intent for the SettingsActivity in the app
         Intent settingsIntent = new Intent(this, SettingsActivity.class);
