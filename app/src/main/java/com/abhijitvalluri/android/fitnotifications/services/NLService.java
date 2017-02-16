@@ -401,9 +401,16 @@ public class NLService extends NotificationListenerService {
      */
     private static boolean anyMatchesFilter(String filter, CharSequence ... items) {
         if (filter != null && !filter.isEmpty()) {
+            String[] parts = filter.split("\\s*,\\s*");
+
             for (CharSequence item : items) {
-                if (item != null && item.toString().contains(filter)) {
-                    return true;
+                if (item != null) {
+                    String tmp = item.toString();
+                    for (String filterText : parts) {
+                        if (filterText.length() > 0 && tmp.contains(filterText)) {
+                            return true;
+                        }
+                    }
                 }
             }
         }
