@@ -92,6 +92,7 @@ public class NLService extends NotificationListenerService {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         mIsServiceEnabled = true;
 
+        // FIXME: preferences keys should not be "translatable" ?
         mDismissPlaceholderNotif = preferences.getBoolean(
                                         getString(R.string.dismiss_placeholder_notif_key), false);
         mDismissRelayedNotif = preferences.getBoolean(
@@ -133,7 +134,7 @@ public class NLService extends NotificationListenerService {
 
     public static void onPlaceholderNotifSettingUpdated(boolean dismissNotif, int delaySeconds) {
         mDismissPlaceholderNotif = dismissNotif;
-        mPlaceholderNotifDismissDelayMillis = delaySeconds*1000;
+        mPlaceholderNotifDismissDelayMillis = delaySeconds * 1000;
     }
 
     public static void onSplitNotificationSettingUpdated(boolean enabled,
@@ -146,12 +147,12 @@ public class NLService extends NotificationListenerService {
 
     public static void onLimitNotificationSettingUpdated(boolean limitNotif, int durationSeconds) {
         mLimitNotifications = limitNotif;
-        mNotifLimitDurationMillis = durationSeconds*1000;
+        mNotifLimitDurationMillis = durationSeconds * 1000;
     }
 
     public static void onRelayedNotifSettingUpdated(boolean dismissNotif, int delaySeconds) {
         mDismissRelayedNotif = dismissNotif;
-        mRelayedNotifDismissDelayMillis = delaySeconds*1000;
+        mRelayedNotifDismissDelayMillis = delaySeconds * 1000;
     }
 
     public static void onDisableWhenScreenOnUpdated(boolean disableWhenScreenOn) {
@@ -238,9 +239,10 @@ public class NLService extends NotificationListenerService {
             return;
         }
 
-        if (isNotEmpty(notificationBigText) && isNotEmpty(notificationText)
-                && notificationBigText.subSequence(0, notificationText.length()).equals(notificationText)) {
-            notificationBigText = notificationBigText.subSequence(notificationText.length(), notificationBigText.length());
+        // if notification "big text" starts with the short text - just use the big one
+        if (startsWith(notificationBigText, notificationText)) {
+            notificationText = notificationBigText;
+            notificationBigText = null;
         }
 
         StringBuilder sb = new StringBuilder();
@@ -428,6 +430,15 @@ public class NLService extends NotificationListenerService {
 
     private static boolean isNotEmpty(CharSequence text) {
         return text != null && text.length() > 0;
+    }
+
+    /**
+     * Checks if the <code>big</code> text has the <code>small</code> text as the prefix.
+     * Returns <code>false</code> if <code>small</code> text is empty.
+     */
+    private static boolean startsWith(CharSequence big, CharSequence small) {
+        return isNotEmpty(big) && isNotEmpty(small)
+                && big.subSequence(0, small.length()).toString().contentEquals(small);
     }
 
     private static boolean isBlank(CharSequence text) {
