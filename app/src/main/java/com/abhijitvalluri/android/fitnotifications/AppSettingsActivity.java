@@ -194,7 +194,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         java.text.DateFormat timeFormat = DateFormat.getTimeFormat(this);
         String formattedTime = timeFormat.format(Func.convertHourMinute2Date(hour, minute));
 
-        if (requestCode == START_TIME_REQUEST) {`
+        if (requestCode == START_TIME_REQUEST) {
             mStartTimeHour = hour;
             mStartTimeMinute = minute;
             mStartTimeButton.setText(formattedTime);
