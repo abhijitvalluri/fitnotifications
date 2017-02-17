@@ -323,9 +323,9 @@ public class NLService extends NotificationListenerService {
                 return null;
             }
         } else if (startsWith(notificationBigText, notificationText)) {
-                // if notification "big text" starts with the short text - just use the big one
-                notificationText = notificationBigText;
-                notificationBigText = null;
+            // if notification "big text" starts with the short text - just use the big one
+            notificationText = notificationBigText;
+            notificationBigText = null;
         }
 
         StringBuilder sb = new StringBuilder();
@@ -429,16 +429,8 @@ public class NLService extends NotificationListenerService {
         }
     }
 
-    private static boolean isNotEmpty(CharSequence text) {
-        return text != null && text.length() > 0;
-    }
-
-    /**
-     * Checks if the <code>big</code> text has the <code>small</code> text as the prefix.
-     * Returns <code>false</code> if <code>small</code> text is empty.
-     */
     private static boolean startsWith(CharSequence big, CharSequence small) {
-        return isNotEmpty(big) && isNotEmpty(small)
+        return big != null && small != null && big.length() >= small.length()
                 && big.subSequence(0, small.length()).toString().contentEquals(small);
     }
 
