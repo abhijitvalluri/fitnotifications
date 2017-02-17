@@ -123,6 +123,7 @@ public class NLService extends NotificationListenerService {
 
         Toast.makeText(this, getString(R.string.notification_service_started), Toast.LENGTH_LONG).show();
     }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         return Service.START_STICKY;
@@ -193,11 +194,7 @@ public class NLService extends NotificationListenerService {
             return;
         }
 
-        if (!notificationFromSelectedApp(appPackageName)) {
-            return;
-        }
-
-        if (!appNotificationScheduleActive(appPackageName)) {
+        if (!appNotificationsActive(appPackageName)) {
             return;
         }
 
@@ -225,13 +222,14 @@ public class NLService extends NotificationListenerService {
         CharSequence notificationTitle = extras.getCharSequence(Notification.EXTRA_TITLE);
         String notificationText = buildNotificationText(extras, appPackageName, discardEmptyNotifications);
 
+        // notificationText can be null only when discardEmptyNotifications is enabled
         if (notificationText == null || anyMatchesFilter(filterText, notificationTitle, notificationText)) {
             return;
         }
 
-        String prevNotificationString = mNotificationStringMap.put(appPackageName, notificationText);
+        String prevNotificationText = mNotificationStringMap.put(appPackageName, notificationText);
         // TODO: add more specific checks to avoid blocking legitimate identical notifications
-        if (notificationText.equals(prevNotificationString)) {
+        if (notificationText.equals(prevNotificationText)) {
             // do not send the duplicate notification, but only for every 2nd occurrence
             // (i.e. when the same text arrives for the 3rd time - send it)
             mNotificationStringMap.remove(appPackageName);
@@ -251,26 +249,14 @@ public class NLService extends NotificationListenerService {
         builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
                 .setContent(contentView)
                 .setContentTitle(notificationTitle)
-                .setLocalOnly(true);        // avoid bridging this notification to other devices
+                .setLocalOnly(true)         // avoid bridging this notification to other devices
+                .setContentIntent(createSettingsIntent())
+                .setAutoCancel(true);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // prevent notification from appearing on the lock screen
             builder.setVisibility(Notification.VISIBILITY_SECRET);
         }
-
-        // Creates an explicit intent for the SettingsActivity in the app
-        Intent settingsIntent = new Intent(this, SettingsActivity.class);
-
-        // The stack builder object will contain an artificial back stack for the started Activity.
-        // This ensures that navigating backward from the Activity leads out of the application to
-        // the Home screen.
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        // Adds the back stack for the Intent (but not the Intent itself)
-        stackBuilder.addParentStack(SettingsActivity.class);
-        // Adds the Intent that starts the Activity to the top of the stack
-        stackBuilder.addNextIntent(settingsIntent);
-        PendingIntent settingsPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
 
         if (mSplitNotification && notificationText.length() > mFitbitNotifCharLimit) {
             List<String> slices = sliceNotificationText(notificationText);
@@ -357,16 +343,32 @@ public class NLService extends NotificationListenerService {
     }
 
     /**
-     * Checks if the notification comes from a selected application
+     * Creates an intent to open Fit Notifications settings when notification is clicked.
      */
-    private boolean notificationFromSelectedApp(String appPackageName) {
-        return mSelectedAppsPackageNames.contains(appPackageName);
+    private PendingIntent createSettingsIntent() {
+        // Creates an explicit intent for the SettingsActivity in the app
+        Intent settingsIntent = new Intent(this, SettingsActivity.class);
+
+        // The stack builder object will contain an artificial back stack for the started Activity.
+        // This ensures that navigating backward from the Activity leads out of the application to
+        // the Home screen.
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        // Adds the back stack for the Intent (but not the Intent itself)
+        stackBuilder.addParentStack(SettingsActivity.class);
+        // Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(settingsIntent);
+        return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     /**
-     * Checks if the schedule for the application is active
+     * Checks if the notification comes from a selected application and if the application
+     * schedule is currently active.
      */
-    private boolean appNotificationScheduleActive(String appPackageName) {
+    private boolean appNotificationsActive(String appPackageName) {
+        if (!mSelectedAppsPackageNames.contains(appPackageName)) {
+            return false;
+        }
+
         AppSelection appSelection = AppSelectionsStore.get(this).getAppSelection(appPackageName);
         if (appSelection == null) { // Should never happen. So if it does, just return false
             return false;
