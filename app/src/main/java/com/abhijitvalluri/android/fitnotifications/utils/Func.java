@@ -47,7 +47,6 @@ public class Func {
 
     public static Date convertHourMinute2Date(int hour, int minute) {
         Calendar cal = Calendar.getInstance();
-        cal.setTime(Constants.TODAY);
         cal.set(Calendar.HOUR_OF_DAY, hour);
         cal.set(Calendar.MINUTE, minute);
         cal.set(Calendar.SECOND, 0);

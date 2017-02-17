@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.format.DateFormat;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -89,15 +90,14 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         mSwitch.setChecked(mDiscardEmptyNotifications);
         setTitle(mAppSelection.getAppName());
 
-        mStartTimeButton.setText(
-                android.text.format.DateFormat.format(
-                        "h:mm a",
-                        Func.convertHourMinute2Date(mStartTimeHour, mStartTimeMinute)));
+        final java.text.DateFormat timeFormat = DateFormat.getTimeFormat(this);
+        final String startTimeFormatted = timeFormat.format(
+                Func.convertHourMinute2Date(mStartTimeHour, mStartTimeMinute));
+        final String stopTimeFormatted = timeFormat.format(
+                Func.convertHourMinute2Date(mStopTimeHour, mStopTimeMinute));
 
-        mStopTimeButton.setText(
-                android.text.format.DateFormat.format(
-                        "h:mm a",
-                        Func.convertHourMinute2Date(mStopTimeHour, mStopTimeMinute)));
+        mStartTimeButton.setText(startTimeFormatted);
+        mStopTimeButton.setText(stopTimeFormatted);
 
         mFilterText.setText(mAppSelection.getFilterText());
 
@@ -108,6 +108,8 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
             }
         });
 
+        final boolean is24hFormat = DateFormat.is24HourFormat(this);
+
         mStartTimeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -116,7 +118,8 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
                                                                            mStartTimeMinute,
                                                                            mStopTimeHour,
                                                                            mStopTimeMinute,
-                                                                           R.string.start_time_heading,
+                                                                           stopTimeFormatted,
+                                                                           is24hFormat,
                                                                            START_TIME_REQUEST);
                 dialog.show(manager, DIALOG_TIME);
             }
@@ -130,7 +133,8 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
                                                                            mStopTimeMinute,
                                                                            mStartTimeHour,
                                                                            mStartTimeMinute,
-                                                                           R.string.stop_time_heading,
+                                                                           startTimeFormatted,
+                                                                           is24hFormat,
                                                                            STOP_TIME_REQUEST);
                 dialog.show(manager, DIALOG_TIME);
             }
