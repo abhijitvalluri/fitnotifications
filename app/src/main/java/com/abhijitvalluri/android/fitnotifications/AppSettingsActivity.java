@@ -190,16 +190,18 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
     public void onActivityResult2(int requestCode, Intent data) {
         int hour = data.getIntExtra(TimePickerFragment.EXTRA_HOUR, 0);
         int minute = data.getIntExtra(TimePickerFragment.EXTRA_MINUTE, 0);
-        if (requestCode == START_TIME_REQUEST) {
+
+        java.text.DateFormat timeFormat = DateFormat.getTimeFormat(this);
+        String formattedTime = timeFormat.format(Func.convertHourMinute2Date(hour, minute));
+
+        if (requestCode == START_TIME_REQUEST) {`
             mStartTimeHour = hour;
             mStartTimeMinute = minute;
-            Date date = Func.convertHourMinute2Date(hour, minute);
-            mStartTimeButton.setText(android.text.format.DateFormat.format("h:mm a", date));
+            mStartTimeButton.setText(formattedTime);
         } else if (requestCode == STOP_TIME_REQUEST) {
             mStopTimeHour = hour;
             mStopTimeMinute = minute;
-            Date date = Func.convertHourMinute2Date(hour, minute);
-            mStopTimeButton.setText(android.text.format.DateFormat.format("h:mm a", date));
+            mStopTimeButton.setText(formattedTime);
         }
     }
 }
