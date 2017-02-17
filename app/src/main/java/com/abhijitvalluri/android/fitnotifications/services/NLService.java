@@ -266,6 +266,17 @@ public class NLService extends NotificationListenerService {
             sb.append(" -- ").append(notificationBigText);
         }
 
+        String notificationString = sb.toString().trim().replaceAll("\\s+", " ");
+
+        String prevNotificationString = mNotificationStringMap.put(appPackageName, notificationString);
+        // TODO: add more specific checks to avoid blocking legitimate identical notifications
+        if (notificationString.equals(prevNotificationString)) {
+            // do not send the duplicate notification, but only for every 2nd occurrence
+            // (i.e. when the same text arrives for the 3rd time - send it)
+            mNotificationStringMap.remove(appPackageName);
+            return;
+        }
+
         RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.custom_notification);
         contentView.setTextViewText(
                 R.id.customNotificationText, getString(R.string.notification_text));
@@ -294,17 +305,6 @@ public class NLService extends NotificationListenerService {
         stackBuilder.addNextIntent(settingsIntent);
         PendingIntent settingsPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
-
-        String notificationString = sb.toString().trim().replaceAll("\\s+", " ");
-
-        String prevNotificationString = mNotificationStringMap.put(appPackageName, notificationString);
-        // TODO: add more specific checks to avoid blocking legitimate identical notifications
-        if (notificationString.equals(prevNotificationString)) {
-            // do not send the duplicate notification, but only for every 2nd occurrence
-            // (i.e. when the same text arrives for the 3rd time - send it)
-            mNotificationStringMap.remove(appPackageName);
-            return;
-        }
 
         if (mSplitNotification && notificationString.length() > mFitbitNotifCharLimit) {
             List<String> slices = sliceNotificationText(notificationString);
