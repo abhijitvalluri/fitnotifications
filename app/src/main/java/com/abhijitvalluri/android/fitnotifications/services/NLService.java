@@ -211,70 +211,36 @@ public class NLService extends NotificationListenerService {
             mLastNotificationTimeMap.put(appPackageName, currentTimeMillis);
         }
 
-        String filterText;
-        boolean discardEmptyNotifications;
+        String filterText = null;
+        boolean discardEmptyNotifications = false;
 
         {
             AppSelection appSelection = AppSelectionsStore.get(this).getAppSelection(appPackageName);
-            if (appSelection == null) { // Should never happen. So if it does, just return false
-                filterText = "";
-                discardEmptyNotifications = false;
-            } else {
+            if (appSelection != null) {
                 filterText = appSelection.getFilterText().trim();
                 discardEmptyNotifications = appSelection.isDiscardEmptyNotifications();
             }
         }
 
         CharSequence notificationTitle = extras.getCharSequence(Notification.EXTRA_TITLE);
-        CharSequence notificationText = extras.getCharSequence(Notification.EXTRA_TEXT);
+        String notificationText = buildNotificationText(extras, appPackageName, discardEmptyNotifications);
 
-        CharSequence notificationBigText = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            notificationBigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
-        }
-
-        if (discardEmptyNotifications && isBlank(notificationText) && isBlank(notificationBigText)) {
+        if (notificationText == null || anyMatchesFilter(filterText, notificationTitle, notificationText)) {
             return;
         }
 
-        if (anyMatchesFilter(filterText, notificationTitle, notificationText, notificationBigText)) {
+        String prevNotificationString = mNotificationStringMap.put(appPackageName, notificationText);
+        // TODO: add more specific checks to avoid blocking legitimate identical notifications
+        if (notificationText.equals(prevNotificationString)) {
+            // do not send the duplicate notification, but only for every 2nd occurrence
+            // (i.e. when the same text arrives for the 3rd time - send it)
+            mNotificationStringMap.remove(appPackageName);
             return;
-        }
-
-        // if notification "big text" starts with the short text - just use the big one
-        if (startsWith(notificationBigText, notificationText)) {
-            notificationText = notificationBigText;
-            notificationBigText = null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        if (mDisplayAppName) {
-            sb.append("[")
-              .append(mAppSelectionsStore.getAppName(appPackageName))
-              .append("] ");
         }
 
         if (mTransliterateNotif) {
             notificationTitle = transliterate(notificationTitle);
             notificationText = transliterate(notificationText);
-            notificationBigText = transliterate(notificationBigText);
-        }
-
-        sb.append(notificationText);
-
-        if (!isBlank(notificationBigText)) {
-            sb.append(" -- ").append(notificationBigText);
-        }
-
-        String notificationString = sb.toString().trim().replaceAll("\\s+", " ");
-
-        String prevNotificationString = mNotificationStringMap.put(appPackageName, notificationString);
-        // TODO: add more specific checks to avoid blocking legitimate identical notifications
-        if (notificationString.equals(prevNotificationString)) {
-            // do not send the duplicate notification, but only for every 2nd occurrence
-            // (i.e. when the same text arrives for the 3rd time - send it)
-            mNotificationStringMap.remove(appPackageName);
-            return;
         }
 
         RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.custom_notification);
@@ -306,8 +272,8 @@ public class NLService extends NotificationListenerService {
         PendingIntent settingsPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
 
-        if (mSplitNotification && notificationString.length() > mFitbitNotifCharLimit) {
-            List<String> slices = sliceNotificationText(notificationString);
+        if (mSplitNotification && notificationText.length() > mFitbitNotifCharLimit) {
+            List<String> slices = sliceNotificationText(notificationText);
             for (int i = 0; i < slices.size(); i++) {
                 builder.setContentText(slices.get(i));
                 final Notification notif = builder.build();
@@ -319,7 +285,7 @@ public class NLService extends NotificationListenerService {
                 }, 500 * (i + 1));
             }
         } else { // Do not split the notification
-            builder.setContentText(sb.toString());
+            builder.setContentText(notificationText);
             mNotificationManager.notify(NOTIFICATION_ID, builder.build());
         }
 
@@ -356,6 +322,38 @@ public class NLService extends NotificationListenerService {
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
         super.onNotificationRemoved(sbn);
+    }
+
+    private String buildNotificationText(Bundle notificationExtras, String appPackageName, boolean discardEmpty) {
+        CharSequence notificationText = notificationExtras.getCharSequence(Notification.EXTRA_TEXT);
+
+        CharSequence notificationBigText = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            notificationBigText = notificationExtras.getCharSequence(Notification.EXTRA_BIG_TEXT);
+        }
+
+        if (isBlank(notificationText) && isBlank(notificationBigText)) {
+            if (discardEmpty) {
+                return null;
+            }
+        } else if (startsWith(notificationBigText, notificationText)) {
+                // if notification "big text" starts with the short text - just use the big one
+                notificationText = notificationBigText;
+                notificationBigText = null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        if (mDisplayAppName) {
+            sb.append("[").append(mAppSelectionsStore.getAppName(appPackageName)).append("] ");
+        }
+
+        sb.append(notificationText);
+
+        if (!isBlank(notificationBigText)) {
+            sb.append(" -- ").append(notificationBigText);
+        }
+
+        return sb.toString().trim().replaceAll("\\s+", " ");
     }
 
     /**
