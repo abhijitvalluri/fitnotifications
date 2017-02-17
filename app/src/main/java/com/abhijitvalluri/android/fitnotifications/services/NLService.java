@@ -211,19 +211,21 @@ public class NLService extends NotificationListenerService {
             mLastNotificationTimeMap.put(appPackageName, currentTimeMillis);
         }
 
-        String filter;
+        String filterText;
         boolean discardEmptyNotifications;
 
-        AppSelection appSelection = AppSelectionsStore.get(this).getAppSelection(appPackageName);
-        if (appSelection == null) { // Should never happen. So if it does, just return false
-            filter = "";
-            discardEmptyNotifications = false;
-        } else {
-            filter = appSelection.getFilterText().trim();
-            discardEmptyNotifications = appSelection.isDiscardEmptyNotifications();
+        {
+            AppSelection appSelection = AppSelectionsStore.get(this).getAppSelection(appPackageName);
+            if (appSelection == null) { // Should never happen. So if it does, just return false
+                filterText = "";
+                discardEmptyNotifications = false;
+            } else {
+                filterText = appSelection.getFilterText().trim();
+                discardEmptyNotifications = appSelection.isDiscardEmptyNotifications();
+            }
         }
 
-        CharSequence title = extras.getCharSequence(Notification.EXTRA_TITLE);
+        CharSequence notificationTitle = extras.getCharSequence(Notification.EXTRA_TITLE);
         CharSequence notificationText = extras.getCharSequence(Notification.EXTRA_TEXT);
 
         CharSequence notificationBigText = null;
@@ -235,7 +237,7 @@ public class NLService extends NotificationListenerService {
             return;
         }
 
-        if (anyMatchesFilter(filter, title, notificationText, notificationBigText)) {
+        if (anyMatchesFilter(filterText, notificationTitle, notificationText, notificationBigText)) {
             return;
         }
 
@@ -253,7 +255,7 @@ public class NLService extends NotificationListenerService {
         }
 
         if (mTransliterateNotif) {
-            title = transliterate(title);
+            notificationTitle = transliterate(notificationTitle);
             notificationText = transliterate(notificationText);
             notificationBigText = transliterate(notificationBigText);
         }
@@ -271,15 +273,11 @@ public class NLService extends NotificationListenerService {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
                 .setContent(contentView)
-                .setContentTitle(title)
+                .setContentTitle(notificationTitle)
                 .setLocalOnly(true);        // avoid bridging this notification to other devices
-
-        // use minimal priority for placeholder notifications
-        builder.setPriority(NotificationCompat.PRIORITY_MIN);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // prevent notification from appearing on the lock screen
-            // (also avoid revealing sensitive data)
             builder.setVisibility(Notification.VISIBILITY_SECRET);
         }
 
@@ -300,8 +298,11 @@ public class NLService extends NotificationListenerService {
         String notificationString = sb.toString().trim().replaceAll("\\s+", " ");
 
         String prevNotificationString = mNotificationStringMap.put(appPackageName, notificationString);
+        // TODO: add more specific checks to avoid blocking legitimate identical notifications
         if (notificationString.equals(prevNotificationString)) {
-            // do not repeat the same notification
+            // do not send the duplicate notification, but only for every 2nd occurrence
+            // (i.e. when the same text arrives for the 3rd time - send it)
+            mNotificationStringMap.remove(appPackageName);
             return;
         }
 
@@ -382,7 +383,7 @@ public class NLService extends NotificationListenerService {
         int minute = cal.get(Calendar.MINUTE);
         int currTime = hour * 60 + minute;
 
-        return ((currTime >= startTime) && (currTime <= stopTime));
+        return ((currTime >= startTime) && (currTime < stopTime));
     }
 
     private boolean isScreenOn() {
