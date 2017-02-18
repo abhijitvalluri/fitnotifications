@@ -91,13 +91,12 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         setTitle(mAppSelection.getAppName());
 
         final java.text.DateFormat timeFormat = DateFormat.getTimeFormat(this);
-        final String startTimeFormatted = timeFormat.format(
-                Func.convertHourMinute2Date(mStartTimeHour, mStartTimeMinute));
-        final String stopTimeFormatted = timeFormat.format(
-                Func.convertHourMinute2Date(mStopTimeHour, mStopTimeMinute));
 
-        mStartTimeButton.setText(startTimeFormatted);
-        mStopTimeButton.setText(stopTimeFormatted);
+        mStartTimeButton.setText(timeFormat.format(
+                Func.convertHourMinute2Date(mStartTimeHour, mStartTimeMinute)));
+
+        mStopTimeButton.setText(timeFormat.format(
+                Func.convertHourMinute2Date(mStopTimeHour, mStopTimeMinute)));
 
         mFilterText.setText(mAppSelection.getFilterText());
 
@@ -108,8 +107,6 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
             }
         });
 
-        final boolean is24hFormat = DateFormat.is24HourFormat(this);
-
         mStartTimeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,8 +115,6 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
                                                                            mStartTimeMinute,
                                                                            mStopTimeHour,
                                                                            mStopTimeMinute,
-                                                                           stopTimeFormatted,
-                                                                           is24hFormat,
                                                                            START_TIME_REQUEST);
                 dialog.show(manager, DIALOG_TIME);
             }
@@ -133,8 +128,6 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
                                                                            mStopTimeMinute,
                                                                            mStartTimeHour,
                                                                            mStartTimeMinute,
-                                                                           startTimeFormatted,
-                                                                           is24hFormat,
                                                                            STOP_TIME_REQUEST);
                 dialog.show(manager, DIALOG_TIME);
             }
