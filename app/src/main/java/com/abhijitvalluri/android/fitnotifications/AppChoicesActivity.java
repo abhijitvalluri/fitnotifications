@@ -38,6 +38,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
@@ -62,6 +63,7 @@ public class AppChoicesActivity extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
     private TextView mLoadingView;
+    private ProgressBar mProgressBar;
     private AppSelectionsStore mAppSelectionsStore;
     private ArrayList<AppSelection> mAppSelections;
     private PackageManager mPackageManager;
@@ -99,6 +101,7 @@ public class AppChoicesActivity extends AppCompatActivity {
         mAppSelectionsStore = AppSelectionsStore.get(this);
         mRecyclerView = (RecyclerView) findViewById(R.id.app_selections_recycler_view);
         mLoadingView = (TextView) findViewById(R.id.app_list_loading_text_view);
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 
@@ -113,6 +116,7 @@ public class AppChoicesActivity extends AppCompatActivity {
             mLoadingView.setText(getString(R.string.app_list_loading_text));
             mRecyclerView.setVisibility(View.GONE);
             mLoadingView.setVisibility(View.VISIBLE);
+            mProgressBar.setVisibility(View.VISIBLE);
             new AppListSetup().execute();
         }
     }
@@ -313,6 +317,7 @@ public class AppChoicesActivity extends AppCompatActivity {
             mLoadingView.setVisibility(View.GONE);
             mRecyclerView.setVisibility(View.VISIBLE);
         }
+        mProgressBar.setVisibility(View.GONE);
     }
 
     private void setupAdapter() {
@@ -320,6 +325,7 @@ public class AppChoicesActivity extends AppCompatActivity {
         mAdapter = new ActivityAdapter(mAppSelections);
         mRecyclerView.setAdapter(mAdapter);
         mLoadingView.setVisibility(View.GONE);
+        mProgressBar.setVisibility(View.GONE);
         mRecyclerView.setVisibility(View.VISIBLE);
         invalidateOptionsMenu();
     }

@@ -10,7 +10,7 @@
         android:contentDescription="@string/other_app_icon"
         android:src="@mipmap/ic_launcher"
         android:id="@+id/appIconImageView"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_vertical_margin"
         android:layout_gravity="center"
         android:layout_width="0dp"
         android:layout_height="48dp"
@@ -42,7 +42,7 @@
         android:id="@+id/appSelectCheckBox"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:layout_margin="@dimen/activity_vertical_margin"
         android:layout_gravity="center"
         android:layout_weight="1"/>
 </LinearLayout>
