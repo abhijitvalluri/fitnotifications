@@ -208,7 +208,7 @@
 
     <!-- App Settings Activity - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
     <string name="filter_heading">Filter Text</string>
-    <string name="filter_desc">All notifications from this app containing the specified text will be filtered out and not displayed on your Fitbit.</string>
+    <string name="filter_desc">All notifications from this app containing the specified text will be filtered out and not displayed on your Fitbit. Separate multiple patterns with a semicolon.</string>
     <string name="discard_empty_notifications">Discard empty notifications</string>
     <string name="schedule_heading">Notification Schedule</string>
     <string name="schedule_desc">Notifications from this app will only be forwarded to your Fitbit from the specified start time till the specified end time.</string>
