@@ -25,11 +25,14 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.v4.app.DialogFragment;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TimePicker;
 import android.widget.Toast;
+
+import com.abhijitvalluri.android.fitnotifications.utils.Func;
 
 /**
  * TimePickerFragment hosts the time picker dialog.
@@ -44,8 +47,6 @@ public class TimePickerFragment extends DialogFragment {
     private static final String ARG_MINUTE = "minute";
     private static final String ARG_OTHER_HOUR = "otherHour";
     private static final String ARG_OTHER_MINUTE = "otherMinute";
-    private static final String ARG_OTHER_TIME_FORMATTED = "otherTimeFormatted";
-    private static final String ARG_24H = "24h";
     private static final String ARG_REQUEST_CODE = "resultCode";
 
     private TimePicker mTimePicker;
@@ -61,7 +62,8 @@ public class TimePickerFragment extends DialogFragment {
         int minute = getArguments().getInt(ARG_MINUTE);
         mOtherHour = getArguments().getInt(ARG_OTHER_HOUR);
         mOtherMinute = getArguments().getInt(ARG_OTHER_MINUTE);
-        mOtherTimeFormatted = getArguments().getString(ARG_OTHER_TIME_FORMATTED);
+        mOtherTimeFormatted = DateFormat.getTimeFormat(getActivity()).format(
+                Func.convertHourMinute2Date(mOtherHour, mOtherMinute));
         mRequestCode = getArguments().getInt(ARG_REQUEST_CODE);
 
         View v = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_time, null);
@@ -76,7 +78,7 @@ public class TimePickerFragment extends DialogFragment {
             //noinspection deprecation
             mTimePicker.setCurrentMinute(minute);
         }
-        mTimePicker.setIs24HourView(getArguments().getBoolean(ARG_24H));
+        mTimePicker.setIs24HourView(DateFormat.is24HourFormat(getActivity()));
 
         @StringRes int titleStringId = mRequestCode == AppSettingsActivity.START_TIME_REQUEST ?
                 R.string.start_time_heading : R.string.stop_time_heading;
@@ -173,16 +175,12 @@ public class TimePickerFragment extends DialogFragment {
                                                  int minute,
                                                  int otherHour,
                                                  int otherMinute,
-                                                 String otherTimeFormatted,
-                                                 boolean is24hFormat,
                                                  int requestCode) {
         Bundle args = new Bundle();
         args.putInt(ARG_HOUR, hour);
         args.putInt(ARG_MINUTE, minute);
         args.putInt(ARG_OTHER_HOUR, otherHour);
         args.putInt(ARG_OTHER_MINUTE, otherMinute);
-        args.putString(ARG_OTHER_TIME_FORMATTED, otherTimeFormatted);
-        args.putBoolean(ARG_24H, is24hFormat);
         args.putInt(ARG_REQUEST_CODE, requestCode);
 
         TimePickerFragment fragment = new TimePickerFragment();
