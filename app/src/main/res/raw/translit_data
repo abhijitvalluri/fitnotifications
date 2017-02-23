@@ -27,3 +27,71 @@
 Э   E
 Ю   Yu
 Я   Ya
+
+
+# Some popular emojis, see http://www.unicode.org/emoji/charts/emoji-list.html
+U+263A      :-)
+U+1F60A     :-)
+U+1F642     :-)
+
+U+1F609     ;-)
+
+U+1F600     :-D
+U+1F601     :-D
+U+1F603 	:-D
+U+1F604     :-D
+
+U+1F605     ,:-D
+
+U+1F606     X-D
+U+1F923     X-D
+
+U+1F60E     B-)
+
+U+1F610     :-|
+U+1F611     :-|
+
+U+1F615     :-/
+
+U+1F61B     :-P
+U+1F61C     ;-P
+
+U+1F62E     :-O
+U+1F632     o_O
+
+U+1F617     :-*
+U+1F618     :-*
+U+1F619     :-*
+U+1F61A     :-*
+
+U+2639      :-(
+U+1F641     :-(
+
+U+1F622     :'(
+
+U+1F620     >:-(
+U+1F621     >:-(
+
+U+1F608     }:-)
+
+U+1F612     :-S
+
+U+1F613     ,:-(
+
+U+1F910     :-$
+
+U+1F918     \m/
+
+U+2764      <3
+U+1F494     </3
+
+
+# Ignore emoji skin tone modifiers
+U+1F3FB
+U+1F3FC
+U+1F3FD
+U+1F3FE
+U+1F3FF
+
+# Zero width joiner (used in "family" emojis)
+U+200D
