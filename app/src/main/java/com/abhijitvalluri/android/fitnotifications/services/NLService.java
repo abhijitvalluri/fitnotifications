@@ -40,7 +40,7 @@ import com.abhijitvalluri.android.fitnotifications.SettingsActivity;
 import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
 import com.abhijitvalluri.android.fitnotifications.utils.AppSelectionsStore;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
-import com.ibm.icu.text.Transliterator;
+import com.abhijitvalluri.android.fitnotifications.utils.TranslitUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -58,7 +58,7 @@ public class NLService extends NotificationListenerService {
 
     private final Handler mHandler = new Handler();
 
-    private final Transliterator transliterator = Transliterator.getInstance("Any-Latin");
+    private final TranslitUtil translitUtil = new TranslitUtil(getResources());
 
     private static List<String> mSelectedAppsPackageNames;
     private static boolean mIsServiceEnabled;
@@ -237,8 +237,8 @@ public class NLService extends NotificationListenerService {
         }
 
         if (mTransliterateNotif) {
-            notificationTitle = transliterate(notificationTitle);
-            notificationText = transliterate(notificationText);
+            notificationTitle = translitUtil.transliterate(notificationTitle);
+            notificationText = translitUtil.transliterate(notificationText);
         }
 
         RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.custom_notification);
@@ -419,14 +419,6 @@ public class NLService extends NotificationListenerService {
             }
         }
         return false;
-    }
-
-    private String transliterate(CharSequence text) {
-        try {
-            return text == null ? null : transliterator.transform(text.toString());
-        } catch (Exception e) {
-            return text.toString();
-        }
     }
 
     private static boolean startsWith(CharSequence big, CharSequence small) {

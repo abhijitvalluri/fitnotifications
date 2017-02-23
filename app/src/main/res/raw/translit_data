@@ -1,0 +1,29 @@
+# These characters are transliterated by ICU4J into Latin symbols not available on Fitbit
+# So we override them with alternative replacements
+
+ъ   '
+ь   '
+Ъ   '
+Ь   '
+
+
+# More common way of transliterating some Russian characters
+ё   e
+ж   zh
+ц   ts
+ч   ch
+ш   sh
+щ   sch
+э   e
+ю   yu
+я   ya
+
+Ё   E
+Ж   Zh
+Ц   Ts
+Ч   Ch
+Ш   Sh
+Щ   Sch
+Э   E
+Ю   Yu
+Я   Ya
