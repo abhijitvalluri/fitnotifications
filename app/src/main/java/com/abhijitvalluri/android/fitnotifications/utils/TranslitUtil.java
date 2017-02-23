@@ -25,7 +25,7 @@ public class TranslitUtil {
 
     private static final String TAG = "TranslitUtil";
 
-    private final char[] symbols;
+    private final int[] symbols;
     private final String[] replacements;
 
 
@@ -43,7 +43,7 @@ public class TranslitUtil {
             replacements = null;
         } else {
             Log.i(TAG, "Loaded " + symbolReplacements.size() + " transliteration replacements");
-            symbols = new char[symbolReplacements.size()];
+            symbols = new int[symbolReplacements.size()];
             replacements = new String[symbolReplacements.size()];
 
             int pos = 0;
@@ -66,7 +66,19 @@ public class TranslitUtil {
                     continue;
                 }
 
-                replacements.add(new SymbolReplacement(line.charAt(0), line.substring(1).trim()));
+                int c = line.charAt(0);
+                int pos = 1;
+
+                // read symbol in Unicode format ('U+xxxxx')
+                if (c == 'U' && line.length() > 2 && line.charAt(1) == '+') {
+                    pos = 2;
+                    while (pos < line.length() && !Character.isWhitespace(line.charAt(pos))) {
+                        pos++;
+                    }
+                    c = Integer.parseInt(line.substring(2, pos), 16);
+                }
+
+                replacements.add(new SymbolReplacement(c, line.substring(pos).trim()));
             }
         } catch (IOException e) {
             Log.e(TAG, "Error loading transliteration replacements", e);
@@ -79,18 +91,18 @@ public class TranslitUtil {
 
 
     private static class SymbolReplacement implements Comparable<SymbolReplacement> {
-        private char symbol;
+        private int symbol;
         private String replacement;
 
 
-        public SymbolReplacement(char symbol, String replacement) {
+        public SymbolReplacement(int symbol, String replacement) {
             this.symbol = symbol;
             this.replacement = replacement;
         }
 
         @Override
         public int compareTo(SymbolReplacement o) {
-            return Character.compare(symbol, o.symbol);
+            return Integer.compare(symbol, o.symbol);
         }
 
         @Override
@@ -121,12 +133,24 @@ public class TranslitUtil {
                 sb = new StringBuffer(text.length() * 2);
                 // copy data replacing some symbols
                 for (int i = 0; i < text.length(); i++) {
-                    char c = text.charAt(i);
+                    int c = text.charAt(i);
+
+                    // decode Unicode surrogate pairs
+                    if (0xD800 <= c && c <= 0xDBFF) {
+                        if (i < text.length() - 1) {
+                            int low = text.charAt(i + 1);
+                            if (0xDC00 <= low && low <= 0xDFFF) {
+                                c = (c - 0xD800) * 0x400 + low - 0xDC00 + 0x10000;
+                                i++;
+                            }
+                        }
+                    }
+
                     int pos = Arrays.binarySearch(symbols, c);
                     if (pos >= 0) {
                         sb.append(replacements[pos]);
                     } else {
-                        sb.append(c);
+                        sb.appendCodePoint(c);
                     }
                 }
             } else {

@@ -45,4 +45,21 @@ public class TranslitUtilTest {
         assertEquals("A B V G D E E Zh Z I J K L M N O P R S T U F H Ts Ch Sh Sch ' Y ' E Yu Ya",
                 tu.transliterate("А Б В Г Д Е Ё Ж З И Й К Л М Н О П Р С Т У Ф Х Ц Ч Ш Щ Ъ Ы Ь Э Ю Я"));
     }
+
+
+    @Test
+    public void testEmojiTransliteration() throws UnsupportedEncodingException {
+        String replacements =
+                "U+263A      :-)\n" +
+                "U+1F641     :-(\n" +
+                "U+1F632     o_O\n" +
+                "U+1F918     \\m/\n" +
+                // skin tone modifier
+                "U+1F3FD\n";
+
+        TranslitUtil tu = new TranslitUtil(new ByteArrayInputStream(replacements.getBytes("UTF-8")));
+
+        assertEquals(":-) o_O \\m/ \uD83D\uDC4D",
+                tu.transliterate("☺ \uD83D\uDE32 \uD83E\uDD18 \uD83D\uDC4D\uD83C\uDFFD"));
+    }
 }
