@@ -58,8 +58,6 @@ public class NLService extends NotificationListenerService {
 
     private final Handler mHandler = new Handler();
 
-    private final TranslitUtil translitUtil = new TranslitUtil(getResources());
-
     private static List<String> mSelectedAppsPackageNames;
     private static boolean mIsServiceEnabled;
     private static boolean mDismissPlaceholderNotif;
@@ -74,6 +72,8 @@ public class NLService extends NotificationListenerService {
     private static int mPlaceholderNotifDismissDelayMillis;
     private static int mRelayedNotifDismissDelayMillis;
     private static int mNotifLimitDurationMillis;
+
+    private TranslitUtil translitUtil;
 
     private NotificationManager mNotificationManager;
     private AppSelectionsStore mAppSelectionsStore;
@@ -122,6 +122,13 @@ public class NLService extends NotificationListenerService {
         mDisplayAppName = preferences.getBoolean(getString(R.string.display_app_name_key), true);
 
         Toast.makeText(this, getString(R.string.notification_service_started), Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        // base context is needed to access Resources
+        translitUtil = new TranslitUtil(getResources());
     }
 
     @Override
