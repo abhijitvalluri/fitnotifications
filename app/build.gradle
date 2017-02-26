@@ -16,8 +16,8 @@ android {
             // define these properties in ~/.gradle/gradle.properties
             storeFile new File(RELEASE_STORE_FILE)
             storePassword RELEASE_STORE_PASSWORD
-            keyAlias RELEASE_KEY_ALIAS
-            keyPassword RELEASE_KEY_PASSWORD
+            keyAlias FN_RELEASE_KEY_ALIAS
+            keyPassword FN_RELEASE_KEY_PASSWORD
         }
     }
     compileOptions {
