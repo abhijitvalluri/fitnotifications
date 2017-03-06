@@ -10,7 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/activity_padding"
         android:descendantFocusability="beforeDescendants"
         android:focusable="true"
         android:focusableInTouchMode="true">
@@ -18,49 +17,82 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:labelFor="@+id/filterText"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:labelFor="@+id/filter_text"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="@string/filter_heading"/>
+            android:text="@string/filter_heading"
+            android:paddingTop="16dp"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:labelFor="@+id/filterText"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:labelFor="@+id/filter_text"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="@string/filter_desc"/>
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:inputType="text"
-            android:id="@+id/filterText"/>
+            android:maxLines="5"
+            android:scrollHorizontally="false"
+            android:id="@+id/filter_text"/>
 
-        <Space
+        <View
             android:layout_width="match_parent"
-            android:layout_height="@dimen/activity_padding"/>
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@color/lightGrey_translucent" />
 
         <Switch
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="@string/discard_empty_notifications"
             android:id="@+id/discard_empty"/>
 
-        <Space
+        <View
             android:layout_width="match_parent"
-            android:layout_height="@dimen/activity_padding"/>
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@color/lightGrey_translucent" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="@string/schedule_heading"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="@string/schedule_desc"/>
+
+        <Switch
+            android:text="@string/all_day"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/all_day"
+            android:textSize="18sp"
+            android:textColor="@color/grey"
+            android:layout_marginTop="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="16dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -75,9 +107,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="3"
-                style="?android:attr/buttonBarButtonStyle"
                 tools:text="12:00 AM"
                 android:textStyle="bold"
+                android:textColor="@color/white"
                 android:textSize="16sp"/>
 
             <TextView
@@ -94,11 +126,23 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="3"
-                style="?android:attr/buttonBarButtonStyle"
                 tools:text="11:59 PM"
                 android:textStyle="bold"
+                android:textColor="@color/white"
                 android:textSize="16sp"/>
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/next_day"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/next_day"
+            android:visibility="invisible"
+            android:textAlignment="textEnd"
+            android:textSize="16sp"
+            android:paddingRight="20dp"
+            android:paddingLeft="20dp"
+            android:layout_marginBottom="16dp"/>
     </LinearLayout>
 </ScrollView>
 

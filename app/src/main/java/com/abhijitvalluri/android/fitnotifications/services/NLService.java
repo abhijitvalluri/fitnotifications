@@ -384,13 +384,24 @@ public class NLService extends NotificationListenerService {
         int startTime = appSelection.getStartTime();
         int stopTime = appSelection.getStopTime();
 
+        if (startTime == 0 && stopTime == 0) {
+            // All day enabled
+            return true;
+        }
+
         // Get current time
         Calendar cal = Calendar.getInstance();
         int hour = cal.get(Calendar.HOUR_OF_DAY);
         int minute = cal.get(Calendar.MINUTE);
         int currTime = hour * 60 + minute;
 
-        return ((currTime >= startTime) && (currTime < stopTime));
+        if (startTime < stopTime) {
+            // Schedule is within one day
+            return ((currTime >= startTime) && (currTime < stopTime));
+        } else {
+            // Schedule spans across a day
+            return ((currTime >= startTime) || (currTime < stopTime));
+        }
     }
 
     private boolean isScreenOn() {

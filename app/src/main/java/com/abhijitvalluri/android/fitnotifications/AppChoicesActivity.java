@@ -19,12 +19,14 @@ package com.abhijitvalluri.android.fitnotifications;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -48,8 +50,6 @@ import com.abhijitvalluri.android.fitnotifications.utils.Constants;
 import com.abhijitvalluri.android.fitnotifications.utils.Func;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -60,6 +60,7 @@ public class AppChoicesActivity extends AppCompatActivity {
     private static final int APP_SELECTIONS_REQUEST = 0;
     private static final String STATE_APP_SELECTIONS = "appSelections";
     private static final String STATE_RECYCLER_VIEW  = "recyclerView";
+    private static final String STATE_SETUP_COMPLETE  = "setupComplete";
 
     private RecyclerView mRecyclerView;
     private TextView mLoadingView;
@@ -68,7 +69,9 @@ public class AppChoicesActivity extends AppCompatActivity {
     private ArrayList<AppSelection> mAppSelections;
     private PackageManager mPackageManager;
     private ActivityAdapter mAdapter;
-    private boolean mShowOnlyEnabledApps = false;
+    private SharedPreferences mPreferences;
+    private boolean mShowOnlyEnabledApps;
+    private boolean mSetupComplete = false;
     private Bundle LAUNCH_ACTIVITY_ANIM_BUNDLE;
 
     public static Intent newIntent(Context packageContext) {
@@ -104,14 +107,29 @@ public class AppChoicesActivity extends AppCompatActivity {
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        PreferenceManager.setDefaultValues(this, R.xml.main_settings, false);
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        mShowOnlyEnabledApps = mPreferences.getBoolean(getString(R.string.show_enabled_apps_key), false);
 
-        if (savedInstanceState != null) {
+        if (savedInstanceState != null && getSetupStatus(savedInstanceState)) {
             mAppSelections = savedInstanceState.getParcelableArrayList(STATE_APP_SELECTIONS);
             Parcelable listState = savedInstanceState.getParcelable(STATE_RECYCLER_VIEW);
 
-            mAdapter = new ActivityAdapter(mAppSelections);
+            if (mShowOnlyEnabledApps) {
+                List<AppSelection> appSelectionsSubList = new ArrayList<>();
+
+                for (AppSelection appSelection : mAppSelections) {
+                    if (appSelection.isSelected()) {
+                        appSelectionsSubList.add(appSelection);
+                    }
+                }
+                mAdapter = new ActivityAdapter(appSelectionsSubList);
+            } else {
+                mAdapter = new ActivityAdapter(mAppSelections);
+            }
             mRecyclerView.setAdapter(mAdapter);
             mRecyclerView.getLayoutManager().onRestoreInstanceState(listState);
+            mSetupComplete = getSetupStatus(savedInstanceState);
         } else {
             mLoadingView.setText(getString(R.string.app_list_loading_text));
             mRecyclerView.setVisibility(View.GONE);
@@ -124,6 +142,7 @@ public class AppChoicesActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putParcelableArrayList(STATE_APP_SELECTIONS, mAppSelections);
+        savedInstanceState.putBoolean(STATE_SETUP_COMPLETE, mSetupComplete);
         Parcelable listState = mRecyclerView.getLayoutManager().onSaveInstanceState();
         savedInstanceState.putParcelable(STATE_RECYCLER_VIEW, listState);
 
@@ -182,6 +201,7 @@ public class AppChoicesActivity extends AppCompatActivity {
                 return true;
             case R.id.menu_filter_enabled:
                 mShowOnlyEnabledApps = !mShowOnlyEnabledApps; // toggles the state of the filter
+                mPreferences.edit().putBoolean(getString(R.string.show_enabled_apps_key), mShowOnlyEnabledApps).apply();
                 item.setChecked(mShowOnlyEnabledApps);
                 recyclerViewShowEnabled();
                 return true;
@@ -218,6 +238,10 @@ public class AppChoicesActivity extends AppCompatActivity {
                 break;
             default:
         }
+    }
+
+    private boolean getSetupStatus(Bundle state) {
+        return state.getBoolean(STATE_SETUP_COMPLETE);
     }
 
     private void updateAppSelections(AppSelection appSelection) {
@@ -322,12 +346,26 @@ public class AppChoicesActivity extends AppCompatActivity {
 
     private void setupAdapter() {
         mAppSelections = mAppSelectionsStore.getAppSelections();
-        mAdapter = new ActivityAdapter(mAppSelections);
+
+        if (mShowOnlyEnabledApps) {
+            List<AppSelection> appSelectionsSubList = new ArrayList<>();
+
+            for (AppSelection appSelection : mAppSelections) {
+                if (appSelection.isSelected()) {
+                    appSelectionsSubList.add(appSelection);
+                }
+            }
+            mAdapter = new ActivityAdapter(appSelectionsSubList);
+        } else {
+            mAdapter = new ActivityAdapter(mAppSelections);
+        }
+
         mRecyclerView.setAdapter(mAdapter);
         mLoadingView.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.GONE);
         mRecyclerView.setVisibility(View.VISIBLE);
         invalidateOptionsMenu();
+        mSetupComplete = true;
     }
 
     private boolean isUninstalled(String appPackageName, List<ResolveInfo> activities) {
@@ -401,12 +439,6 @@ public class AppChoicesActivity extends AppCompatActivity {
 
         public ActivityAdapter(List<AppSelection> appSelectionsSubList) {
             mAppSelectionsSubList = appSelectionsSubList;
-            Collections.sort(mAppSelectionsSubList, new Comparator<AppSelection>() {
-                @Override
-                public int compare(AppSelection lhs, AppSelection rhs) {
-                    return String.CASE_INSENSITIVE_ORDER.compare(lhs.getAppName(), rhs.getAppName());
-                }
-            });
         }
 
         @Override

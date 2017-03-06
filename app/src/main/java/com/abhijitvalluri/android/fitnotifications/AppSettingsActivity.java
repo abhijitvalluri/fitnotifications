@@ -24,13 +24,13 @@ import android.text.format.DateFormat;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
 import com.abhijitvalluri.android.fitnotifications.utils.Func;
-
-import java.util.Date;
 
 /**
  * AppSettingsActivity is an activity that allows user to set additional preferences regarding each app
@@ -52,9 +52,11 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
 
     private AppSelection mAppSelection;
     private EditText mFilterText;
+    private TextView mNextDay;
     private Button mStartTimeButton;
     private Button mStopTimeButton;
-    private Switch mSwitch;
+    private Switch mDiscardEmptySwitch;
+    private Switch mAllDaySwitch;
     private int mStartTimeHour;
     private int mStartTimeMinute;
     private int mStopTimeHour;
@@ -66,10 +68,15 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_settings);
 
-        mFilterText = (EditText) findViewById(R.id.filterText);
+        mFilterText = (EditText) findViewById(R.id.filter_text);
         mStartTimeButton = (Button) findViewById(R.id.start_time);
         mStopTimeButton = (Button) findViewById(R.id.stop_time);
-        mSwitch = (Switch) findViewById(R.id.discard_empty);
+        mDiscardEmptySwitch = (Switch) findViewById(R.id.discard_empty);
+        mAllDaySwitch = (Switch) findViewById(R.id.all_day);
+        mNextDay = (TextView) findViewById(R.id.next_day);
+
+        mFilterText.setHorizontallyScrolling(false);
+        mFilterText.setMaxLines(5);
 
         if (savedInstanceState == null) {
             mAppSelection = getIntent().getParcelableExtra(APP_SELECTION_EXTRA);
@@ -87,23 +94,17 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
             mDiscardEmptyNotifications = savedInstanceState.getBoolean(STATE_DISCARD_EMPTY_NOTIFICATIONS);
         }
 
-        mSwitch.setChecked(mDiscardEmptyNotifications);
+        mDiscardEmptySwitch.setChecked(mDiscardEmptyNotifications);
         setTitle(mAppSelection.getAppName());
-
-        final java.text.DateFormat timeFormat = DateFormat.getTimeFormat(this);
-
-        mStartTimeButton.setText(timeFormat.format(
-                Func.convertHourMinute2Date(mStartTimeHour, mStartTimeMinute)));
-
-        mStopTimeButton.setText(timeFormat.format(
-                Func.convertHourMinute2Date(mStopTimeHour, mStopTimeMinute)));
-
         mFilterText.setText(mAppSelection.getFilterText());
 
-        mSwitch.setOnClickListener(new View.OnClickListener() {
+        mAllDaySwitch.setChecked(mStartTimeHour + mStartTimeMinute + mStopTimeHour + mStopTimeMinute == 0);
+        setupScheduleSettings(mAllDaySwitch.isChecked());
+
+        mDiscardEmptySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
-                mDiscardEmptyNotifications = mSwitch.isChecked();
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mDiscardEmptyNotifications = isChecked;
             }
         });
 
@@ -132,6 +133,53 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
                 dialog.show(manager, DIALOG_TIME);
             }
         });
+
+        mAllDaySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                setupScheduleSettings(isChecked);
+            }
+        });
+    }
+
+    private void setupScheduleSettings(Boolean isAllDay) {
+        if (isAllDay) {
+            mStartTimeHour = 0;
+            mStartTimeMinute = 0;
+            mStopTimeHour = 0;
+            mStopTimeMinute = 0;
+
+            mStartTimeButton.setEnabled(false);
+            mStartTimeButton.setBackgroundColor(0x649e9e9e);
+            mStartTimeButton.setText(R.string.schedule_disabled);
+            mStopTimeButton.setEnabled(false);
+            mStopTimeButton.setBackgroundColor(0x649e9e9e);
+            mStopTimeButton.setText(R.string.schedule_disabled);
+            mNextDay.setVisibility(View.INVISIBLE);
+        } else {
+            mStartTimeButton.setEnabled(true);
+            mStopTimeButton.setEnabled(true);
+
+            mStartTimeButton.setBackgroundColor(0xffff4081);
+            mStopTimeButton.setBackgroundColor(0xffff4081);
+
+            final java.text.DateFormat timeFormat = DateFormat.getTimeFormat(this);
+
+            mStartTimeButton.setText(timeFormat.format(
+                    Func.convertHourMinute2Date(mStartTimeHour, mStartTimeMinute)));
+
+            mStopTimeButton.setText(timeFormat.format(
+                    Func.convertHourMinute2Date(mStopTimeHour, mStopTimeMinute)));
+
+            int startTime = mStartTimeHour * 60 + mStartTimeMinute;
+            int stopTime = mStopTimeHour * 60 + mStopTimeMinute;
+
+            if (startTime > stopTime) {
+                mNextDay.setVisibility(View.VISIBLE);
+            } else {
+                mNextDay.setVisibility(View.INVISIBLE);
+            }
+        }
     }
 
     @Override
@@ -186,15 +234,29 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
 
         java.text.DateFormat timeFormat = DateFormat.getTimeFormat(this);
         String formattedTime = timeFormat.format(Func.convertHourMinute2Date(hour, minute));
+        int time = hour * 60 + minute;
 
         if (requestCode == START_TIME_REQUEST) {
             mStartTimeHour = hour;
             mStartTimeMinute = minute;
             mStartTimeButton.setText(formattedTime);
+            int stopTime = mStopTimeHour * 60 + mStopTimeMinute;
+            if (time > stopTime) {
+                mNextDay.setVisibility(View.VISIBLE);
+            } else {
+                mNextDay.setVisibility(View.INVISIBLE);
+            }
+
         } else if (requestCode == STOP_TIME_REQUEST) {
             mStopTimeHour = hour;
             mStopTimeMinute = minute;
             mStopTimeButton.setText(formattedTime);
+            int startTime = mStartTimeHour * 60 + mStartTimeMinute;
+            if (time < startTime) {
+                mNextDay.setVisibility(View.VISIBLE);
+            } else {
+                mNextDay.setVisibility(View.INVISIBLE);
+            }
         }
     }
 }

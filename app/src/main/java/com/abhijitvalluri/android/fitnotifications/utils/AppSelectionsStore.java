@@ -27,6 +27,8 @@ import com.abhijitvalluri.android.fitnotifications.database.AppSelectionDbSchema
 import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -73,6 +75,13 @@ public class AppSelectionsStore {
         } finally {
             cursor.close();
         }
+
+        Collections.sort(appSelections, new Comparator<AppSelection>() {
+            @Override
+            public int compare(AppSelection lhs, AppSelection rhs) {
+                return String.CASE_INSENSITIVE_ORDER.compare(lhs.getAppName(), rhs.getAppName());
+            }
+        });
 
         return appSelections;
     }

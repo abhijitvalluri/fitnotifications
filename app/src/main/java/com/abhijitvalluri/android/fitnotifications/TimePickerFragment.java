@@ -139,26 +139,17 @@ public class TimePickerFragment extends DialogFragment {
         int time = hour * 60 + minute;
         int otherTime = mOtherHour * 60 + mOtherMinute;
 
-        switch (mRequestCode) {
-            case AppSettingsActivity.START_TIME_REQUEST:
-                if (time >= otherTime) {
-                    positiveButton.setEnabled(false);
-                    String text = getString(R.string.start_time_error, mOtherTimeFormatted);
-                    Toast.makeText(getContext(), text, Toast.LENGTH_SHORT).show();
-                } else {
-                    positiveButton.setEnabled(true);
-                }
-                break;
-            case AppSettingsActivity.STOP_TIME_REQUEST:
-                if (time <= otherTime) {
-                    positiveButton.setEnabled(false);
-                    String text = getString(R.string.stop_time_error, mOtherTimeFormatted);
-                    Toast.makeText(getContext(), text, Toast.LENGTH_SHORT).show();
-                } else {
-                    positiveButton.setEnabled(true);
-                }
-                break;
-            default:
+        if (time == otherTime) {
+            String errToast;
+            positiveButton.setEnabled(false);
+            if (mRequestCode == AppSettingsActivity.START_TIME_REQUEST) {
+                errToast = getString(R.string.start_time_error);
+            } else {
+                errToast = getString(R.string.stop_time_error);
+            }
+            Toast.makeText(getContext(), errToast, Toast.LENGTH_SHORT).show();
+        } else {
+            positiveButton.setEnabled(true);
         }
     }
 
