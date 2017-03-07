@@ -6,7 +6,6 @@
 Ъ   '
 Ь   '
 
-
 # More common way of transliterating some Russian characters
 ё   e
 ж   zh
@@ -28,6 +27,14 @@
 Ю   Yu
 Я   Ya
 
+# Fixes for Hebrew characters
+א   a
+ח   c
+ע   æ
+צ   ß
+ץ   ß
+ש   x
+ת   ÷
 
 # Some popular emojis, see http://www.unicode.org/emoji/charts/emoji-list.html
 U+263A      :-)
