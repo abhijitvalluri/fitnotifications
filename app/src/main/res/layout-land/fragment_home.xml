@@ -129,6 +129,24 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/improve_transliteration"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"/>
 
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+    <TextView
+        android:id="@+id/rate_app"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/rate_app"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/white"
+        android:background="@color/colorAccent"
+        android:padding="@dimen/activity_horizontal_margin" />
 
 </LinearLayout>

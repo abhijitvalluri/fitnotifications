@@ -18,6 +18,8 @@
     <string name="app_choices_activity_title">Select Apps</string>
     <string name="enabled_apps_filter_menu">Filter Enabled Apps</string>
     <string name="notification_service_started">Fit Notifications Service started</string>
+    <string name="rate_app">Like our app? Then rate it!</string>
+    <string name="improve_transliteration">Do you want to help improve transliteration for your language? Then click here!</string>
     <string name="placeholder_notification_text">[Placeholder notification] Click to enable auto-dismiss.</string>
     <string name="notification_text">[Placeholder notification] Click to enable auto-dismiss. You can enable auto-dismiss for the relayed notification as well.</string>
     <string name="test_notification">Test Notification</string>
@@ -211,7 +213,7 @@
 
     <!-- App Settings Activity - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
     <string name="filter_heading">Filter Text</string>
-    <string name="filter_desc">All notifications from this app containing the specified text will be filtered out and not displayed on your Fitbit. Separate multiple patterns with a semicolon.</string>
+    <string name="filter_desc">All notifications from this app containing the specified text will be filtered out and not displayed on your Fitbit. Separate multiple patterns with a semicolon (;).</string>
     <string name="discard_empty_notifications">Discard empty notifications</string>
     <string name="schedule_heading">Notification Schedule</string>
     <string name="schedule_desc">Notifications from this app will only be forwarded to your Fitbit from the specified start time till the specified end time.</string>
@@ -221,12 +223,13 @@
     <string name="stop_time_error">End time cannot be the same as the start time</string>
     <string name="all_day">All day schedule</string>
     <string name="next_day">(Next day)</string>
-    <string name="schedule_disabled">Disabled</string>
+    <string name="schedule_disabled">All day</string>
 
     <!-- HTML Information - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <string name="about_app_text"><![CDATA[
     <p>Fit Notifications is a third party application that allows you to send notifications from any of the apps installed on your phone to your compatible Fitbit device.
        In order to properly setup this application, please follow the provided instructions.</p>
+    <p>The source code for this app is available at <a href=\"https://github.com/abhijitvalluri/fitnotifications\">Github (abhijitvalluri/fitnotifications)</a>, with contributions from other developers apart from Smart Dinosaurs Entertainment.</p>
 	<p>Please note that neither \'Fit Notifications\' nor \'Smart Dinosaurs Entertainment\' is affiliated with Fitbit, Inc. in anyway.</p>
 	<h2>Disclaimer</h2>
 	<p>Fitbit is a registered trademark and service mark of Fitbit, Inc.
@@ -308,18 +311,17 @@
        We will attempt to resolve this issue in an update.</p>
     ]]></string>
     <string name="whats_new_text"><![CDATA[
-    <p>Bug fixes in <b>version 2.7.1:</b></p>
+    <p>Changes in <b>version 2.8:</b></p>
     <ul>
-        <li>Fixed bugs in Notification Schedule app setting and other general bug fixes and UI improvements.</li>
+        <li>Various bug fixes and performance improvements.<br /><br /></li>
+        <li>Improve transliteration quality for Russian and Hebrew. Transliterate some popular emojis.<br /><br /></li>
+        <li>Improve app schedule setting. Now, you can either set schedule to be \'all day\' or a time period. The time period can span across two days (i.e. night time schedule).<br /><br /></li>
+        <li>Update app\'s main page to provide easy access to rate the app, and provide feedback to improve transliteration.</li>
     </ul>
     <p>Changes in <b>version 2.7</b>: New per app settings!</p>
     <ul>
-        <li>You can now filter notifications from each enabled app so that notifications that contain certain text in them will not be forwarded to your Fitbit device.<br /><br /></li>
-        <li>Apps may occasionally send you empty notifications with no content. You can now ignore such notifications so that they are not forwarded to your Fitbit device.<br /><br /></li>
-        <li>You can now setup a notification schedule for each enabled app. This means that you can specify when notifications from a particular app should be forwarded to your Fitbit device.
-            At other times, you will not be disturbed.<br /><br /></li>
+        <li>You can now filter notifications, discard empty notifications, and set a schedule for when notifications are forwarded.</li>
     </ul>
-
     <p>To enable these new settings, go to the \'Setup Apps\' option on the main screen and click the \'gear\' icon next to the app name.</p>
 
     ]]></string>

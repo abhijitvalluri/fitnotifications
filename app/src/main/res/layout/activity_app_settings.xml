@@ -140,8 +140,8 @@
             android:visibility="invisible"
             android:textAlignment="textEnd"
             android:textSize="16sp"
-            android:paddingRight="20dp"
-            android:paddingLeft="20dp"
+            android:paddingRight="18dp"
+            android:paddingLeft="18dp"
             android:layout_marginBottom="16dp"/>
     </LinearLayout>
 </ScrollView>

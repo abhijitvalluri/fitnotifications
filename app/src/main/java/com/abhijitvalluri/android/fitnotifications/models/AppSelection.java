@@ -33,6 +33,7 @@ public class AppSelection implements Parcelable {
     private int mStopTimeHour;
     private int mStopTimeMinute;
     private boolean mDiscardEmptyNotifications;
+    private boolean mAllDaySchedule;
 
     public AppSelection(String appPackageName, String appName) {
         mAppPackageName = appPackageName;
@@ -42,6 +43,7 @@ public class AppSelection implements Parcelable {
         mStartTimeMinute = 0;
         mStopTimeHour = 23;
         mStopTimeMinute = 59;
+        mAllDaySchedule = true;
     }
 
     public AppSelection(String appPackageName,
@@ -52,7 +54,8 @@ public class AppSelection implements Parcelable {
                         int startTimeMinute,
                         int stopTimeHour,
                         int stopTimeMinute,
-                        boolean discardEmptyNotifications) {
+                        boolean discardEmptyNotifications,
+                        boolean allDaySchedule) {
         mAppPackageName = appPackageName;
         mAppName = appName;
         mIsSelected = isSelected;
@@ -62,6 +65,7 @@ public class AppSelection implements Parcelable {
         mStopTimeHour = stopTimeHour;
         mStopTimeMinute = stopTimeMinute;
         mDiscardEmptyNotifications = discardEmptyNotifications;
+        mAllDaySchedule = allDaySchedule;
     }
 
     public boolean isSelected() {
@@ -128,6 +132,14 @@ public class AppSelection implements Parcelable {
         mDiscardEmptyNotifications = discardEmptyNotifications;
     }
 
+    public boolean isAllDaySchedule() {
+        return mAllDaySchedule;
+    }
+
+    public void setAllDaySchedule(boolean allDaySchedule) {
+        mAllDaySchedule = allDaySchedule;
+    }
+
     public int getStartTime() {
         return mStartTimeHour * 60 + mStartTimeMinute;
     }
@@ -146,6 +158,7 @@ public class AppSelection implements Parcelable {
         mStopTimeHour = in.readInt();
         mStopTimeMinute = in.readInt();
         mDiscardEmptyNotifications = in.readByte() != 0x00;
+        mAllDaySchedule = in.readByte() != 0x00;
     }
 
     @Override
@@ -164,6 +177,7 @@ public class AppSelection implements Parcelable {
         dest.writeInt(mStopTimeHour);
         dest.writeInt(mStopTimeMinute);
         dest.writeByte((byte) (mDiscardEmptyNotifications ? 0x01 : 0x00));
+        dest.writeByte((byte) (mAllDaySchedule ? 0x01 : 0x00));
     }
 
     @SuppressWarnings("unused")

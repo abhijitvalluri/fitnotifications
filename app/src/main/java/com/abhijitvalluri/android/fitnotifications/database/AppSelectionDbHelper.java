@@ -26,7 +26,7 @@ import com.abhijitvalluri.android.fitnotifications.database.AppSelectionDbSchema
  * Helper class for the Database
  */
 public class AppSelectionDbHelper extends SQLiteOpenHelper {
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
     private static final String DATABASE_NAME = "fitNotificationAppSelection.db";
 
     public AppSelectionDbHelper(Context context) {
@@ -45,7 +45,8 @@ public class AppSelectionDbHelper extends SQLiteOpenHelper {
                 AppChoiceTable.Cols.START_TIME_MINUTE + ", " +
                 AppChoiceTable.Cols.STOP_TIME_HOUR + ", " +
                 AppChoiceTable.Cols.STOP_TIME_MINUTE + ", " +
-                AppChoiceTable.Cols.DISCARD_EMPTY_NOTIFICATIONS +
+                AppChoiceTable.Cols.DISCARD_EMPTY_NOTIFICATIONS + ", " +
+                AppChoiceTable.Cols.ALL_DAY_SCHEDULE +
                 ")"
         );
     }
@@ -65,6 +66,11 @@ public class AppSelectionDbHelper extends SQLiteOpenHelper {
                     AppChoiceTable.Cols.STOP_TIME_MINUTE + " INTEGER NOT NULL DEFAULT 59;");
             db.execSQL("alter table " + AppChoiceTable.NAME + " add column " +
                     AppChoiceTable.Cols.DISCARD_EMPTY_NOTIFICATIONS + " INTEGER NOT NULL DEFAULT 0;");
+            db.execSQL("alter table " + AppChoiceTable.NAME + " add column " +
+                    AppChoiceTable.Cols.ALL_DAY_SCHEDULE + " INTEGER NOT NULL DEFAULT 1;");
+        } else if (oldVersion == 2 && newVersion == VERSION) {
+            db.execSQL("alter table " + AppChoiceTable.NAME + " add column " +
+                    AppChoiceTable.Cols.ALL_DAY_SCHEDULE + " INTEGER NOT NULL DEFAULT 1;");
         }
     }
 }

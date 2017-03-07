@@ -171,6 +171,7 @@ public class AppSelectionsStore {
         values.put(AppChoiceTable.Cols.STOP_TIME_HOUR, appSelection.getStopTimeHour());
         values.put(AppChoiceTable.Cols.STOP_TIME_MINUTE, appSelection.getStopTimeMinute());
         values.put(AppChoiceTable.Cols.DISCARD_EMPTY_NOTIFICATIONS, appSelection.isDiscardEmptyNotifications() ? 1 : 0);
+        values.put(AppChoiceTable.Cols.ALL_DAY_SCHEDULE, appSelection.isAllDaySchedule() ? 1 : 0);
 
         return values;
     }

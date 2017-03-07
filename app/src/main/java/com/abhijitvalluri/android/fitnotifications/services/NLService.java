@@ -340,7 +340,9 @@ public class NLService extends NotificationListenerService {
             sb.append("[").append(mAppSelectionsStore.getAppName(appPackageName)).append("] ");
         }
 
-        sb.append(notificationText);
+        if (notificationText != null) {
+            sb.append(notificationText);
+        }
 
         if (!isBlank(notificationBigText)) {
             sb.append(" -- ").append(notificationBigText);
@@ -379,6 +381,10 @@ public class NLService extends NotificationListenerService {
         AppSelection appSelection = AppSelectionsStore.get(this).getAppSelection(appPackageName);
         if (appSelection == null) { // Should never happen. So if it does, just return false
             return false;
+        }
+
+        if (appSelection.isAllDaySchedule()) {
+            return true;
         }
 
         int startTime = appSelection.getStartTime();

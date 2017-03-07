@@ -102,11 +102,10 @@ public class HomeActivity extends AppCompatActivity {
             List<AppSelection> appSelections = store.getAppSelections();
 
             for (AppSelection selection : appSelections) {
-                if (selection.getStartTime() == 0 && selection.getStopTime() == 1439) {
-                    // Old setting for all day schedule was 12:00 AM (0th minute) to 11:59 PM (1439th minute)
-                    // New setting is both being 12:00 AM (0th minute)
-                    selection.setStopTimeHour(0);
-                    selection.setStopTimeMinute(0);
+                if (selection.getStartTime() == 0 && (selection.getStopTime() == 1439) || selection.getStopTime() == 0) {
+                    // Default setting should be 11:59pm for end time.
+                    selection.setStopTimeHour(23);
+                    selection.setStopTimeMinute(59);
                     store.updateAppSelection(selection);
                 }
             }

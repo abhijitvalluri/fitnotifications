@@ -47,6 +47,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
     public static final String STATE_STOP_TIME_HOUR = "stopTimeHour";
     public static final String STATE_STOP_TIME_MINUTE = "stopTimeMinute";
     public static final String STATE_DISCARD_EMPTY_NOTIFICATIONS = "discardEmptyNotifications";
+    public static final String STATE_ALL_DAY_SCHEDULE = "allDaySchedule";
 
     private static final String DIALOG_TIME = "dialogTime";
 
@@ -55,25 +56,28 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
     private TextView mNextDay;
     private Button mStartTimeButton;
     private Button mStopTimeButton;
-    private Switch mDiscardEmptySwitch;
-    private Switch mAllDaySwitch;
+
     private int mStartTimeHour;
     private int mStartTimeMinute;
     private int mStopTimeHour;
     private int mStopTimeMinute;
     private boolean mDiscardEmptyNotifications;
+    private boolean mAllDaySchedule;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_settings);
 
+        Switch discardEmptySwitch;
+        Switch allDaySwitch;
+
         mFilterText = (EditText) findViewById(R.id.filter_text);
         mStartTimeButton = (Button) findViewById(R.id.start_time);
         mStopTimeButton = (Button) findViewById(R.id.stop_time);
-        mDiscardEmptySwitch = (Switch) findViewById(R.id.discard_empty);
-        mAllDaySwitch = (Switch) findViewById(R.id.all_day);
         mNextDay = (TextView) findViewById(R.id.next_day);
+        discardEmptySwitch = (Switch) findViewById(R.id.discard_empty);
+        allDaySwitch = (Switch) findViewById(R.id.all_day);
 
         mFilterText.setHorizontallyScrolling(false);
         mFilterText.setMaxLines(5);
@@ -85,6 +89,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
             mStopTimeHour = mAppSelection.getStopTimeHour();
             mStopTimeMinute = mAppSelection.getStopTimeMinute();
             mDiscardEmptyNotifications = mAppSelection.isDiscardEmptyNotifications();
+            mAllDaySchedule = mAppSelection.isAllDaySchedule();
         } else {
             mAppSelection = savedInstanceState.getParcelable(STATE_APP_SELECTION);
             mStartTimeHour = savedInstanceState.getInt(STATE_START_TIME_HOUR);
@@ -92,16 +97,17 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
             mStopTimeHour = savedInstanceState.getInt(STATE_STOP_TIME_HOUR);
             mStopTimeMinute = savedInstanceState.getInt(STATE_STOP_TIME_MINUTE);
             mDiscardEmptyNotifications = savedInstanceState.getBoolean(STATE_DISCARD_EMPTY_NOTIFICATIONS);
+            mAllDaySchedule = savedInstanceState.getBoolean(STATE_ALL_DAY_SCHEDULE);
         }
 
-        mDiscardEmptySwitch.setChecked(mDiscardEmptyNotifications);
+        discardEmptySwitch.setChecked(mDiscardEmptyNotifications);
         setTitle(mAppSelection.getAppName());
         mFilterText.setText(mAppSelection.getFilterText());
 
-        mAllDaySwitch.setChecked(mStartTimeHour + mStartTimeMinute + mStopTimeHour + mStopTimeMinute == 0);
-        setupScheduleSettings(mAllDaySwitch.isChecked());
+        allDaySwitch.setChecked(mAllDaySchedule);
+        setupScheduleSettings();
 
-        mDiscardEmptySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        discardEmptySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mDiscardEmptyNotifications = isChecked;
@@ -134,21 +140,17 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
             }
         });
 
-        mAllDaySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        allDaySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                setupScheduleSettings(isChecked);
+                mAllDaySchedule = isChecked;
+                setupScheduleSettings();
             }
         });
     }
 
-    private void setupScheduleSettings(Boolean isAllDay) {
-        if (isAllDay) {
-            mStartTimeHour = 0;
-            mStartTimeMinute = 0;
-            mStopTimeHour = 0;
-            mStopTimeMinute = 0;
-
+    private void setupScheduleSettings() {
+        if (mAllDaySchedule) {
             mStartTimeButton.setEnabled(false);
             mStartTimeButton.setBackgroundColor(0x649e9e9e);
             mStartTimeButton.setText(R.string.schedule_disabled);
@@ -190,6 +192,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         outState.putInt(STATE_STOP_TIME_HOUR, mStopTimeHour);
         outState.putInt(STATE_STOP_TIME_MINUTE, mStopTimeMinute);
         outState.putBoolean(STATE_DISCARD_EMPTY_NOTIFICATIONS, mDiscardEmptyNotifications);
+        outState.putBoolean(STATE_ALL_DAY_SCHEDULE, mAllDaySchedule);
 
         super.onSaveInstanceState(outState);
     }
@@ -213,6 +216,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         mAppSelection.setStopTimeHour(mStopTimeHour);
         mAppSelection.setStopTimeMinute(mStopTimeMinute);
         mAppSelection.setDiscardEmptyNotifications(mDiscardEmptyNotifications);
+        mAppSelection.setAllDaySchedule(mAllDaySchedule);
 
         Intent intent = new Intent();
         intent.putExtra(APP_SELECTION_EXTRA, mAppSelection);
