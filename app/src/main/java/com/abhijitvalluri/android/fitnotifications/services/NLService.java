@@ -56,6 +56,8 @@ public class NLService extends NotificationListenerService {
 
     private static final Integer NOTIFICATION_ID = (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
 
+    private static final MessageExtractor DEFAULT_EXTRACTOR = new GenericMessageExtractor();
+
     private final Handler mHandler = new Handler();
 
     private static List<String> mSelectedAppsPackageNames;
@@ -226,12 +228,21 @@ public class NLService extends NotificationListenerService {
             }
         }
 
-        CharSequence notificationTitle = extras.getCharSequence(Notification.EXTRA_TITLE);
-        String notificationText = buildNotificationText(extras, appPackageName, discardEmptyNotifications);
+        CharSequence[] titleAndText = DEFAULT_EXTRACTOR.getTitleAndText(extras, notification.flags);
 
-        // notificationText can be null only when discardEmptyNotifications is enabled
-        if (notificationText == null || anyMatchesFilter(filterText, notificationTitle, notificationText)) {
+        if (titleAndText[1] == null && discardEmptyNotifications) {
             return;
+        }
+
+        if (anyMatchesFilter(filterText, titleAndText)) {
+            return;
+        }
+
+        CharSequence notificationTitle = titleAndText[0];
+        String notificationText = titleAndText[1] == null ? "" : titleAndText[1].toString();
+
+        if (mDisplayAppName) {
+            notificationText = "[" + mAppSelectionsStore.getAppName(appPackageName) + "] " + notificationText;
         }
 
         String prevNotificationText = mNotificationStringMap.put(appPackageName, notificationText);
@@ -315,40 +326,6 @@ public class NLService extends NotificationListenerService {
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
         super.onNotificationRemoved(sbn);
-    }
-
-    private String buildNotificationText(Bundle notificationExtras, String appPackageName, boolean discardEmpty) {
-        CharSequence notificationText = notificationExtras.getCharSequence(Notification.EXTRA_TEXT);
-
-        CharSequence notificationBigText = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            notificationBigText = notificationExtras.getCharSequence(Notification.EXTRA_BIG_TEXT);
-        }
-
-        if (isBlank(notificationText) && isBlank(notificationBigText)) {
-            if (discardEmpty) {
-                return null;
-            }
-        } else if (startsWith(notificationBigText, notificationText)) {
-            // if notification "big text" starts with the short text - just use the big one
-            notificationText = notificationBigText;
-            notificationBigText = null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        if (mDisplayAppName) {
-            sb.append("[").append(mAppSelectionsStore.getAppName(appPackageName)).append("] ");
-        }
-
-        if (notificationText != null) {
-            sb.append(notificationText);
-        }
-
-        if (!isBlank(notificationBigText)) {
-            sb.append(" -- ").append(notificationBigText);
-        }
-
-        return sb.toString().trim().replaceAll("\\s+", " ");
     }
 
     /**
@@ -443,23 +420,6 @@ public class NLService extends NotificationListenerService {
             }
         }
         return false;
-    }
-
-    private static boolean startsWith(CharSequence big, CharSequence small) {
-        return big != null && small != null && big.length() >= small.length()
-                && big.subSequence(0, small.length()).toString().contentEquals(small);
-    }
-
-    private static boolean isBlank(CharSequence text) {
-        if (text != null && text.length() > 0) {
-            for (int i = 0; i < text.length(); i++) {
-                // FIXME: isWhitespace() does not recognize some characters (e.g. non-breaking space)
-                if (!Character.isWhitespace(text.charAt(i))) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     /**
