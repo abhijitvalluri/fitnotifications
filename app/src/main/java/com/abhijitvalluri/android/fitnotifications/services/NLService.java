@@ -31,6 +31,7 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.support.annotation.NonNull;
 import android.support.v7.app.NotificationCompat;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -48,6 +49,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Fit Notification Service
@@ -57,6 +60,7 @@ public class NLService extends NotificationListenerService {
     private static final Integer NOTIFICATION_ID = (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
 
     private static final MessageExtractor DEFAULT_EXTRACTOR = new GenericMessageExtractor();
+    private static final Map<String, MessageExtractor> EXTRACTORS = new TreeMap<>();
 
     private final Handler mHandler = new Handler();
 
@@ -228,7 +232,7 @@ public class NLService extends NotificationListenerService {
             }
         }
 
-        CharSequence[] titleAndText = DEFAULT_EXTRACTOR.getTitleAndText(extras, notification.flags);
+        CharSequence[] titleAndText = getMessageExtractor(appPackageName).getTitleAndText(extras, notification.flags);
 
         if (titleAndText[1] == null && discardEmptyNotifications) {
             return;
@@ -315,6 +319,12 @@ public class NLService extends NotificationListenerService {
                 }
             }, mRelayedNotifDismissDelayMillis);
         }
+    }
+
+    @NonNull
+    private MessageExtractor getMessageExtractor(String appPackageName) {
+        MessageExtractor extractor = EXTRACTORS.get(appPackageName);
+        return extractor == null ? DEFAULT_EXTRACTOR : extractor;
     }
 
     @Override
