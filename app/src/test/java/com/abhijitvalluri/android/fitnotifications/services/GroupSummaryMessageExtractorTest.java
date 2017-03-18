@@ -50,28 +50,23 @@ public class GroupSummaryMessageExtractorTest {
 
         assertTitleAndTextEqual("Bob", "Hi! Check this video http://...",
                 extractor.getTitleAndText(notification("Telegram", "5 new messages from 2 chats",
-                        "Bob: Check this video http://...", "Bob: Hi!", "Alice: Let's meet",
-                        "Alice: How are you doing?", "Alice: Hello there!"),
+                        "Bob: Check this video http://...", "Bob: Hi!",
+                        "Alice: Let's meet", "Alice: How are you doing?", "Alice: Hello there!"),
                         SUMMARY));
 
-/*
-        // TODO:
         // three more messages arrived to multiple chats
         assertTitleAndTextEqual("Bob", null,
-                extractor.getTitleAndText(notification("Bob", "Hi! Check this video http://... It's hilarious!"),
-                        REGULAR);
+                extractor.getTitleAndText(notification("Bob", "Hi! Check this video http://... It's hilarious!"), REGULAR));
 
         assertTitleAndTextEqual("Alice", null,
-                extractor.getTitleAndText(notification("Alice", "Hello there! How are you doing? Let's meet. Starbucks? How about at 5?"),
-                        REGULAR);
+                extractor.getTitleAndText(notification("Alice", "Hello there! How are you doing? Let's meet. Starbucks? How about at 5?"), REGULAR));
 
         assertTitleAndTextEqual("Telegram", "Alice: Starbucks? How about at 5?; Bob: It's hilarious!",
                 extractor.getTitleAndText(notification("Telegram", "8 new messages from 2 chats",
                         "Alice: How about at 5?", "Bob: It's hilarious!", "Alice: Starbucks?",
                         "Bob: Check this video http://...", "Bob: Hi!",
                         "Alice: Let's meet", "Alice: How are you doing?", "Alice: Hello there!"),
-                        SUMMARY);
-*/
+                        SUMMARY));
     }
 
 
@@ -113,22 +108,19 @@ public class GroupSummaryMessageExtractorTest {
                         "Bob: Hi!", "Bob: Check this video http://..."),
                         SUMMARY));
 
-/*
-        // TODO:
         // three more messages arrived to different chats
         assertTitleAndTextEqual("Alice", null,
-                extractor.getTitleAndText(notification("Alice", "Hello there!"), REGULAR);
+                extractor.getTitleAndText(notification("Alice", "Hello there!"), REGULAR));
 
         assertTitleAndTextEqual("Bob", null,
-                extractor.getTitleAndText(notification("Bob", "Hi!"), REGULAR);
+                extractor.getTitleAndText(notification("Bob", "Hi!"), REGULAR));
 
         assertTitleAndTextEqual("WhatsApp", "Alice: Starbucks? How about at 5?; Bob: It's hilarious!",
                 extractor.getTitleAndText(notification("WhatsApp", "8 messages from 2 chats",
                         "Alice: Hello there!", "Alice: How are you doing?", "Alice: Let's meet",
                         "Bob: Hi!", "Bob: Check this video http://...",
                         "Alice: Starbucks?", "Bob: It's hilarious!", "Alice: How about at 5?"),
-                        SUMMARY);
-*/
+                        SUMMARY));
     }
 
 
@@ -136,7 +128,6 @@ public class GroupSummaryMessageExtractorTest {
                                                 CharSequence[] actualTitleAndText) {
         assertContentEquals("title", expectedTitle, actualTitleAndText[0]);
         assertContentEquals("text", expectedText, actualTitleAndText[1]);
-
     }
 
 

@@ -39,13 +39,13 @@ class GenericMessageExtractor implements MessageExtractor {
     }
 
 
-    private static boolean startsWith(CharSequence big, CharSequence small) {
+    protected static boolean startsWith(CharSequence big, CharSequence small) {
         return big != null && small != null && big.length() >= small.length()
                 && big.subSequence(0, small.length()).toString().contentEquals(small);
     }
 
 
-    private static boolean isBlank(CharSequence text) {
+    protected static boolean isBlank(CharSequence text) {
         if (text != null && text.length() > 0) {
             for (int i = 0; i < text.length(); i++) {
                 // FIXME: isWhitespace() does not recognize some characters (e.g. non-breaking space)
