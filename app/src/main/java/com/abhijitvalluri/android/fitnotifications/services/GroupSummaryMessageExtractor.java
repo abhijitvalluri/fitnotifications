@@ -35,7 +35,7 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
             // 1. regular text - use the generic approach
             if (notificationText == null || (!NEW_MESSAGES.matcher(notificationText).matches()
                     && !NEW_MESSAGES_MULTIPLE_CHATS.matcher(notificationText).matches())) {
-                lastSeenMessageHash = hash(notificationText);
+                lastSeenMessageHash = hash(notificationTitle, notificationText);
                 return super.getTitleAndText(extras, notificationFlags);
             }
 
@@ -49,7 +49,7 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
             if (NEW_MESSAGES_MULTIPLE_CHATS.matcher(notificationText).find()) {
                 // 2. "N new messages from M chats" - pick both title and new text from EXTRA_TEXT_LINES
                 // texts in EXTRA_TEXT_LINES have sender as the prefix
-                int pos = findFirstNewMessage(lines, true);
+                int pos = findFirstNewMessage(lines, null);
 
                 if (pos < 0) {
                     notificationText = buildMultiMessage(lines, -pos - 1, newMessagesFirst ? -1 : 1);
@@ -59,16 +59,15 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
                     notificationTitle = getSender(lines[newestMessageIndex]);
                 }
 
-                // FIXME: what if the same message arrives to another chat? (e.g. "ok")
-                lastSeenMessageHash = hash(stripSender(lines[newestMessageIndex]));
+                lastSeenMessageHash = hash(lines[newestMessageIndex], 0);
             }
             else {
                 // 3. "N new messages" - pick new text from EXTRA_TEXT_LINES
                 // texts in EXTRA_TEXT_LINES are from one sender - no prefix
-                int pos = findFirstNewMessage(lines, false);
+                int pos = findFirstNewMessage(lines, notificationTitle);
                 notificationText = buildMessage(lines, pos, newMessagesFirst ? -1 : 1, false);
 
-                lastSeenMessageHash = hash(lines[newestMessageIndex]);
+                lastSeenMessageHash = hash(notificationTitle, lines[newestMessageIndex]);
             }
         }
 
@@ -83,7 +82,7 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
      * In such case it can be converted to the actual position like this: <code>-pos - 1</code>.
      * This is needed to make sure the returned value is negative even when the first message is at position 0.
      */
-    private int findFirstNewMessage(CharSequence[] lines, boolean senderPrefixPresent) {
+    private int findFirstNewMessage(CharSequence[] lines, CharSequence title) {
         // and there could be several we haven't shown yet - scan until we find the last seen one
         int pos = lines.length - 1;
         int step = -1;
@@ -95,13 +94,13 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
         boolean multipleSenders = false;
         String previousSender = null;
         for (; 0 <= pos && pos < lines.length; pos += step) {
-            CharSequence message = senderPrefixPresent ? stripSender(lines[pos]) : lines[pos];
-            if (hash(message) == lastSeenMessageHash) {
+            int messageHash = title == null ? hash(lines[pos], 0) : hash(title, lines[pos]);
+            if (messageHash == lastSeenMessageHash) {
                 break;
             }
 
             // detect if new messages are from different senders
-            if (senderPrefixPresent && !multipleSenders) {
+            if (title == null && !multipleSenders) {
                 String sender = getSender(lines[pos]).toString();
                 if (previousSender != null && !sender.equals(previousSender)) {
                     multipleSenders = true;
@@ -200,8 +199,19 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
     }
 
 
-    private static int hash(CharSequence cs) {
-        int h = 0;
+    private static int hash(CharSequence title, CharSequence text) {
+        int h = hash(title, 0);
+
+        if (text != null) {
+            h = hash(": ", h);
+            h = hash(text, h);
+        }
+
+        return h;
+    }
+
+
+    private static int hash(CharSequence cs, int h) {
         for (int i = 0; i < cs.length(); i++) {
             h = 31 * h + cs.charAt(i);
         }

@@ -124,6 +124,25 @@ public class GroupSummaryMessageExtractorTest {
     }
 
 
+    @Test
+    public void testSameMessageInMultipleChats() {
+        MessageExtractor extractor = new GroupSummaryMessageExtractor(false);
+
+        assertTitleAndTextEqual("Alice", "Ok",
+                extractor.getTitleAndText(notification("Alice", "Ok"), SUMMARY));
+
+        // then two more messages arrive to another chat
+        assertTitleAndTextEqual("Bob", null,
+                extractor.getTitleAndText(notification("Bob", "I'll see what I can do"), REGULAR));
+
+        assertTitleAndTextEqual("Bob", "I'll see what I can do Ok",
+                extractor.getTitleAndText(notification("WhatsApp", "3 messages from 2 chats",
+                        "Alice: Ok",
+                        "Bob: I'll see what I can do", "Bob: Ok"),
+                        SUMMARY));
+    }
+
+
     private static void assertTitleAndTextEqual(CharSequence expectedTitle, CharSequence expectedText,
                                                 CharSequence[] actualTitleAndText) {
         assertContentEquals("title", expectedTitle, actualTitleAndText[0]);
