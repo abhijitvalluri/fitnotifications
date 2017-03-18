@@ -62,6 +62,11 @@ public class NLService extends NotificationListenerService {
     private static final MessageExtractor DEFAULT_EXTRACTOR = new GenericMessageExtractor();
     private static final Map<String, MessageExtractor> EXTRACTORS = new TreeMap<>();
 
+    static {
+        // Telegram
+        EXTRACTORS.put("org.telegram.messenger", new GroupSummaryMessageExtractor());
+    }
+
     private final Handler mHandler = new Handler();
 
     private static List<String> mSelectedAppsPackageNames;
