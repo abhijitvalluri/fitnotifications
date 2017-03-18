@@ -91,7 +91,6 @@ public class NLService extends NotificationListenerService {
     private NotificationManager mNotificationManager;
     private AppSelectionsStore mAppSelectionsStore;
     private HashMap<String, Long> mLastNotificationTimeMap;
-    private HashMap<String, String> mNotificationStringMap;
 
     @Override
     public void onCreate() {
@@ -99,7 +98,6 @@ public class NLService extends NotificationListenerService {
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mAppSelectionsStore = AppSelectionsStore.get(this);
         mLastNotificationTimeMap = new HashMap<>();
-        mNotificationStringMap = new HashMap<>();
 
         mSelectedAppsPackageNames = mAppSelectionsStore.getSelectedAppsPackageNames();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -239,7 +237,7 @@ public class NLService extends NotificationListenerService {
             }
         }
 
-        CharSequence[] titleAndText = getMessageExtractor(appPackageName).getTitleAndText(extras, notification.flags);
+        CharSequence[] titleAndText = getMessageExtractor(appPackageName).getTitleAndText(appPackageName, extras, notification.flags);
 
         if (titleAndText[1] == null && discardEmptyNotifications) {
             return;
@@ -254,15 +252,6 @@ public class NLService extends NotificationListenerService {
 
         if (mDisplayAppName) {
             notificationText = "[" + mAppSelectionsStore.getAppName(appPackageName) + "] " + notificationText;
-        }
-
-        String prevNotificationText = mNotificationStringMap.put(appPackageName, notificationText);
-        // TODO: add more specific checks to avoid blocking legitimate identical notifications
-        if (notificationText.equals(prevNotificationText)) {
-            // do not send the duplicate notification, but only for every 2nd occurrence
-            // (i.e. when the same text arrives for the 3rd time - send it)
-            mNotificationStringMap.remove(appPackageName);
-            return;
         }
 
         if (mTransliterateNotif) {

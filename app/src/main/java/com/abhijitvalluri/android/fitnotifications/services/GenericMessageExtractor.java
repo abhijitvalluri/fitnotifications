@@ -4,11 +4,34 @@ import android.app.Notification;
 import android.os.Build;
 import android.os.Bundle;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 class GenericMessageExtractor implements MessageExtractor {
 
+    private Map<String, String> mNotificationStringMap = new HashMap<>();
+
+
     @Override
-    public CharSequence[] getTitleAndText(Bundle extras, int notificationFlags) {
+    public CharSequence[] getTitleAndText(String appPackageName, Bundle extras, int notificationFlags) {
+        CharSequence[] titleAndText = extractTitleAndText(extras);
+
+        String text = titleAndText[1].toString();
+        String prevNotificationText = mNotificationStringMap.put(appPackageName, text);
+        // TODO: add more specific checks to avoid blocking legitimate identical notifications
+        if (text.equals(prevNotificationText)) {
+            // do not send the duplicate notification, but only for every 2nd occurrence
+            // (i.e. when the same text arrives for the 3rd time - send it)
+            mNotificationStringMap.remove(appPackageName);
+            titleAndText[1] = null;
+        }
+
+        return titleAndText;
+    }
+
+
+    protected static CharSequence[] extractTitleAndText(Bundle extras) {
         CharSequence notificationTitle = extras.getCharSequence(Notification.EXTRA_TITLE);
 
         CharSequence notificationText = extras.getCharSequence(Notification.EXTRA_TEXT);
@@ -33,11 +56,10 @@ class GenericMessageExtractor implements MessageExtractor {
             sb.append(" -- ").append(notificationBigText);
         }
 
-        CharSequence text = sb.toString().trim().replaceAll("\\s+", " ");
+        String text = sb.toString().trim().replaceAll("\\s+", " ");
 
         return new CharSequence[] { notificationTitle, text };
     }
-
 
     protected static boolean startsWith(CharSequence big, CharSequence small) {
         return big != null && small != null && big.length() >= small.length()
