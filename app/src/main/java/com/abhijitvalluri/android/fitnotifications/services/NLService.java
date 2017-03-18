@@ -64,7 +64,9 @@ public class NLService extends NotificationListenerService {
 
     static {
         // Telegram
-        EXTRACTORS.put("org.telegram.messenger", new GroupSummaryMessageExtractor());
+        EXTRACTORS.put("org.telegram.messenger", new GroupSummaryMessageExtractor(true));
+        // WhatsApp
+        EXTRACTORS.put("com.whatsapp", new GroupSummaryMessageExtractor(false));
     }
 
     private final Handler mHandler = new Handler();

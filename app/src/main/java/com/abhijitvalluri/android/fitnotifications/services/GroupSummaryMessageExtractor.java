@@ -10,10 +10,16 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
 
     // TODO: also use localized version of the patterns
     private static final Pattern NEW_MESSAGES = Pattern.compile("\\d+ new messages");
-    private static final Pattern NEW_MESSAGES_MULTIPLE_CHATS = Pattern.compile("\\d+ new messages from \\d+ chats");
+    private static final Pattern NEW_MESSAGES_MULTIPLE_CHATS = Pattern.compile("\\d+ (new )?messages from \\d+ chats");
 
+    // some apps (Telegram) put new messages at the beginning of EXTRA_TEXT_LINES, other (WhatsApp) at the end
+    private final boolean newMessagesFirst;
     private int lastSeenMessageHash = 0;
 
+
+    public GroupSummaryMessageExtractor(boolean newMessagesFirst) {
+        this.newMessagesFirst = newMessagesFirst;
+    }
 
     @Override
     public CharSequence[] getTitleAndText(Bundle extras, int notificationFlags) {
@@ -25,38 +31,34 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
             notificationText = extras.getCharSequence(Notification.EXTRA_TEXT);
 
             // 1. regular text - use the generic approach
-            if (notificationText == null || !NEW_MESSAGES.matcher(notificationText).find()) {
+            if (notificationText == null || (!NEW_MESSAGES.matcher(notificationText).matches()
+                    && !NEW_MESSAGES_MULTIPLE_CHATS.matcher(notificationText).matches())) {
                 lastSeenMessageHash = hash(notificationText);
                 return super.getTitleAndText(extras, notificationFlags);
             }
 
+            CharSequence[] lines = extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
+            if (lines == null) {
+                return super.getTitleAndText(extras, notificationFlags);
+            }
+
+            int newestMessageIndex = newMessagesFirst ? 0 : lines.length - 1;
+
             if (NEW_MESSAGES_MULTIPLE_CHATS.matcher(notificationText).find()) {
                 // 2. "N new messages from M chats" - pick both title and new text from EXTRA_TEXT_LINES
-                CharSequence[] lines = extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
-                if (lines == null) {
-                    return super.getTitleAndText(extras, notificationFlags);
-                }
-
                 // texts in EXTRA_TEXT_LINES have sender as the prefix
                 notificationText = collectNewMessages(lines, true);
-                notificationTitle = getSender(lines[0]);
+                notificationTitle = getSender(lines[newestMessageIndex]);
 
                 // FIXME: what if there are new messages from multiple senders ???
-
-                lastSeenMessageHash = hash(stripSender(lines[0]));
             }
             else {
                 // 3. "N new messages" - pick new text from EXTRA_TEXT_LINES
-                CharSequence[] lines = extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
-                if (lines == null) {
-                    return super.getTitleAndText(extras, notificationFlags);
-                }
-
                 // texts in EXTRA_TEXT_LINES are from one sender - no prefix
                 notificationText = collectNewMessages(lines, false);
-
-                lastSeenMessageHash = hash(lines[0]);
             }
+
+            lastSeenMessageHash = hash(lines[newestMessageIndex]);
 
         }
 
@@ -66,9 +68,14 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
 
     private CharSequence collectNewMessages(CharSequence[] lines, boolean senderPrefix) {
         // and there could be several we haven't shown yet - scan until we find the last seen one
-        int pos = 0;
+        int pos = lines.length - 1;
+        int step = -1;
+        if (newMessagesFirst) {
+            pos = 0;
+            step = 1;
+        }
 
-        for (; pos < lines.length; pos++) {
+        for (; 0 <= pos && pos < lines.length; pos += step) {
             CharSequence message = senderPrefix ? stripSender(lines[pos]) : lines[pos];
             if (hash(message) == lastSeenMessageHash) {
                 break;
@@ -76,10 +83,11 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
         }
 
         // step back to the first new message
-        pos -= 1;
+        pos -= step;
+
         // collect the new messages from oldest to newest
         StringBuilder sb = new StringBuilder();
-        for (; 0 <= pos; pos--) {
+        for (; 0 <= pos && pos < lines.length; pos -= step) {
             sb.append(senderPrefix ? stripSender(lines[pos]) : lines[pos]).append(' ');
         }
 
