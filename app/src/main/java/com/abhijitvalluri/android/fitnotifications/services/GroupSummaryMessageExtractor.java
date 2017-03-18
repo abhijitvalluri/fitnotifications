@@ -3,6 +3,8 @@ package com.abhijitvalluri.android.fitnotifications.services;
 import android.app.Notification;
 import android.os.Bundle;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 
@@ -26,7 +28,7 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
         CharSequence notificationTitle = extras.getCharSequence(Notification.EXTRA_TITLE);
         CharSequence notificationText = null;
 
-        // for Telegram we only process "summary" notifications
+        // we only process "summary" notifications
         if ((notificationFlags & Notification.FLAG_GROUP_SUMMARY) != 0) {
             notificationText = extras.getCharSequence(Notification.EXTRA_TEXT);
 
@@ -47,26 +49,41 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
             if (NEW_MESSAGES_MULTIPLE_CHATS.matcher(notificationText).find()) {
                 // 2. "N new messages from M chats" - pick both title and new text from EXTRA_TEXT_LINES
                 // texts in EXTRA_TEXT_LINES have sender as the prefix
-                notificationText = collectNewMessages(lines, true);
-                notificationTitle = getSender(lines[newestMessageIndex]);
+                int pos = findFirstNewMessage(lines, true);
 
-                // FIXME: what if there are new messages from multiple senders ???
+                if (pos < 0) {
+                    notificationText = buildMultiMessage(lines, -pos - 1, newMessagesFirst ? -1 : 1);
+                }
+                else {
+                    notificationText = buildMessage(lines, pos, newMessagesFirst ? -1 : 1, true);
+                    notificationTitle = getSender(lines[newestMessageIndex]);
+                }
+
+                // FIXME: what if the same message arrives to another chat? (e.g. "ok")
+                lastSeenMessageHash = hash(stripSender(lines[newestMessageIndex]));
             }
             else {
                 // 3. "N new messages" - pick new text from EXTRA_TEXT_LINES
                 // texts in EXTRA_TEXT_LINES are from one sender - no prefix
-                notificationText = collectNewMessages(lines, false);
+                int pos = findFirstNewMessage(lines, false);
+                notificationText = buildMessage(lines, pos, newMessagesFirst ? -1 : 1, false);
+
+                lastSeenMessageHash = hash(lines[newestMessageIndex]);
             }
-
-            lastSeenMessageHash = hash(lines[newestMessageIndex]);
-
         }
 
         return new CharSequence[] { notificationTitle, notificationText };
     }
 
 
-    private CharSequence collectNewMessages(CharSequence[] lines, boolean senderPrefix) {
+    /**
+     * Returns the index of the first new message in the <code>lines</code>.
+     *
+     * The index is negative in case the new messages are from several different senders.
+     * In such case it can be converted to the actual position like this: <code>-pos - 1</code>.
+     * This is needed to make sure the returned value is negative even when the first message is at position 0.
+     */
+    private int findFirstNewMessage(CharSequence[] lines, boolean senderPrefixPresent) {
         // and there could be several we haven't shown yet - scan until we find the last seen one
         int pos = lines.length - 1;
         int step = -1;
@@ -75,20 +92,36 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
             step = 1;
         }
 
+        boolean multipleSenders = false;
+        String previousSender = null;
         for (; 0 <= pos && pos < lines.length; pos += step) {
-            CharSequence message = senderPrefix ? stripSender(lines[pos]) : lines[pos];
+            CharSequence message = senderPrefixPresent ? stripSender(lines[pos]) : lines[pos];
             if (hash(message) == lastSeenMessageHash) {
                 break;
+            }
+
+            // detect if new messages are from different senders
+            if (senderPrefixPresent && !multipleSenders) {
+                String sender = getSender(lines[pos]).toString();
+                if (previousSender != null && !sender.equals(previousSender)) {
+                    multipleSenders = true;
+                }
+                previousSender = sender;
             }
         }
 
         // step back to the first new message
         pos -= step;
 
-        // collect the new messages from oldest to newest
+        return multipleSenders ? -(pos + 1) : pos;
+    }
+
+
+    // collect the new messages from oldest to newest
+    private static CharSequence buildMessage(CharSequence[] lines, int pos, int step, boolean senderPrefixPresent) {
         StringBuilder sb = new StringBuilder();
-        for (; 0 <= pos && pos < lines.length; pos -= step) {
-            sb.append(senderPrefix ? stripSender(lines[pos]) : lines[pos]).append(' ');
+        for (; 0 <= pos && pos < lines.length; pos += step) {
+            sb.append(senderPrefixPresent ? stripSender(lines[pos]) : lines[pos]).append(' ');
         }
 
         // trim trailing space
@@ -97,6 +130,45 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
         }
 
         return sb;
+    }
+
+
+    // collect the new messages from oldest to newest grouping them per sender
+    private static CharSequence buildMultiMessage(CharSequence[] lines, int pos, int step) {
+        List<StringBuilder> messages = new ArrayList<>();
+
+        for (; 0 <= pos && pos < lines.length; pos += step) {
+            CharSequence senderPrefix = getSender(lines[pos]) + ": ";
+
+            // find the message to append to
+            StringBuilder msg = null;
+            for (StringBuilder sb : messages) {
+                if (startsWith(sb, senderPrefix)) {
+                    msg = sb;
+                    break;
+                }
+            }
+
+            if (msg == null) {
+                msg = new StringBuilder(senderPrefix);
+                messages.add(msg);
+            }
+
+            msg.append(stripSender(lines[pos])).append(' ');
+        }
+
+        StringBuilder all = new StringBuilder();
+        for (StringBuilder msg : messages) {
+            // omit the trailing space in individual messages
+            all.append(msg, 0, msg.length() - 1).append("; ");
+        }
+
+        // trim trailing semicolon
+        if (all.length() > 1) {
+            all.setLength(all.length() - 2);
+        }
+
+        return all;
     }
 
 
