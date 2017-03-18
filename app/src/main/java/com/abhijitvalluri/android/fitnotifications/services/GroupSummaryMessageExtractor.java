@@ -24,7 +24,7 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
     }
 
     @Override
-    public CharSequence[] getTitleAndText(Bundle extras, int notificationFlags) {
+    public CharSequence[] getTitleAndText(String appPackageName, Bundle extras, int notificationFlags) {
         CharSequence notificationTitle = extras.getCharSequence(Notification.EXTRA_TITLE);
         CharSequence notificationText = null;
 
@@ -36,12 +36,12 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
             if (notificationText == null || (!NEW_MESSAGES.matcher(notificationText).matches()
                     && !NEW_MESSAGES_MULTIPLE_CHATS.matcher(notificationText).matches())) {
                 lastSeenMessageHash = hash(notificationTitle, notificationText);
-                return super.getTitleAndText(extras, notificationFlags);
+                return extractTitleAndText(extras);
             }
 
             CharSequence[] lines = extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
             if (lines == null) {
-                return super.getTitleAndText(extras, notificationFlags);
+                return extractTitleAndText(extras);
             }
 
             int newestMessageIndex = newMessagesFirst ? 0 : lines.length - 1;

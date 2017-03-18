@@ -9,6 +9,6 @@ public interface MessageExtractor {
      * [0] - title
      * [1] - text
      */
-    CharSequence[] getTitleAndText(Bundle extras, int notificationFlags);
+    CharSequence[] getTitleAndText(String appPackageName, Bundle extras, int notificationFlags);
 
 }
