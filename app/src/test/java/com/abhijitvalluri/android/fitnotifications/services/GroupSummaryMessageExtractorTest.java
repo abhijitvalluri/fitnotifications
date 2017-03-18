@@ -18,7 +18,7 @@ public class GroupSummaryMessageExtractorTest {
 
     @Test
     public void testTelegramMessagesPattern() {
-        MessageExtractor extractor = new GroupSummaryMessageExtractor();
+        MessageExtractor extractor = new GroupSummaryMessageExtractor(true);
 
         assertTitleAndTextEqual("Alice", null,
                 extractor.getTitleAndText(notification("Alice", "Hello there!"), REGULAR));
@@ -70,6 +70,63 @@ public class GroupSummaryMessageExtractorTest {
                         "Alice: How about at 5?", "Bob: It's hilarious!", "Alice: Starbucks?",
                         "Bob: Check this video http://...", "Bob: Hi!",
                         "Alice: Let's meet", "Alice: How are you doing?", "Alice: Hello there!"),
+                        SUMMARY);
+*/
+    }
+
+
+    @Test
+    public void testWhatsAppMessagesPattern() {
+        MessageExtractor extractor = new GroupSummaryMessageExtractor(false);
+
+        assertTitleAndTextEqual("Alice", "Hello there!",
+                extractor.getTitleAndText(notification("Alice", "Hello there!"), SUMMARY));
+
+        // 2nd message arrived
+        assertTitleAndTextEqual("Alice", null,
+                extractor.getTitleAndText(notification("Alice", "Hello there!"), REGULAR));
+
+        assertTitleAndTextEqual("Alice", "How are you doing?",
+                extractor.getTitleAndText(notification("Alice", "2 new messages",
+                        "Hello there!", "How are you doing?"),
+                        SUMMARY));
+
+        // 3rd message arrived
+        assertTitleAndTextEqual("Alice", null,
+                extractor.getTitleAndText(notification("Alice", "Hello there!"), REGULAR));
+
+        assertTitleAndTextEqual("Alice", "Let's meet",
+                extractor.getTitleAndText(notification("Alice", "3 new messages",
+                        "Hello there!", "How are you doing?", "Let's meet"),
+                        SUMMARY));
+
+        // 4th & 5th message arrived together to another chat
+        assertTitleAndTextEqual("Alice", null,
+                extractor.getTitleAndText(notification("Alice", "Hello there!"), REGULAR));
+
+        assertTitleAndTextEqual("Bob", null,
+                extractor.getTitleAndText(notification("Bob", "Hi!"), REGULAR));
+
+        assertTitleAndTextEqual("Bob", "Hi! Check this video http://...",
+                extractor.getTitleAndText(notification("WhatsApp", "5 messages from 2 chats",
+                        "Alice: Hello there!", "Alice: How are you doing?", "Alice: Let's meet",
+                        "Bob: Hi!", "Bob: Check this video http://..."),
+                        SUMMARY));
+
+/*
+        // TODO:
+        // three more messages arrived to different chats
+        assertTitleAndTextEqual("Alice", null,
+                extractor.getTitleAndText(notification("Alice", "Hello there!"), REGULAR);
+
+        assertTitleAndTextEqual("Bob", null,
+                extractor.getTitleAndText(notification("Bob", "Hi!"), REGULAR);
+
+        assertTitleAndTextEqual("WhatsApp", "Alice: Starbucks? How about at 5?; Bob: It's hilarious!",
+                extractor.getTitleAndText(notification("WhatsApp", "8 messages from 2 chats",
+                        "Alice: Hello there!", "Alice: How are you doing?", "Alice: Let's meet",
+                        "Bob: Hi!", "Bob: Check this video http://...",
+                        "Alice: Starbucks?", "Bob: It's hilarious!", "Alice: How about at 5?"),
                         SUMMARY);
 */
     }
