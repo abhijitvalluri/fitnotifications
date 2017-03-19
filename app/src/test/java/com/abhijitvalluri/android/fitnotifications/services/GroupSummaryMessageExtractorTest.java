@@ -24,52 +24,48 @@ public class GroupSummaryMessageExtractorTest {
         MessageExtractor extractor = new GroupSummaryMessageExtractor(true);
 
         assertTitleAndTextEqual("Alice", null,
-                extractor.getTitleAndText("org.example", notification("Alice", "Hello there!"), REGULAR));
+                getTitleAndText(extractor, REGULAR, "Alice", "Hello there!"));
 
         assertTitleAndTextEqual("Alice", "Hello there!",
-                extractor.getTitleAndText("org.example", notification("Alice", "Hello there!"), SUMMARY));
+                getTitleAndText(extractor, SUMMARY, "Alice", "Hello there!"));
 
         // 2nd message arrived
         assertTitleAndTextEqual("Alice", null,
-                extractor.getTitleAndText("org.example", notification("Alice", "Hello there! How are you doing?"), REGULAR));
+                getTitleAndText(extractor, REGULAR, "Alice", "Hello there! How are you doing?"));
 
         assertTitleAndTextEqual("Alice", "How are you doing?",
-                extractor.getTitleAndText("org.example", notification("Alice", "2 new messages",
-                        "How are you doing?", "Hello there!"),
-                        SUMMARY));
+                getTitleAndText(extractor, SUMMARY, "Alice", "2 new messages",
+                        "How are you doing?", "Hello there!"));
 
         // 3rd message arrived
         assertTitleAndTextEqual("Alice", null,
-                extractor.getTitleAndText("org.example", notification("Alice", "Hello there! How are you doing? Let's meet."), REGULAR));
+                getTitleAndText(extractor, REGULAR, "Alice", "Hello there! How are you doing? Let's meet."));
 
         assertTitleAndTextEqual("Alice", "Let's meet",
-                extractor.getTitleAndText("org.example", notification("Alice", "3 new messages",
-                        "Let's meet", "How are you doing?", "Hello there!"),
-                        SUMMARY));
+                getTitleAndText(extractor, SUMMARY, "Alice", "3 new messages",
+                        "Let's meet", "How are you doing?", "Hello there!"));
 
         // 4th & 5th message arrived together to another chat
         assertTitleAndTextEqual("Bob", null,
-                extractor.getTitleAndText("org.example", notification("Bob", "Hi! Check this video http://..."), REGULAR));
+                getTitleAndText(extractor, REGULAR, "Bob", "Hi! Check this video http://..."));
 
         assertTitleAndTextEqual("Bob", "Hi! Check this video http://...",
-                extractor.getTitleAndText("org.example", notification("Telegram", "5 new messages from 2 chats",
+                getTitleAndText(extractor, SUMMARY, "Telegram", "5 new messages from 2 chats",
                         "Bob: Check this video http://...", "Bob: Hi!",
-                        "Alice: Let's meet", "Alice: How are you doing?", "Alice: Hello there!"),
-                        SUMMARY));
+                        "Alice: Let's meet", "Alice: How are you doing?", "Alice: Hello there!"));
 
         // three more messages arrived to multiple chats
         assertTitleAndTextEqual("Bob", null,
-                extractor.getTitleAndText("org.example", notification("Bob", "Hi! Check this video http://... It's hilarious!"), REGULAR));
+                getTitleAndText(extractor, REGULAR, "Bob", "Hi! Check this video http://... It's hilarious!"));
 
         assertTitleAndTextEqual("Alice", null,
-                extractor.getTitleAndText("org.example", notification("Alice", "Hello there! How are you doing? Let's meet. Starbucks? How about at 5?"), REGULAR));
+                getTitleAndText(extractor, REGULAR, "Alice", "Hello there! How are you doing? Let's meet. Starbucks? How about at 5?"));
 
         assertTitleAndTextEqual("Telegram", "Alice: Starbucks? How about at 5?; Bob: It's hilarious!",
-                extractor.getTitleAndText("org.example", notification("Telegram", "8 new messages from 2 chats",
+                getTitleAndText(extractor, SUMMARY, "Telegram", "8 new messages from 2 chats",
                         "Alice: How about at 5?", "Bob: It's hilarious!", "Alice: Starbucks?",
                         "Bob: Check this video http://...", "Bob: Hi!",
-                        "Alice: Let's meet", "Alice: How are you doing?", "Alice: Hello there!"),
-                        SUMMARY));
+                        "Alice: Let's meet", "Alice: How are you doing?", "Alice: Hello there!"));
     }
 
 
@@ -78,52 +74,48 @@ public class GroupSummaryMessageExtractorTest {
         MessageExtractor extractor = new GroupSummaryMessageExtractor(false);
 
         assertTitleAndTextEqual("Alice", "Hello there!",
-                extractor.getTitleAndText("org.example", notification("Alice", "Hello there!"), SUMMARY));
+                getTitleAndText(extractor, SUMMARY, "Alice", "Hello there!"));
 
         // 2nd message arrived
         assertTitleAndTextEqual("Alice", null,
-                extractor.getTitleAndText("org.example", notification("Alice", "Hello there!"), REGULAR));
+                getTitleAndText(extractor, REGULAR, "Alice", "Hello there!"));
 
         assertTitleAndTextEqual("Alice", "How are you doing?",
-                extractor.getTitleAndText("org.example", notification("Alice", "2 new messages",
-                        "Hello there!", "How are you doing?"),
-                        SUMMARY));
+                getTitleAndText(extractor, SUMMARY, "Alice", "2 new messages",
+                        "Hello there!", "How are you doing?"));
 
         // 3rd message arrived
         assertTitleAndTextEqual("Alice", null,
-                extractor.getTitleAndText("org.example", notification("Alice", "Hello there!"), REGULAR));
+                getTitleAndText(extractor, REGULAR, "Alice", "Hello there!"));
 
         assertTitleAndTextEqual("Alice", "Let's meet",
-                extractor.getTitleAndText("org.example", notification("Alice", "3 new messages",
-                        "Hello there!", "How are you doing?", "Let's meet"),
-                        SUMMARY));
+                getTitleAndText(extractor, SUMMARY, "Alice", "3 new messages",
+                        "Hello there!", "How are you doing?", "Let's meet"));
 
         // 4th & 5th message arrived together to another chat
         assertTitleAndTextEqual("Alice", null,
-                extractor.getTitleAndText("org.example", notification("Alice", "Hello there!"), REGULAR));
+                getTitleAndText(extractor, REGULAR, "Alice", "Hello there!"));
 
         assertTitleAndTextEqual("Bob", null,
-                extractor.getTitleAndText("org.example", notification("Bob", "Hi!"), REGULAR));
+                getTitleAndText(extractor, REGULAR, "Bob", "Hi!"));
 
         assertTitleAndTextEqual("Bob", "Hi! Check this video http://...",
-                extractor.getTitleAndText("org.example", notification("WhatsApp", "5 messages from 2 chats",
+                getTitleAndText(extractor, SUMMARY, "WhatsApp", "5 messages from 2 chats",
                         "Alice: Hello there!", "Alice: How are you doing?", "Alice: Let's meet",
-                        "Bob: Hi!", "Bob: Check this video http://..."),
-                        SUMMARY));
+                        "Bob: Hi!", "Bob: Check this video http://..."));
 
         // three more messages arrived to different chats
         assertTitleAndTextEqual("Alice", null,
-                extractor.getTitleAndText("org.example", notification("Alice", "Hello there!"), REGULAR));
+                getTitleAndText(extractor, REGULAR, "Alice", "Hello there!"));
 
         assertTitleAndTextEqual("Bob", null,
-                extractor.getTitleAndText("org.example", notification("Bob", "Hi!"), REGULAR));
+                getTitleAndText(extractor, REGULAR, "Bob", "Hi!"));
 
         assertTitleAndTextEqual("WhatsApp", "Alice: Starbucks? How about at 5?; Bob: It's hilarious!",
-                extractor.getTitleAndText("org.example", notification("WhatsApp", "8 messages from 2 chats",
+                getTitleAndText(extractor, SUMMARY, "WhatsApp", "8 messages from 2 chats",
                         "Alice: Hello there!", "Alice: How are you doing?", "Alice: Let's meet",
                         "Bob: Hi!", "Bob: Check this video http://...",
-                        "Alice: Starbucks?", "Bob: It's hilarious!", "Alice: How about at 5?"),
-                        SUMMARY));
+                        "Alice: Starbucks?", "Bob: It's hilarious!", "Alice: How about at 5?"));
     }
 
 
@@ -132,17 +124,16 @@ public class GroupSummaryMessageExtractorTest {
         MessageExtractor extractor = new GroupSummaryMessageExtractor(false);
 
         assertTitleAndTextEqual("Alice", "Ok",
-                extractor.getTitleAndText("org.example", notification("Alice", "Ok"), SUMMARY));
+                getTitleAndText(extractor, SUMMARY, "Alice", "Ok"));
 
         // then two more messages arrive to another chat
         assertTitleAndTextEqual("Bob", null,
-                extractor.getTitleAndText("org.example", notification("Bob", "I'll see what I can do"), REGULAR));
+                getTitleAndText(extractor, REGULAR, "Bob", "I'll see what I can do"));
 
         assertTitleAndTextEqual("Bob", "I'll see what I can do Ok",
-                extractor.getTitleAndText("org.example", notification("WhatsApp", "3 messages from 2 chats",
+                getTitleAndText(extractor, SUMMARY, "WhatsApp", "3 messages from 2 chats",
                         "Alice: Ok",
-                        "Bob: I'll see what I can do", "Bob: Ok"),
-                        SUMMARY));
+                        "Bob: I'll see what I can do", "Bob: Ok"));
     }
 
 
@@ -159,23 +150,21 @@ public class GroupSummaryMessageExtractorTest {
         MessageExtractor extractor = new GroupSummaryMessageExtractor(resourcesMock, false);
 
         assertTitleAndTextEqual("Alice", "Marco",
-                extractor.getTitleAndText("org.example", notification("Alice", "Marco"), SUMMARY));
+                getTitleAndText(extractor, SUMMARY, "Alice", "Marco"));
 
         assertTitleAndTextEqual("Bob", null,
-                extractor.getTitleAndText("org.example", notification("Bob", "Polo"), REGULAR));
+                getTitleAndText(extractor, REGULAR, "Bob", "Polo"));
 
         assertTitleAndTextEqual("Bob", "Polo",
-                extractor.getTitleAndText("org.example", notification("WhatsApp", "2 neue Nachrichten von 2 Chats",
-                        "Alice: Marco", "Bob: Polo"),
-                        SUMMARY));
+                getTitleAndText(extractor, SUMMARY, "WhatsApp", "2 neue Nachrichten von 2 Chats",
+                        "Alice: Marco", "Bob: Polo"));
 
         assertTitleAndTextEqual("Bob", null,
-                extractor.getTitleAndText("org.example", notification("Bob", "Polo"), REGULAR));
+                getTitleAndText(extractor, REGULAR, "Bob", "Polo"));
 
         assertTitleAndTextEqual("Bob", "I win!",
-                extractor.getTitleAndText("org.example", notification("WhatsApp", "3 Nachrichten aus 2 Chats",
-                        "Alice: Marco", "Bob: Polo", "Bob: I win!"),
-                        SUMMARY));
+                getTitleAndText(extractor, SUMMARY, "WhatsApp", "3 Nachrichten aus 2 Chats",
+                        "Alice: Marco", "Bob: Polo", "Bob: I win!"));
     }
 
 
@@ -195,6 +184,12 @@ public class GroupSummaryMessageExtractorTest {
 
             assertEquals("Mismatching " + label, expected.toString(), actual.toString());
         }
+    }
+
+
+    private static CharSequence[] getTitleAndText(MessageExtractor extractor, int messageType,
+                                                  CharSequence title, CharSequence text, CharSequence ... lines) {
+        return extractor.getTitleAndText("org.example", notification(title, text, lines), messageType);
     }
 
 
