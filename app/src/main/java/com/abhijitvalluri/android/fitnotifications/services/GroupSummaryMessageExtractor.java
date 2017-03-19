@@ -1,7 +1,10 @@
 package com.abhijitvalluri.android.fitnotifications.services;
 
 import android.app.Notification;
+import android.content.res.Resources;
 import android.os.Bundle;
+
+import com.abhijitvalluri.android.fitnotifications.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,9 +13,11 @@ import java.util.regex.Pattern;
 
 class GroupSummaryMessageExtractor extends GenericMessageExtractor {
 
-    // TODO: also use localized version of the patterns
     private static final Pattern NEW_MESSAGES = Pattern.compile("\\d+ new messages");
     private static final Pattern NEW_MESSAGES_MULTIPLE_CHATS = Pattern.compile("\\d+ (new )?messages from \\d+ chats");
+
+    private final Pattern[] allNewMessagesPatterns;
+    private final Pattern[] newMessagesMultipleChatsPatterns;
 
     // some apps (Telegram) put new messages at the beginning of EXTRA_TEXT_LINES, other (WhatsApp) at the end
     private final boolean newMessagesFirst;
@@ -21,6 +26,33 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
 
     public GroupSummaryMessageExtractor(boolean newMessagesFirst) {
         this.newMessagesFirst = newMessagesFirst;
+
+        allNewMessagesPatterns = new Pattern[] { NEW_MESSAGES, NEW_MESSAGES_MULTIPLE_CHATS };
+        newMessagesMultipleChatsPatterns = new Pattern[] { NEW_MESSAGES_MULTIPLE_CHATS };
+    }
+
+    public GroupSummaryMessageExtractor(Resources res, boolean newMessagesFirst) {
+        this.newMessagesFirst = newMessagesFirst;
+
+        // avoid doubling the patterns in case of missing translation
+        String newMessagesLocalized = res.getString(R.string.new_messages_summary_pattern);
+        Pattern newMessagesPatternLocalized = NEW_MESSAGES.pattern().equals(newMessagesLocalized) ?
+                null : Pattern.compile(newMessagesLocalized);
+
+        String newMessagesMultipleChatsLocalized = res.getString(R.string.new_messages_multiple_chats_summary_pattern);
+        Pattern newMessagesMultipleChatsPatternLocalized = NEW_MESSAGES_MULTIPLE_CHATS.pattern().equals(newMessagesMultipleChatsLocalized) ?
+                null : Pattern.compile(newMessagesMultipleChatsLocalized);
+
+        // always check against the English version too (e.g. Telegram lacks Russian translation)
+        allNewMessagesPatterns = new Pattern[] {
+                NEW_MESSAGES, NEW_MESSAGES_MULTIPLE_CHATS,
+                newMessagesPatternLocalized, newMessagesMultipleChatsPatternLocalized
+        };
+
+        newMessagesMultipleChatsPatterns = new Pattern[] {
+                NEW_MESSAGES_MULTIPLE_CHATS,
+                newMessagesMultipleChatsPatternLocalized
+        };
     }
 
     @Override
@@ -33,20 +65,20 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
             notificationText = extras.getCharSequence(Notification.EXTRA_TEXT);
 
             // 1. regular text - use the generic approach
-            if (notificationText == null || (!NEW_MESSAGES.matcher(notificationText).matches()
-                    && !NEW_MESSAGES_MULTIPLE_CHATS.matcher(notificationText).matches())) {
+            if (notificationText == null || !matchesAnyPattern(notificationText, allNewMessagesPatterns)) {
                 lastSeenMessageHash = hash(notificationTitle, notificationText);
                 return extractTitleAndText(extras);
             }
 
             CharSequence[] lines = extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
             if (lines == null) {
+                lastSeenMessageHash = hash(notificationTitle, notificationText);
                 return extractTitleAndText(extras);
             }
 
             int newestMessageIndex = newMessagesFirst ? 0 : lines.length - 1;
 
-            if (NEW_MESSAGES_MULTIPLE_CHATS.matcher(notificationText).find()) {
+            if (matchesAnyPattern(notificationText, newMessagesMultipleChatsPatterns)) {
                 // 2. "N new messages from M chats" - pick both title and new text from EXTRA_TEXT_LINES
                 // texts in EXTRA_TEXT_LINES have sender as the prefix
                 int pos = findFirstNewMessage(lines, null);
@@ -72,6 +104,16 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
         }
 
         return new CharSequence[] { notificationTitle, notificationText };
+    }
+
+
+    private static boolean matchesAnyPattern(CharSequence text, Pattern ... patterns) {
+        for (Pattern p : patterns) {
+            if (p != null && p.matcher(text).matches()) {
+                return true;
+            }
+        }
+        return false;
     }
 
 

@@ -1,7 +1,10 @@
 package com.abhijitvalluri.android.fitnotifications.services;
 
 import android.app.Notification;
+import android.content.res.Resources;
 import android.os.Bundle;
+
+import com.abhijitvalluri.android.fitnotifications.R;
 
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -139,6 +142,39 @@ public class GroupSummaryMessageExtractorTest {
                 extractor.getTitleAndText("org.example", notification("WhatsApp", "3 messages from 2 chats",
                         "Alice: Ok",
                         "Bob: I'll see what I can do", "Bob: Ok"),
+                        SUMMARY));
+    }
+
+
+    @Test
+    public void testLocalizedSummary() {
+        Resources resourcesMock = Mockito.mock(Resources.class);
+
+        Mockito.doReturn("\\d+ neue Nachrichten")
+                .when(resourcesMock).getString(R.string.new_messages_summary_pattern);
+        Mockito.doReturn("\\d+ (neue )?Nachrichten (aus|von) \\d+ Chats")
+                .when(resourcesMock).getString(R.string.new_messages_multiple_chats_summary_pattern);
+
+
+        MessageExtractor extractor = new GroupSummaryMessageExtractor(resourcesMock, false);
+
+        assertTitleAndTextEqual("Alice", "Marco",
+                extractor.getTitleAndText("org.example", notification("Alice", "Marco"), SUMMARY));
+
+        assertTitleAndTextEqual("Bob", null,
+                extractor.getTitleAndText("org.example", notification("Bob", "Polo"), REGULAR));
+
+        assertTitleAndTextEqual("Bob", "Polo",
+                extractor.getTitleAndText("org.example", notification("WhatsApp", "2 neue Nachrichten von 2 Chats",
+                        "Alice: Marco", "Bob: Polo"),
+                        SUMMARY));
+
+        assertTitleAndTextEqual("Bob", null,
+                extractor.getTitleAndText("org.example", notification("Bob", "Polo"), REGULAR));
+
+        assertTitleAndTextEqual("Bob", "I win!",
+                extractor.getTitleAndText("org.example", notification("WhatsApp", "3 Nachrichten aus 2 Chats",
+                        "Alice: Marco", "Bob: Polo", "Bob: I win!"),
                         SUMMARY));
     }
 

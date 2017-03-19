@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Notification summary patterns  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <string name="new_messages_summary_pattern">\d+ nieuwe berichten</string>
+    <string name="new_messages_multiple_chats_summary_pattern">\d+ (nieuwe )?berichten (in|van) \d+ chats</string>
+
+</resources>

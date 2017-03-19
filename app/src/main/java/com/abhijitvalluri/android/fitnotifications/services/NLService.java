@@ -24,6 +24,7 @@ import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -60,14 +61,7 @@ public class NLService extends NotificationListenerService {
     private static final Integer NOTIFICATION_ID = (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
 
     private static final MessageExtractor DEFAULT_EXTRACTOR = new GenericMessageExtractor();
-    private static final Map<String, MessageExtractor> EXTRACTORS = new TreeMap<>();
-
-    static {
-        // Telegram
-        EXTRACTORS.put("org.telegram.messenger", new GroupSummaryMessageExtractor(true));
-        // WhatsApp
-        EXTRACTORS.put("com.whatsapp", new GroupSummaryMessageExtractor(false));
-    }
+    private final Map<String, MessageExtractor> messageExtractors = new TreeMap<>();
 
     private final Handler mHandler = new Handler();
 
@@ -138,8 +132,16 @@ public class NLService extends NotificationListenerService {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
+
         // base context is needed to access Resources
-        translitUtil = new TranslitUtil(getResources());
+        Resources res = getResources();
+
+        translitUtil = new TranslitUtil(res);
+
+        // Telegram
+        messageExtractors.put("org.telegram.messenger", new GroupSummaryMessageExtractor(res, true));
+        // WhatsApp
+        messageExtractors.put("com.whatsapp", new GroupSummaryMessageExtractor(res, false));
     }
 
     @Override
@@ -319,7 +321,7 @@ public class NLService extends NotificationListenerService {
 
     @NonNull
     private MessageExtractor getMessageExtractor(String appPackageName) {
-        MessageExtractor extractor = EXTRACTORS.get(appPackageName);
+        MessageExtractor extractor = messageExtractors.get(appPackageName);
         return extractor == null ? DEFAULT_EXTRACTOR : extractor;
     }
 
