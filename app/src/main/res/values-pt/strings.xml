@@ -2,7 +2,7 @@
 <resources>
 
     <!-- Notification summary patterns  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <string name="new_messages_summary_pattern">\d+ mensagens não lidas</string>
-    <string name="new_messages_multiple_chats_summary_pattern">\d+ mensagens (não lidas )?de \d+ conversas</string>
+    <string name="new_messages_summary_pattern">\\d+ mensagens não lidas</string>
+    <string name="new_messages_multiple_chats_summary_pattern">\\d+ mensagens (não lidas )?de \\d+ conversas</string>
 
 </resources>

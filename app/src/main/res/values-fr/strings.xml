@@ -2,7 +2,7 @@
 <resources>
 
     <!-- Notification summary patterns  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <string name="new_messages_summary_pattern">\d+ nouveaux messages</string>
-    <string name="new_messages_multiple_chats_summary_pattern">\d+ (nouveaux )?messages de \d+ discussions</string>
+    <string name="new_messages_summary_pattern">\\d+ nouveaux messages</string>
+    <string name="new_messages_multiple_chats_summary_pattern">\\d+ (nouveaux )?messages de \\d+ discussions</string>
 
 </resources>
