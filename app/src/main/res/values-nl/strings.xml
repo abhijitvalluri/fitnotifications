@@ -2,7 +2,7 @@
 <resources>
 
     <!-- Notification summary patterns  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <string name="new_messages_summary_pattern">\d+ nieuwe berichten</string>
-    <string name="new_messages_multiple_chats_summary_pattern">\d+ (nieuwe )?berichten (in|van) \d+ chats</string>
+    <string name="new_messages_summary_pattern">\\d+ nieuwe berichten</string>
+    <string name="new_messages_multiple_chats_summary_pattern">\\d+ (nieuwe )?berichten (in|van) \\d+ chats</string>
 
 </resources>
