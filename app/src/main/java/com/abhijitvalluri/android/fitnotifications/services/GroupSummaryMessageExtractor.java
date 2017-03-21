@@ -3,6 +3,7 @@ package com.abhijitvalluri.android.fitnotifications.services;
 import android.app.Notification;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.abhijitvalluri.android.fitnotifications.R;
 
@@ -35,13 +36,25 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
         this.newMessagesFirst = newMessagesFirst;
 
         // avoid doubling the patterns in case of missing translation
+        Pattern newMessagesPatternLocalized = null;
         String newMessagesLocalized = res.getString(R.string.new_messages_summary_pattern);
-        Pattern newMessagesPatternLocalized = NEW_MESSAGES.pattern().equals(newMessagesLocalized) ?
-                null : Pattern.compile(newMessagesLocalized);
+        if (!NEW_MESSAGES.pattern().equals(newMessagesLocalized)) {
+            try {
+                newMessagesPatternLocalized = Pattern.compile(newMessagesLocalized);
+            } catch (Exception e) {
+                Log.e("GroupSummary", "Error compiling localized summary pattern: " + newMessagesLocalized, e);
+            }
+        }
 
+        Pattern newMessagesMultipleChatsPatternLocalized = null;
         String newMessagesMultipleChatsLocalized = res.getString(R.string.new_messages_multiple_chats_summary_pattern);
-        Pattern newMessagesMultipleChatsPatternLocalized = NEW_MESSAGES_MULTIPLE_CHATS.pattern().equals(newMessagesMultipleChatsLocalized) ?
-                null : Pattern.compile(newMessagesMultipleChatsLocalized);
+        if (!NEW_MESSAGES_MULTIPLE_CHATS.pattern().equals(newMessagesMultipleChatsLocalized)) {
+            try {
+                newMessagesMultipleChatsPatternLocalized = Pattern.compile(newMessagesMultipleChatsLocalized);
+            } catch (Exception e) {
+                Log.e("GroupSummary", "Error compiling localized summary pattern: " + newMessagesMultipleChatsLocalized, e);
+            }
+        }
 
         // always check against the English version too (e.g. Telegram lacks Russian translation)
         allNewMessagesPatterns = new Pattern[] {
