@@ -84,7 +84,7 @@ public class NLService extends NotificationListenerService {
 
     private NotificationManager mNotificationManager;
     private AppSelectionsStore mAppSelectionsStore;
-    private HashMap<String, Long> mLastNotificationTimeMap;
+    private Map<String, Long> mLastNotificationTimeMap;
 
     @Override
     public void onCreate() {
@@ -241,7 +241,9 @@ public class NLService extends NotificationListenerService {
 
         CharSequence[] titleAndText = getMessageExtractor(appPackageName).getTitleAndText(appPackageName, extras, notification.flags);
 
-        if (titleAndText[1] == null && discardEmptyNotifications) {
+        // "generic" extractor will never return null as the notificationText
+        // and app-specific extractors will return null for notifications that should be skipped
+        if (titleAndText[1] == null || (titleAndText[1].length() == 0 && discardEmptyNotifications)) {
             return;
         }
 
