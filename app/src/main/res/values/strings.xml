@@ -9,7 +9,7 @@
     <string name="instructions_heading">Setup</string>
     <string name="manual_setup_instructions">Setup Instructions</string>
     <string name="faqs">Frequently asked questions</string>
-    <string name="contact_us">Contact us</string>
+    <string name="smart_dinosaurs">Smart Dinosaurs Entertainment</string>
     <string name="whats_new">What\'s new</string>
     <string name="disclaimer">Disclaimer</string>
     <string name="opensource">Open source licenses</string>
@@ -19,7 +19,18 @@
     <string name="enabled_apps_filter_menu">Filter Enabled Apps</string>
     <string name="notification_service_started">Fit Notifications Service started</string>
     <string name="rate_app">Like our app? Then rate it!</string>
-    <string name="improve_transliteration">Do you want to help improve transliteration for your language? Then click here!</string>
+    <string name="send_email">Send Email</string>
+    <string name="email_subject">Improve Transliterations for LANGUAGE</string>
+    <string name="email_body">**STOP! READ BELOW BEFORE SENDING EMAIL!**\n\nBefore sending this email,
+                              please replace \'LANGUAGE\' in the subject with your language.
+                              Also, provide the letter and transliterated letter pairs for
+                              those letters that are not correctly transliterated.</string>
+    <string name="transliteration_feature">Transliteration Feature</string>
+    <string name="transliteration_feature_text">The transliteration feature is enabled for you!
+                                           This feature converts non-latin characters to latin.
+                                           Does it have issues with your language? If so, you can
+                                           help fix it by emailing us!\n\nYou can turn off the
+                                           feature by going to the settings page in this app.</string>
     <string name="placeholder_notification_text">[Placeholder notification] Click to enable auto-dismiss.</string>
     <string name="notification_text">[Placeholder notification] Click to enable auto-dismiss. You can enable auto-dismiss for the relayed notification as well.</string>
     <string name="test_notification">Test Notification</string>
@@ -96,6 +107,8 @@
     <!-- Side bar -->
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
+    <string name="feedback">Feedback</string>
+    <string name="improve_transliteration">Improve Transliteration</string>
 
     <!-- First launch -->
     <string name="done_first_launch_key">FirstLaunch</string>
@@ -117,6 +130,7 @@
     <string name="one_notification">1 notification every</string>
     <string name="second">second</string>
     <string name="seconds">seconds</string>
+    <string name="requested_transliteration_improvement">requestedTransliterationImprovement</string>
 
     <!-- Settings Menu headings -->
     <string name="settings_menu">Settings</string>
@@ -311,16 +325,17 @@
        We will attempt to resolve this issue in an update.</p>
     ]]></string>
     <string name="whats_new_text"><![CDATA[
-    <p>Changes in <b>version 2.8:</b></p>
+    <p>Changes in <b>version 2.8.1:</b></p>
     <ul>
         <li>Various bug fixes and performance improvements.<br /><br /></li>
-        <li>Improve transliteration quality for Russian and Hebrew. Transliterate some popular emojis.<br /><br /></li>
-        <li>Improve app schedule setting. Now, you can either set schedule to be \'all day\' or a time period. The time period can span across two days (i.e. night time schedule).<br /><br /></li>
-        <li>Update app\'s main page to provide easy access to rate the app, and provide feedback to improve transliteration.</li>
+        <li>Improve transliteration quality for Polish and Lithuanian.<br /><br /></li>
+        <li>Add option to send feedback on transliterations in the side navigation bar.</li>
     </ul>
-    <p>Changes in <b>version 2.7</b>: New per app settings!</p>
+    <p>Recent new features: New per app settings!</p>
     <ul>
-        <li>You can now filter notifications, discard empty notifications, and set a schedule for when notifications are forwarded.</li>
+        <li>You can now filter notifications, discard empty notifications, and set a schedule for when notifications are forwarded.<br /><br /></li>
+        <li>Improve app schedule setting. Now, you can either set schedule to be \'all day\' or a time period. The time period can span across two days (i.e. night time schedule).</li>
+
     </ul>
     <p>To enable these new settings, go to the \'Setup Apps\' option on the main screen and click the \'gear\' icon next to the app name.</p>
 
@@ -718,7 +733,7 @@ Except as contained in this notice, the name of a copyright holder shall not be 
     ]]>
 
     </string>
-    <string name="contact_us_text"><![CDATA[
+    <string name="smart_dino_text"><![CDATA[
     <p>Developed by Smart Dinosaurs Entertainment</p>
     <p>Lead Software Engineer: <a href=\"https://abhijitvalluri.com\">Abhijit Kiran Valluri</a></p>
     <h4>Contact Information:</h4>

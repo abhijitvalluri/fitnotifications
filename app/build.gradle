@@ -8,8 +8,8 @@ android {
         applicationId "com.abhijitvalluri.android.fitnotifications"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 21
-        versionName "2.8"
+        versionCode 22
+        versionName "2.8.1"
     }
     compileOptions {
         encoding "UTF-8"

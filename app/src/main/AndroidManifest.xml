@@ -13,30 +13,12 @@
                   android:theme="@style/HomeTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.DIAL"/>
-
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-            <intent-filter>
                 <action android:name="android.intent.action.SENDTO"/>
-
                 <category android:name="android.intent.category.DEFAULT"/>
-
-                <data android:scheme="smsto"/>
                 <data android:scheme="sms"/>
-                <data android:scheme="tel"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND"/>
-                <action android:name="android.intent.action.SEND_MULTIPLE"/>
-
-                <category android:name="android.intent.category.DEFAULT"/>
-
-                <data android:mimeType="*/*"/>
             </intent-filter>
         </activity>
         <activity

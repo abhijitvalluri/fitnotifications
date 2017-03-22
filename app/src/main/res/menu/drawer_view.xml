@@ -48,7 +48,18 @@
                     <item
                         android:id="@+id/nav_contact"
                         android:icon="@drawable/ic_public_white_24dp"
-                        android:title="@string/contact_us" />
+                        android:title="@string/smart_dinosaurs" />
+                </group>
+            </menu>
+        </item>
+
+        <item android:title="@string/feedback">
+            <menu>
+                <group android:checkableBehavior="none">
+                <item
+                        android:id="@+id/nav_improve_transliteration"
+                        android:icon="@drawable/ic_feedback_white_24dp"
+                        android:title="@string/improve_transliteration" />
                 </group>
             </menu>
         </item>
