@@ -142,6 +142,8 @@ public class NLService extends NotificationListenerService {
         messageExtractors.put("org.telegram.messenger", new GroupSummaryMessageExtractor(res, true));
         // WhatsApp
         messageExtractors.put("com.whatsapp", new GroupSummaryMessageExtractor(res, false));
+        // Google Calendar
+        messageExtractors.put("com.google.android.calendar", new BasicMessageExtractor());
     }
 
     @Override

@@ -12,7 +12,12 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 
-class GroupSummaryMessageExtractor extends GenericMessageExtractor {
+/**
+ * A special extractor that ignores all non-summary notifications and extracts the new messages
+ * from the group summary "lines" property. It can also handle messages from multiple chats
+ * (when the message is prefixed with the chat/sender name).
+ */
+class GroupSummaryMessageExtractor extends BasicMessageExtractor {
 
     private static final Pattern NEW_MESSAGES = Pattern.compile("\\d+ new messages");
     private static final Pattern NEW_MESSAGES_MULTIPLE_CHATS = Pattern.compile("\\d+ (new )?messages from \\d+ chats");
@@ -80,13 +85,13 @@ class GroupSummaryMessageExtractor extends GenericMessageExtractor {
             // 1. regular text - use the generic approach
             if (notificationText == null || !matchesAnyPattern(notificationText, allNewMessagesPatterns)) {
                 lastSeenMessageHash = hash(notificationTitle, notificationText);
-                return extractTitleAndText(extras);
+                return super.getTitleAndText(appPackageName, extras, notificationFlags);
             }
 
             CharSequence[] lines = extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
             if (lines == null) {
                 lastSeenMessageHash = hash(notificationTitle, notificationText);
-                return extractTitleAndText(extras);
+                return super.getTitleAndText(appPackageName, extras, notificationFlags);
             }
 
             int newestMessageIndex = newMessagesFirst ? 0 : lines.length - 1;
