@@ -218,16 +218,6 @@ public class NLService extends NotificationListenerService {
             return;
         }
 
-        if (mLimitNotifications) {
-            Long currentTimeMillis = System.currentTimeMillis();
-            Long lastNotificationTime = mLastNotificationTimeMap.get(appPackageName);
-            if (lastNotificationTime != null
-                    && currentTimeMillis < lastNotificationTime + mNotifLimitDurationMillis) {
-                return;
-            }
-            mLastNotificationTimeMap.put(appPackageName, currentTimeMillis);
-        }
-
         String filterText = null;
         boolean discardEmptyNotifications = false;
 
@@ -251,8 +241,17 @@ public class NLService extends NotificationListenerService {
             return;
         }
 
+        if (mLimitNotifications) {
+            Long currentTimeMillis = System.currentTimeMillis();
+            Long lastNotificationTime = mLastNotificationTimeMap.get(appPackageName);
+            if (lastNotificationTime != null && currentTimeMillis < lastNotificationTime + mNotifLimitDurationMillis) {
+                return;
+            }
+            mLastNotificationTimeMap.put(appPackageName, currentTimeMillis);
+        }
+
         CharSequence notificationTitle = titleAndText[0];
-        String notificationText = titleAndText[1] == null ? "" : titleAndText[1].toString();
+        String notificationText = titleAndText[1].toString();
 
         if (mDisplayAppName) {
             notificationText = "[" + mAppSelectionsStore.getAppName(appPackageName) + "] " + notificationText;
