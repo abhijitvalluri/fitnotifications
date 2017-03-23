@@ -144,6 +144,8 @@ public class NLService extends NotificationListenerService {
         messageExtractors.put("com.whatsapp", new GroupSummaryMessageExtractor(res, false));
         // Google Calendar
         messageExtractors.put("com.google.android.calendar", new BasicMessageExtractor());
+        // GMail
+        messageExtractors.put("com.google.android.gm", new IgnoreSummaryMessageExtractor());
     }
 
     @Override
@@ -235,7 +237,7 @@ public class NLService extends NotificationListenerService {
 
         // "generic" extractor will never return null as the notificationText
         // and app-specific extractors will return null for notifications that should be skipped
-        if (titleAndText[1] == null || (titleAndText[1].length() == 0 && discardEmptyNotifications)) {
+        if (titleAndText == null || titleAndText[1] == null || (titleAndText[1].length() == 0 && discardEmptyNotifications)) {
             return;
         }
 
