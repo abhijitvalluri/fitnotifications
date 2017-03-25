@@ -4,5 +4,5 @@
     <!-- Notification summary patterns  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <string name="new_messages_summary_pattern">\\d+ новых сообщени[йя]</string>
     <string name="new_messages_multiple_chats_summary_pattern">\\d+ (новых )?сообщени[йя] из \\d+ чатов</string>
-
+    <string name="notification_message_photo">📷 Фото</string>
 </resources>

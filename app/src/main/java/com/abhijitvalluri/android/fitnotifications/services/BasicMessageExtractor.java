@@ -48,6 +48,12 @@ class BasicMessageExtractor implements MessageExtractor {
     }
 
 
+    protected static boolean endsWith(CharSequence big, CharSequence small) {
+        return big != null && small != null && big.length() >= small.length()
+                && big.subSequence(big.length() - small.length(), big.length()).toString().contentEquals(small);
+    }
+
+
     protected static boolean isBlank(CharSequence text) {
         if (text != null && text.length() > 0) {
             for (int i = 0; i < text.length(); i++) {

@@ -186,6 +186,38 @@ public class GroupSummaryMessageExtractorTest {
     }
 
 
+    @Test
+    public void testPhotoMessages() {
+        MessageExtractor extractor = new GroupSummaryMessageExtractor(false);
+
+        // Telegram
+        assertTitleAndTextEqual("Alice", "sent you a photo",
+                getTitleAndText(extractor, SUMMARY, "Alice", "3 new messages",
+                        "sent you a photo", "sent you a photo", "sent you a photo"));
+
+        assertTitleAndTextEqual("Bob", "\uD83D\uDCF7 Photo",
+                getTitleAndText(extractor, SUMMARY, "Bob", "\uD83D\uDCF7 Photo"));
+
+        assertTitleAndTextEqual("Bob", "Check this out! sent you a photo And this sent you a photo",
+                getTitleAndText(extractor, SUMMARY, "Bob", "4 new messages",
+                        "Check this out!", "sent you a photo", "And this", "sent you a photo"));
+
+        // WhatsApp
+        assertTitleAndTextEqual("Bob", "\uD83D\uDCF7 Photo",
+                getTitleAndText(extractor, SUMMARY, "Bob", "3 new messages",
+                        "\uD83D\uDCF7 Photo", "\uD83D\uDCF7 Photo", "\uD83D\uDCF7 Photo"));
+
+        assertTitleAndTextEqual("Alice", "\uD83D\uDCF7 Photo Or maybe this? \uD83D\uDCF7 Photo",
+                getTitleAndText(extractor, SUMMARY, "Alice", "3 new messages",
+                        "\uD83D\uDCF7 Photo", "Or maybe this?", "\uD83D\uDCF7 Photo"));
+
+        assertTitleAndTextEqual("WhatsApp", "Alice: sent you a photo I like these two most; Bob: \uD83D\uDCF7 Photo",
+                getTitleAndText(extractor, SUMMARY, "WhatsApp", "5 messages from 2 chats",
+                        "Alice: sent you a photo", "Alice: sent you a photo", "Bob: \uD83D\uDCF7 Photo",
+                        "Alice: I like these two most", "Bob: \uD83D\uDCF7 Photo"));
+    }
+
+
     private static void assertTitleAndTextEqual(CharSequence expectedTitle, CharSequence expectedText,
                                                 CharSequence[] actualTitleAndText) {
         assertContentEquals("title", expectedTitle, actualTitleAndText[0]);
