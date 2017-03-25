@@ -228,6 +228,7 @@
     <!-- Notification summary patterns  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <string name="new_messages_summary_pattern">\\d+ new messages</string>
     <string name="new_messages_multiple_chats_summary_pattern">\\d+ (new )?messages from \\d+ chats</string>
+    <string name="notification_message_photo">(sent you a photo|📷 Photo)</string>
 
     <!-- HTML Information - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <string name="about_app_text"><![CDATA[

@@ -102,3 +102,6 @@ U+1F3FF
 
 # Zero width joiner (used in "family" emojis)
 U+200D
+
+# Camera emoji used by WhatsApp
+U+1F4F7     ['o]

@@ -21,9 +21,11 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
 
     private static final Pattern NEW_MESSAGES = Pattern.compile("\\d+ new messages");
     private static final Pattern NEW_MESSAGES_MULTIPLE_CHATS = Pattern.compile("\\d+ (new )?messages from \\d+ chats");
+    private static final Pattern PHOTO_MESSAGE = Pattern.compile("(sent you a photo|\uD83D\uDCF7 Photo)");
 
     private final Pattern[] allNewMessagesPatterns;
     private final Pattern[] newMessagesMultipleChatsPatterns;
+    private final Pattern[] photoMessagePatterns;
 
     // some apps (Telegram) put new messages at the beginning of EXTRA_TEXT_LINES, other (WhatsApp) at the end
     private final boolean newMessagesFirst;
@@ -35,31 +37,20 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
 
         allNewMessagesPatterns = new Pattern[] { NEW_MESSAGES, NEW_MESSAGES_MULTIPLE_CHATS };
         newMessagesMultipleChatsPatterns = new Pattern[] { NEW_MESSAGES_MULTIPLE_CHATS };
+        photoMessagePatterns = new Pattern[] { PHOTO_MESSAGE };
     }
+
 
     public GroupSummaryMessageExtractor(Resources res, boolean newMessagesFirst) {
         this.newMessagesFirst = newMessagesFirst;
 
         // avoid doubling the patterns in case of missing translation
-        Pattern newMessagesPatternLocalized = null;
-        String newMessagesLocalized = res.getString(R.string.new_messages_summary_pattern);
-        if (!NEW_MESSAGES.pattern().equals(newMessagesLocalized)) {
-            try {
-                newMessagesPatternLocalized = Pattern.compile(newMessagesLocalized);
-            } catch (Exception e) {
-                Log.e("GroupSummary", "Error compiling localized summary pattern: " + newMessagesLocalized, e);
-            }
-        }
+        Pattern newMessagesPatternLocalized =
+                getLocalizedPattern(NEW_MESSAGES, res.getString(R.string.new_messages_summary_pattern));
 
-        Pattern newMessagesMultipleChatsPatternLocalized = null;
-        String newMessagesMultipleChatsLocalized = res.getString(R.string.new_messages_multiple_chats_summary_pattern);
-        if (!NEW_MESSAGES_MULTIPLE_CHATS.pattern().equals(newMessagesMultipleChatsLocalized)) {
-            try {
-                newMessagesMultipleChatsPatternLocalized = Pattern.compile(newMessagesMultipleChatsLocalized);
-            } catch (Exception e) {
-                Log.e("GroupSummary", "Error compiling localized summary pattern: " + newMessagesMultipleChatsLocalized, e);
-            }
-        }
+        Pattern newMessagesMultipleChatsPatternLocalized =
+                getLocalizedPattern(NEW_MESSAGES_MULTIPLE_CHATS, res.getString(R.string.new_messages_multiple_chats_summary_pattern));
+
 
         // always check against the English version too (e.g. Telegram lacks Russian translation)
         allNewMessagesPatterns = new Pattern[] {
@@ -71,7 +62,26 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
                 NEW_MESSAGES_MULTIPLE_CHATS,
                 newMessagesMultipleChatsPatternLocalized
         };
+
+        photoMessagePatterns = new Pattern[] {
+                PHOTO_MESSAGE,
+                getLocalizedPattern(PHOTO_MESSAGE, res.getString(R.string.notification_message_photo))
+        };
     }
+
+
+    private static Pattern getLocalizedPattern(Pattern referencePattern, String localizedPattern) {
+        if (!referencePattern.pattern().equals(localizedPattern)) {
+            try {
+                return Pattern.compile(localizedPattern);
+            } catch (Exception e) {
+                Log.e("GroupSummary", "Error compiling localized pattern: " + localizedPattern, e);
+            }
+        }
+
+        return null;
+    }
+
 
     @Override
     public CharSequence[] getTitleAndText(String appPackageName, Bundle extras, int notificationFlags) {
@@ -183,15 +193,16 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
 
 
     // collect the new messages from oldest to newest
-    private static CharSequence buildMessage(CharSequence[] lines, int pos, int step, boolean senderPrefixPresent) {
+    private CharSequence buildMessage(CharSequence[] lines, int pos, int step, boolean senderPrefixPresent) {
         StringBuilder sb = new StringBuilder();
         for (; 0 <= pos && pos < lines.length; pos += step) {
-            sb.append(senderPrefixPresent ? stripSender(lines[pos]) : lines[pos]).append(' ');
-        }
-
-        // trim trailing space
-        if (sb.length() > 0) {
-            sb.setLength(sb.length() - 1);
+            CharSequence message = senderPrefixPresent ? stripSender(lines[pos]) : lines[pos];
+            if (!matchesAnyPattern(message, photoMessagePatterns) || !endsWith(sb, message)) {
+                if (sb.length() > 0) {
+                    sb.append(' ');
+                }
+                sb.append(message);
+            }
         }
 
         return sb;
@@ -199,41 +210,43 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
 
 
     // collect the new messages from oldest to newest grouping them per sender
-    private static CharSequence buildMultiMessage(CharSequence[] lines, int pos, int step) {
-        List<StringBuilder> messages = new ArrayList<>();
+    private CharSequence buildMultiMessage(CharSequence[] lines, int pos, int step) {
+        List<StringBuilder> allSenderMessages = new ArrayList<>();
 
         for (; 0 <= pos && pos < lines.length; pos += step) {
             CharSequence senderPrefix = getSender(lines[pos]) + ": ";
 
             // find the message to append to
-            StringBuilder msg = null;
-            for (StringBuilder sb : messages) {
+            StringBuilder senderMessages = null;
+            for (StringBuilder sb : allSenderMessages) {
                 if (startsWith(sb, senderPrefix)) {
-                    msg = sb;
+                    senderMessages = sb;
                     break;
                 }
             }
 
-            if (msg == null) {
-                msg = new StringBuilder(senderPrefix);
-                messages.add(msg);
+            if (senderMessages == null) {
+                senderMessages = new StringBuilder();
+                // do not add trailing space as it will be added with the message later
+                senderMessages.append(senderPrefix, 0, senderPrefix.length() - 1);
+                allSenderMessages.add(senderMessages);
             }
 
-            msg.append(stripSender(lines[pos])).append(' ');
+            CharSequence message = stripSender(lines[pos]);
+            if (!matchesAnyPattern(message, photoMessagePatterns) || !endsWith(senderMessages, message)) {
+                senderMessages.append(' ').append(message);
+            }
         }
 
-        StringBuilder all = new StringBuilder();
-        for (StringBuilder msg : messages) {
-            // omit the trailing space in individual messages
-            all.append(msg, 0, msg.length() - 1).append("; ");
+        StringBuilder result = new StringBuilder();
+        for (StringBuilder senderMessage : allSenderMessages) {
+            if (result.length() > 0) {
+                result.append("; ");
+            }
+            result.append(senderMessage);
         }
 
-        // trim trailing semicolon
-        if (all.length() > 1) {
-            all.setLength(all.length() - 2);
-        }
-
-        return all;
+        return result;
     }
 
 
