@@ -138,6 +138,24 @@ public class GroupSummaryMessageExtractorTest {
 
 
     @Test
+    public void testRepeatedText() {
+        MessageExtractor extractor = new GroupSummaryMessageExtractor(false);
+
+        assertTitleAndTextEqual("Bob", "Ok",
+                getTitleAndText(extractor, SUMMARY, "Bob", "Ok"));
+
+        assertTitleAndTextEqual("Bob", "I will do it Ok",
+                getTitleAndText(extractor, SUMMARY, "Bob", "3 new messages",
+                        "Ok", "I will do it", "Ok"));
+
+        // we cannot tell which "Ok" was the last one we saw
+        // hence the unfortunate repetition
+        assertTitleAndTextEqual("Bob", "I will do it Ok I promise",
+                getTitleAndText(extractor, SUMMARY, "Bob", "4 new messages",
+                        "Ok", "I will do it", "Ok", "I promise"));
+    }
+
+    @Test
     public void testLocalizedSummary() {
         Resources resourcesMock = Mockito.mock(Resources.class);
 
