@@ -144,11 +144,11 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
      */
     private int findFirstNewMessage(CharSequence[] lines, CharSequence title) {
         // and there could be several we haven't shown yet - scan until we find the last seen one
-        int pos = lines.length - 1;
-        int step = -1;
+        int pos = 0;
+        int step = 1;
         if (newMessagesFirst) {
-            pos = 0;
-            step = 1;
+            pos = lines.length - 1;
+            step = -1;
         }
 
         boolean multipleSenders = false;
@@ -169,8 +169,14 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
             }
         }
 
-        // step back to the first new message
-        pos -= step;
+        if (pos < 0 || pos == lines.length) {
+            // the last seen message was not found - consider all messages new
+            pos = newMessagesFirst ? lines.length - 1 : 0;
+        }
+        else {
+            // advance to the first new message
+            pos += step;
+        }
 
         return multipleSenders ? -(pos + 1) : pos;
     }
