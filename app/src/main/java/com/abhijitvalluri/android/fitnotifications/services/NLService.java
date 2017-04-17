@@ -190,17 +190,6 @@ public class NLService extends NotificationListenerService {
         final String appPackageName = sbn.getPackageName();
         Bundle extras = notification.extras;
 
-        // DISREGARD SPAMMY NOTIFICATIONS
-        if ((notification.flags & Notification.FLAG_ONGOING_EVENT) > 0) {
-            // Discard ongoing notifications
-            // TODO: Nothing else apart from this is consistent.
-            // I tried to see InboxStyle notifications vs. not and that did not help
-            // Not all use the EXTRA_SUMMARY_GROUP correctly either
-            // Perhaps best option is to allow users to custom discard useless
-            // messages via a string match
-            return;
-        }
-
         if (!appNotificationsActive(appPackageName)) {
             return;
         }
@@ -217,13 +206,26 @@ public class NLService extends NotificationListenerService {
 
         String filterText = null;
         boolean discardEmptyNotifications = false;
+        boolean discardOngoingNotifications = true;
 
         {
             AppSelection appSelection = AppSelectionsStore.get(this).getAppSelection(appPackageName);
             if (appSelection != null) {
                 filterText = appSelection.getFilterText().trim();
                 discardEmptyNotifications = appSelection.isDiscardEmptyNotifications();
+                discardOngoingNotifications = appSelection.isDiscardOngoingNotifications();
             }
+        }
+
+        // DISREGARD SPAMMY NOTIFICATIONS
+        if (discardOngoingNotifications && (notification.flags & Notification.FLAG_ONGOING_EVENT) > 0) {
+            // Discard ongoing notifications
+            // TODO: Nothing else apart from this is consistent.
+            // I tried to see InboxStyle notifications vs. not and that did not help
+            // Not all use the EXTRA_SUMMARY_GROUP correctly either
+            // Perhaps best option is to allow users to custom discard useless
+            // messages via a string match
+            return;
         }
 
         CharSequence notificationTitle = extras.getCharSequence(Notification.EXTRA_TITLE);

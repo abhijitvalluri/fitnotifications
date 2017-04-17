@@ -59,6 +59,16 @@
             android:text="@string/discard_empty_notifications"
             android:id="@+id/discard_empty"/>
 
+        <Switch
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/discard_ongoing_notifications"
+            android:id="@+id/discard_ongoing"
+            android:checked="true" />
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
