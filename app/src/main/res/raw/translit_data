@@ -81,7 +81,7 @@ U+1F609     ;-)
 
 U+1F600     :-D
 U+1F601     :-D
-U+1F603 	:-D
+U+1F603     :-D
 U+1F604     :-D
 
 U+1F605     ,:-D
@@ -138,6 +138,31 @@ U+1F3FF
 
 # Zero width joiner (used in "family" emojis)
 U+200D
+
+# Some other misc characters that the Fitbit charset doesn't include
+£   GBP
+€   EUR
+¥   JPY
+¢   c
+©   (C)
+®   (R)
+™   (tm)
+¬
+¯   -
+µ   u
+¯   -
+´   '
+±   +/-
+½   1/2
+¼   1/4
+¾   3/4
+¹   ^1
+²   ^2
+³   ^3
+¶
+§
+¸
+¨
 
 # Camera emoji used by WhatsApp
 U+1F4F7     ['o]
