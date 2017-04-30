@@ -24,6 +24,7 @@ import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,6 +32,7 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.support.annotation.NonNull;
 import android.support.v7.app.NotificationCompat;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -48,6 +50,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Fit Notification Service
@@ -55,6 +59,9 @@ import java.util.Locale;
 public class NLService extends NotificationListenerService {
 
     private static final Integer NOTIFICATION_ID = (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
+
+    private static final MessageExtractor DEFAULT_EXTRACTOR = new GenericMessageExtractor();
+    private final Map<String, MessageExtractor> messageExtractors = new TreeMap<>();
 
     private final Handler mHandler = new Handler();
 
@@ -77,8 +84,7 @@ public class NLService extends NotificationListenerService {
 
     private NotificationManager mNotificationManager;
     private AppSelectionsStore mAppSelectionsStore;
-    private HashMap<String, Long> mLastNotificationTimeMap;
-    private HashMap<String, String> mNotificationStringMap;
+    private Map<String, Long> mLastNotificationTimeMap;
 
     @Override
     public void onCreate() {
@@ -86,7 +92,6 @@ public class NLService extends NotificationListenerService {
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mAppSelectionsStore = AppSelectionsStore.get(this);
         mLastNotificationTimeMap = new HashMap<>();
-        mNotificationStringMap = new HashMap<>();
 
         mSelectedAppsPackageNames = mAppSelectionsStore.getSelectedAppsPackageNames();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -127,8 +132,20 @@ public class NLService extends NotificationListenerService {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
+
         // base context is needed to access Resources
-        translitUtil = new TranslitUtil(getResources());
+        Resources res = getResources();
+
+        translitUtil = new TranslitUtil(res);
+
+        // Telegram
+        messageExtractors.put("org.telegram.messenger", new GroupSummaryMessageExtractor(res, true));
+        // WhatsApp
+        messageExtractors.put("com.whatsapp", new GroupSummaryMessageExtractor(res, false));
+        // Google Calendar
+        messageExtractors.put("com.google.android.calendar", new BasicMessageExtractor());
+        // GMail
+        messageExtractors.put("com.google.android.gm", new IgnoreSummaryMessageExtractor());
     }
 
     @Override
@@ -205,16 +222,6 @@ public class NLService extends NotificationListenerService {
             return;
         }
 
-        if (mLimitNotifications) {
-            Long currentTimeMillis = System.currentTimeMillis();
-            Long lastNotificationTime = mLastNotificationTimeMap.get(appPackageName);
-            if (lastNotificationTime != null
-                    && currentTimeMillis < lastNotificationTime + mNotifLimitDurationMillis) {
-                return;
-            }
-            mLastNotificationTimeMap.put(appPackageName, currentTimeMillis);
-        }
-
         String filterText = null;
         boolean discardEmptyNotifications = false;
 
@@ -226,21 +233,32 @@ public class NLService extends NotificationListenerService {
             }
         }
 
-        CharSequence notificationTitle = extras.getCharSequence(Notification.EXTRA_TITLE);
-        String notificationText = buildNotificationText(extras, appPackageName, discardEmptyNotifications);
+        CharSequence[] titleAndText = getMessageExtractor(appPackageName).getTitleAndText(appPackageName, extras, notification.flags);
 
-        // notificationText can be null only when discardEmptyNotifications is enabled
-        if (notificationText == null || anyMatchesFilter(filterText, notificationTitle, notificationText)) {
+        // "generic" extractor will never return null as the notificationText
+        // and app-specific extractors will return null for notifications that should be skipped
+        if (titleAndText == null || titleAndText[1] == null || (titleAndText[1].length() == 0 && discardEmptyNotifications)) {
             return;
         }
 
-        String prevNotificationText = mNotificationStringMap.put(appPackageName, notificationText);
-        // TODO: add more specific checks to avoid blocking legitimate identical notifications
-        if (notificationText.equals(prevNotificationText)) {
-            // do not send the duplicate notification, but only for every 2nd occurrence
-            // (i.e. when the same text arrives for the 3rd time - send it)
-            mNotificationStringMap.remove(appPackageName);
+        if (anyMatchesFilter(filterText, titleAndText)) {
             return;
+        }
+
+        if (mLimitNotifications) {
+            Long currentTimeMillis = System.currentTimeMillis();
+            Long lastNotificationTime = mLastNotificationTimeMap.get(appPackageName);
+            if (lastNotificationTime != null && currentTimeMillis < lastNotificationTime + mNotifLimitDurationMillis) {
+                return;
+            }
+            mLastNotificationTimeMap.put(appPackageName, currentTimeMillis);
+        }
+
+        CharSequence notificationTitle = titleAndText[0];
+        String notificationText = titleAndText[1].toString();
+
+        if (mDisplayAppName) {
+            notificationText = "[" + mAppSelectionsStore.getAppName(appPackageName) + "] " + notificationText;
         }
 
         if (mTransliterateNotif) {
@@ -306,6 +324,12 @@ public class NLService extends NotificationListenerService {
         }
     }
 
+    @NonNull
+    private MessageExtractor getMessageExtractor(String appPackageName) {
+        MessageExtractor extractor = messageExtractors.get(appPackageName);
+        return extractor == null ? DEFAULT_EXTRACTOR : extractor;
+    }
+
     @Override
     public void onNotificationPosted(StatusBarNotification sbn,
                                      NotificationListenerService.RankingMap rankingMap) {
@@ -315,40 +339,6 @@ public class NLService extends NotificationListenerService {
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
         super.onNotificationRemoved(sbn);
-    }
-
-    private String buildNotificationText(Bundle notificationExtras, String appPackageName, boolean discardEmpty) {
-        CharSequence notificationText = notificationExtras.getCharSequence(Notification.EXTRA_TEXT);
-
-        CharSequence notificationBigText = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            notificationBigText = notificationExtras.getCharSequence(Notification.EXTRA_BIG_TEXT);
-        }
-
-        if (isBlank(notificationText) && isBlank(notificationBigText)) {
-            if (discardEmpty) {
-                return null;
-            }
-        } else if (startsWith(notificationBigText, notificationText)) {
-            // if notification "big text" starts with the short text - just use the big one
-            notificationText = notificationBigText;
-            notificationBigText = null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        if (mDisplayAppName) {
-            sb.append("[").append(mAppSelectionsStore.getAppName(appPackageName)).append("] ");
-        }
-
-        if (notificationText != null) {
-            sb.append(notificationText);
-        }
-
-        if (!isBlank(notificationBigText)) {
-            sb.append(" -- ").append(notificationBigText);
-        }
-
-        return sb.toString().trim().replaceAll("\\s+", " ");
     }
 
     /**
@@ -443,23 +433,6 @@ public class NLService extends NotificationListenerService {
             }
         }
         return false;
-    }
-
-    private static boolean startsWith(CharSequence big, CharSequence small) {
-        return big != null && small != null && big.length() >= small.length()
-                && big.subSequence(0, small.length()).toString().contentEquals(small);
-    }
-
-    private static boolean isBlank(CharSequence text) {
-        if (text != null && text.length() > 0) {
-            for (int i = 0; i < text.length(); i++) {
-                // FIXME: isWhitespace() does not recognize some characters (e.g. non-breaking space)
-                if (!Character.isWhitespace(text.charAt(i))) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     /**

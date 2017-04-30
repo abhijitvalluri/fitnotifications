@@ -129,11 +129,6 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/improve_transliteration"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"/>
-
     <Space
         android:layout_width="match_parent"
         android:layout_height="0dp"

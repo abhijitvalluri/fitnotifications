@@ -22,6 +22,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
@@ -37,12 +38,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
 import com.abhijitvalluri.android.fitnotifications.setup.AppIntroActivity;
-import com.abhijitvalluri.android.fitnotifications.utils.AppSelectionsStore;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
-
-import java.util.List;
 
 /**
  * Main activity for the app
@@ -98,17 +95,6 @@ public class HomeActivity extends AppCompatActivity {
         if (mPreferences.getInt(getString(R.string.version_key), 0) < Constants.VERSION_CODE
                 && mPreferences.getBoolean(getString(R.string.done_first_launch_key), false)) {
             // App has been updated
-            AppSelectionsStore store = AppSelectionsStore.get(this);
-            List<AppSelection> appSelections = store.getAppSelections();
-
-            for (AppSelection selection : appSelections) {
-                if (selection.getStartTime() == 0 && (selection.getStopTime() == 1439) || selection.getStopTime() == 0) {
-                    // Default setting should be 11:59pm for end time.
-                    selection.setStopTimeHour(23);
-                    selection.setStopTimeMinute(59);
-                    store.updateAppSelection(selection);
-                }
-            }
 
             mNavDrawer.setCheckedItem(R.id.nav_whats_new);
             setTitle(R.string.whats_new);
@@ -124,6 +110,30 @@ public class HomeActivity extends AppCompatActivity {
                     LAUNCH_ACTIVITY_ANIM_BUNDLE);
         }
 
+        if (mPreferences.getBoolean(getString(R.string.transliterate_notification_key), false) &&
+            !mPreferences.getBoolean(getString(R.string.requested_transliteration_improvement), false)) {
+            new AlertDialog.Builder(HomeActivity.this)
+                    .setTitle(getString(R.string.transliteration_feature))
+                    .setMessage(getString(R.string.transliteration_feature_text))
+                    .setPositiveButton(android.R.string.ok, null)
+                    .create()
+                    .show();
+            mPreferences.edit().putBoolean(getString(R.string.requested_transliteration_improvement), true).apply();
+        }
+
+    }
+
+    private void sendFeedbackToImproveTransliteration() {
+        String uriText =
+                "mailto:android@abhijitvalluri.com" +
+                        "?subject=" + Uri.encode(getString(R.string.email_subject)) +
+                        "&body=" + Uri.encode(getString(R.string.email_body));
+
+        Uri uri = Uri.parse(uriText);
+
+        Intent sendIntent = new Intent(Intent.ACTION_SENDTO);
+        sendIntent.setData(uri);
+        startActivity(Intent.createChooser(sendIntent, "Select app to send email"));
     }
 
     private void setupDrawerContent(NavigationView navigationView) {
@@ -197,12 +207,16 @@ public class HomeActivity extends AppCompatActivity {
             case R.id.nav_contact:
                 setTitle(menuItem.getTitle());
                 if (isInfoFragment) {
-                    ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.contact_us_text));
+                    ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.smart_dino_text));
                     frag = null;
                 } else {
-                    frag = InfoFragment.newInstance(getString(R.string.contact_us_text));
+                    frag = InfoFragment.newInstance(getString(R.string.smart_dino_text));
                 }
                 break;
+            case R.id.nav_improve_transliteration:
+                sendFeedbackToImproveTransliteration();
+                mDrawerLayout.closeDrawers();
+                return;
             default:
                 // something unexpected has happened Log it may be?
                 return;

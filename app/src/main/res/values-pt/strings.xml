@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Notification summary patterns  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <string name="new_messages_summary_pattern">\\d+ mensagens não lidas</string>
+    <string name="new_messages_multiple_chats_summary_pattern">\\d+ mensagens (não lidas )?de \\d+ conversas</string>
+    <string name="notification_message_photo">📷 Fotografia</string>
+
+</resources>

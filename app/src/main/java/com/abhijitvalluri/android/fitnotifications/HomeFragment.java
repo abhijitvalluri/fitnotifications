@@ -62,7 +62,6 @@ public class HomeFragment extends Fragment {
     private TextView mDemoTV;
     private TextView mNotificationAccessTV;
     private TextView mServiceStateTV;
-    private TextView mImproveTransliterationTV;
     private TextView mRateAppTV;
 
     private SharedPreferences mPreferences;
@@ -81,7 +80,6 @@ public class HomeFragment extends Fragment {
         mDemoTV = (TextView) v.findViewById(R.id.demoNotifTV);
         mNotificationAccessTV = (TextView) v.findViewById(R.id.notificationAccessTV);
         mServiceStateTV = (TextView) v.findViewById(R.id.serviceStateText);
-        mImproveTransliterationTV = (TextView) v.findViewById(R.id.improve_transliteration);
         mRateAppTV = (TextView) v.findViewById(R.id.rate_app);
 
         mContext = getContext();
@@ -142,22 +140,6 @@ public class HomeFragment extends Fragment {
         initializeServiceButtons();
         initializeDemoButton();
         initializeEnableNotificationButton();
-
-        mImproveTransliterationTV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String uriText =
-                        "mailto:android@abhijitvalluri.com" +
-                                "?subject=" + Uri.encode("Improve Transliterations for <SPECIFY_LANGUAGE>") +
-                                "&body=" + Uri.encode("<MESSAGE>");
-
-                Uri uri = Uri.parse(uriText);
-
-                Intent sendIntent = new Intent(Intent.ACTION_SENDTO);
-                sendIntent.setData(uri);
-                startActivity(Intent.createChooser(sendIntent, "Send email"));
-            }
-        });
 
         mRateAppTV.setOnClickListener(new View.OnClickListener() {
             @Override
