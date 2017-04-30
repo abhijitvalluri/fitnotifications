@@ -29,7 +29,7 @@
     <string name="transliteration_feature_text">The transliteration feature is enabled for you!
                                            This feature converts non-latin characters to latin.
                                            Does it have issues with your language? If so, you can
-                                           help fix it by emailing us!\n\nYou can turn off the
+                                           help fix it by sending us feedback from the side menu bar!\n\nYou can turn off the
                                            feature by going to the settings page in this app.</string>
     <string name="placeholder_notification_text">[Placeholder notification] Click to enable auto-dismiss.</string>
     <string name="notification_text">[Placeholder notification] Click to enable auto-dismiss. You can enable auto-dismiss for the relayed notification as well.</string>

@@ -113,15 +113,9 @@ public class HomeActivity extends AppCompatActivity {
         if (mPreferences.getBoolean(getString(R.string.transliterate_notification_key), false) &&
             !mPreferences.getBoolean(getString(R.string.requested_transliteration_improvement), false)) {
             new AlertDialog.Builder(HomeActivity.this)
-                    .setMessage(getString(R.string.transliteration_feature_text))
                     .setTitle(getString(R.string.transliteration_feature))
-                    .setPositiveButton(R.string.send_email, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            sendFeedbackToImproveTransliteration();
-                        }
-                    })
-                    .setNegativeButton(android.R.string.cancel, null)
+                    .setMessage(getString(R.string.transliteration_feature_text))
+                    .setPositiveButton(android.R.string.ok, null)
                     .create()
                     .show();
             mPreferences.edit().putBoolean(getString(R.string.requested_transliteration_improvement), true).apply();
