@@ -47,6 +47,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
     public static final String STATE_STOP_TIME_HOUR = "stopTimeHour";
     public static final String STATE_STOP_TIME_MINUTE = "stopTimeMinute";
     public static final String STATE_DISCARD_EMPTY_NOTIFICATIONS = "discardEmptyNotifications";
+    public static final String STATE_DISCARD_ONGOING_NOTIFICATIONS = "discardOngoingNotifications";
     public static final String STATE_ALL_DAY_SCHEDULE = "allDaySchedule";
 
     private static final String DIALOG_TIME = "dialogTime";
@@ -62,6 +63,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
     private int mStopTimeHour;
     private int mStopTimeMinute;
     private boolean mDiscardEmptyNotifications;
+    private boolean mDiscardOngoingNotifications;
     private boolean mAllDaySchedule;
 
     @Override
@@ -70,6 +72,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         setContentView(R.layout.activity_app_settings);
 
         Switch discardEmptySwitch;
+        Switch discardOngoingSwitch;
         Switch allDaySwitch;
 
         mFilterText = (EditText) findViewById(R.id.filter_text);
@@ -77,6 +80,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         mStopTimeButton = (Button) findViewById(R.id.stop_time);
         mNextDay = (TextView) findViewById(R.id.next_day);
         discardEmptySwitch = (Switch) findViewById(R.id.discard_empty);
+        discardOngoingSwitch = (Switch) findViewById(R.id.discard_ongoing);
         allDaySwitch = (Switch) findViewById(R.id.all_day);
 
         mFilterText.setHorizontallyScrolling(false);
@@ -89,6 +93,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
             mStopTimeHour = mAppSelection.getStopTimeHour();
             mStopTimeMinute = mAppSelection.getStopTimeMinute();
             mDiscardEmptyNotifications = mAppSelection.isDiscardEmptyNotifications();
+            mDiscardOngoingNotifications = mAppSelection.isDiscardOngoingNotifications();
             mAllDaySchedule = mAppSelection.isAllDaySchedule();
         } else {
             mAppSelection = savedInstanceState.getParcelable(STATE_APP_SELECTION);
@@ -97,10 +102,12 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
             mStopTimeHour = savedInstanceState.getInt(STATE_STOP_TIME_HOUR);
             mStopTimeMinute = savedInstanceState.getInt(STATE_STOP_TIME_MINUTE);
             mDiscardEmptyNotifications = savedInstanceState.getBoolean(STATE_DISCARD_EMPTY_NOTIFICATIONS);
+            mDiscardOngoingNotifications = savedInstanceState.getBoolean(STATE_DISCARD_ONGOING_NOTIFICATIONS);
             mAllDaySchedule = savedInstanceState.getBoolean(STATE_ALL_DAY_SCHEDULE);
         }
 
         discardEmptySwitch.setChecked(mDiscardEmptyNotifications);
+        discardOngoingSwitch.setChecked(mDiscardOngoingNotifications);
         setTitle(mAppSelection.getAppName());
         mFilterText.setText(mAppSelection.getFilterText());
 
@@ -111,6 +118,13 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mDiscardEmptyNotifications = isChecked;
+            }
+        });
+
+        discardOngoingSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mDiscardOngoingNotifications = isChecked;
             }
         });
 
@@ -193,6 +207,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         outState.putInt(STATE_STOP_TIME_MINUTE, mStopTimeMinute);
         outState.putBoolean(STATE_DISCARD_EMPTY_NOTIFICATIONS, mDiscardEmptyNotifications);
         outState.putBoolean(STATE_ALL_DAY_SCHEDULE, mAllDaySchedule);
+        outState.putBoolean(STATE_DISCARD_ONGOING_NOTIFICATIONS, mDiscardOngoingNotifications);
 
         super.onSaveInstanceState(outState);
     }
@@ -216,6 +231,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         mAppSelection.setStopTimeHour(mStopTimeHour);
         mAppSelection.setStopTimeMinute(mStopTimeMinute);
         mAppSelection.setDiscardEmptyNotifications(mDiscardEmptyNotifications);
+        mAppSelection.setDiscardOngoingNotifications(mDiscardOngoingNotifications);
         mAppSelection.setAllDaySchedule(mAllDaySchedule);
 
         Intent intent = new Intent();

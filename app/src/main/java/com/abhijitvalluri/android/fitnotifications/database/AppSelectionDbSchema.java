@@ -33,6 +33,7 @@ public class AppSelectionDbSchema {
             public static final String STOP_TIME_HOUR = "stopTimeHour";
             public static final String STOP_TIME_MINUTE = "stopTimeMinute";
             public static final String DISCARD_EMPTY_NOTIFICATIONS = "discardEmptyNotifications";
+            public static final String DISCARD_ONGOING_NOTIFICATIONS = "discardOngoingNotifications";
             public static final String ALL_DAY_SCHEDULE = "allDaySchedule";
         }
     }
