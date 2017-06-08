@@ -23,6 +23,14 @@
             </menu>
         </item>
 
+        <item android:title="@string/donate">
+            <menu>
+                <item
+                    android:id="@+id/nav_donate"
+                    android:icon="@drawable/ic_monetization_on_white_24dp"
+                    android:title="@string/support_dev" />
+            </menu>
+        </item>
         <item android:title="Troubleshooting">
             <menu>
                 <group android:checkableBehavior="single">

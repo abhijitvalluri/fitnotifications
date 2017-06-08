@@ -53,6 +53,8 @@ public class HomeFragment extends Fragment {
 
     private final Handler mHandler = new Handler();
 
+    public static final String STATE_IS_DONATE_BANNER = "donateBanner";
+
     private static boolean mDismissPlaceholderNotif;
     private static int mPlaceholderNotifDismissDelayMillis;
 
@@ -62,9 +64,9 @@ public class HomeFragment extends Fragment {
     private TextView mDemoTV;
     private TextView mNotificationAccessTV;
     private TextView mServiceStateTV;
-    private TextView mRateAppTV;
+    private TextView mBannerTV;
+    private Boolean mIsDonateBanner = false;
 
-    private SharedPreferences mPreferences;
     private Bundle LAUNCH_ACTIVITY_ANIM_BUNDLE;
     private Context mContext;
 
@@ -74,13 +76,24 @@ public class HomeFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_home, container, false);
 
+        if (savedInstanceState != null) {
+            mIsDonateBanner = savedInstanceState.getBoolean(STATE_IS_DONATE_BANNER);
+        }
+
         mInstructionTV = (TextView) v.findViewById(R.id.instructionsTV);
         mAppSelectionTV = (TextView) v.findViewById(R.id.appSelectionTV);
         mServiceButton = (Button) v.findViewById(R.id.serviceButton);
         mDemoTV = (TextView) v.findViewById(R.id.demoNotifTV);
         mNotificationAccessTV = (TextView) v.findViewById(R.id.notificationAccessTV);
         mServiceStateTV = (TextView) v.findViewById(R.id.serviceStateText);
-        mRateAppTV = (TextView) v.findViewById(R.id.rate_app);
+        mBannerTV = (TextView) v.findViewById(R.id.rate_app);
+        if (!mIsDonateBanner && Math.random() <= 0.1) {
+            mIsDonateBanner = true;
+            mBannerTV.setText(R.string.support_dev);
+        } else {
+            mIsDonateBanner = false;
+            mBannerTV.setText(R.string.rate_app);
+        }
 
         mContext = getContext();
         initializeSettings();
@@ -93,6 +106,12 @@ public class HomeFragment extends Fragment {
         activateTextViewLinks();
 
         return v;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(STATE_IS_DONATE_BANNER, mIsDonateBanner);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -128,10 +147,10 @@ public class HomeFragment extends Fragment {
 
     private void initializeSettings() {
         PreferenceManager.setDefaultValues(mContext, R.xml.main_settings, false);
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        mDismissPlaceholderNotif = mPreferences.getBoolean(
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mDismissPlaceholderNotif = preferences.getBoolean(
                 getString(R.string.dismiss_placeholder_notif_key), false);
-        mPlaceholderNotifDismissDelayMillis = mPreferences.getInt(
+        mPlaceholderNotifDismissDelayMillis = preferences.getInt(
                 getString(R.string.placeholder_dismiss_delay_key), Constants.DEFAULT_DELAY_SECONDS)
                 *1000;
     }
@@ -141,20 +160,24 @@ public class HomeFragment extends Fragment {
         initializeDemoButton();
         initializeEnableNotificationButton();
 
-        mRateAppTV.setOnClickListener(new View.OnClickListener() {
+        mBannerTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Uri uri = Uri.parse("market://details?id=" + Constants.PACKAGE_NAME);
-                Intent gotoPlayStore = new Intent(Intent.ACTION_VIEW, uri);
-                // To count with Play market backstack, After pressing back button,
-                // to taken back to our application, we need to add following flags to intent.
-                gotoPlayStore.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
-                        Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                try {
-                    startActivity(gotoPlayStore);
-                } catch (ActivityNotFoundException e) {
-                    startActivity(new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("http://play.google.com/store/apps/details?id=" + Constants.PACKAGE_NAME)));
+                if (mIsDonateBanner) {
+                    startActivity(HomeActivity.userDonationIntent());
+                } else {
+                    Uri uri = Uri.parse("market://details?id=" + Constants.PACKAGE_NAME);
+                    Intent gotoPlayStore = new Intent(Intent.ACTION_VIEW, uri);
+                    // To count with Play market backstack, After pressing back button,
+                    // to taken back to our application, we need to add following flags to intent.
+                    gotoPlayStore.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
+                            Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                    try {
+                        startActivity(gotoPlayStore);
+                    } catch (ActivityNotFoundException e) {
+                        startActivity(new Intent(Intent.ACTION_VIEW,
+                                Uri.parse("http://play.google.com/store/apps/details?id=" + Constants.PACKAGE_NAME)));
+                    }
                 }
             }
         });

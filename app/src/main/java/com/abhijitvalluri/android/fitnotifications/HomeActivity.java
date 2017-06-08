@@ -25,6 +25,7 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -52,8 +53,6 @@ public class HomeActivity extends AppCompatActivity {
     private Bundle LAUNCH_ACTIVITY_ANIM_BUNDLE;
     private DrawerLayout mDrawerLayout;
     private SmoothDrawerToggle mDrawerToggle;
-    private Toolbar mToolbar;
-    private NavigationView mNavDrawer;
     private SharedPreferences mPreferences;
 
     @Override
@@ -62,8 +61,8 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home);
 
         // Set a Toolbar to replace the ActionBar.
-        mToolbar = (Toolbar) findViewById(R.id.home_toolbar);
-        setSupportActionBar(mToolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.home_toolbar);
+        setSupportActionBar(toolbar);
 
         LAUNCH_ACTIVITY_ANIM_BUNDLE = ActivityOptions.
                 makeCustomAnimation(HomeActivity.this,
@@ -73,12 +72,12 @@ public class HomeActivity extends AppCompatActivity {
         // Initialize settings to defaults
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerToggle = new SmoothDrawerToggle(this, mDrawerLayout, mToolbar, R.string.drawer_open,  R.string.drawer_close);
+        mDrawerToggle = new SmoothDrawerToggle(this, mDrawerLayout, toolbar, R.string.drawer_open,  R.string.drawer_close);
 
         mDrawerLayout.addDrawerListener(mDrawerToggle);
 
-        mNavDrawer = (NavigationView) findViewById(R.id.navDrawer);
-        setupDrawerContent(mNavDrawer);
+        NavigationView navDrawer = (NavigationView) findViewById(R.id.navDrawer);
+        setupDrawerContent(navDrawer);
 
 
         PreferenceManager.setDefaultValues(this, R.xml.main_settings, false);
@@ -96,7 +95,7 @@ public class HomeActivity extends AppCompatActivity {
                 && mPreferences.getBoolean(getString(R.string.done_first_launch_key), false)) {
             // App has been updated
 
-            mNavDrawer.setCheckedItem(R.id.nav_whats_new);
+            navDrawer.setCheckedItem(R.id.nav_whats_new);
             setTitle(R.string.whats_new);
             frag = InfoFragment.newInstance(getString(R.string.whats_new_text));
             fragmentManager.beginTransaction().replace(R.id.flContent, frag).commit();
@@ -140,11 +139,18 @@ public class HomeActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(
             new NavigationView.OnNavigationItemSelectedListener() {
                 @Override
-                public boolean onNavigationItemSelected(MenuItem menuItem) {
+                public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                     selectDrawerItem(menuItem);
                     return true;
                 }
             });
+    }
+
+    public static Intent userDonationIntent() {
+        String url = "https://abhijitvalluri.com/android/donate";
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(url));
+        return i;
     }
 
     private void selectDrawerItem(MenuItem menuItem) {
@@ -157,9 +163,20 @@ public class HomeActivity extends AppCompatActivity {
             isInfoFragment = true;
         }
 
-        setTitle(menuItem.getTitle());
+        if (menuItem.getItemId() != R.id.nav_improve_transliteration &&
+            menuItem.getItemId() != R.id.nav_donate) {
+            setTitle(menuItem.getTitle());
+        }
 
         switch (menuItem.getItemId()) {
+            case R.id.nav_donate:
+                startActivity(userDonationIntent());
+                mDrawerLayout.closeDrawers();
+                return;
+            case R.id.nav_improve_transliteration:
+                sendFeedbackToImproveTransliteration();
+                mDrawerLayout.closeDrawers();
+                return;
             case R.id.nav_home:
                 setTitle(R.string.app_name);
                 frag = new HomeFragment();
@@ -213,10 +230,6 @@ public class HomeActivity extends AppCompatActivity {
                     frag = InfoFragment.newInstance(getString(R.string.smart_dino_text));
                 }
                 break;
-            case R.id.nav_improve_transliteration:
-                sendFeedbackToImproveTransliteration();
-                mDrawerLayout.closeDrawers();
-                return;
             default:
                 // something unexpected has happened Log it may be?
                 return;
@@ -310,7 +323,7 @@ public class HomeActivity extends AppCompatActivity {
     private class SmoothDrawerToggle extends ActionBarDrawerToggle {
         private Runnable runnable;
 
-        public SmoothDrawerToggle(Activity activity, DrawerLayout drawerLayout, Toolbar toolbar, int openDrawerContentDescRes, int closeDrawerContentDescRes) {
+        SmoothDrawerToggle(Activity activity, DrawerLayout drawerLayout, Toolbar toolbar, int openDrawerContentDescRes, int closeDrawerContentDescRes) {
             super(activity, drawerLayout, toolbar, openDrawerContentDescRes, closeDrawerContentDescRes);
         }
 
@@ -333,7 +346,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         }
 
-        public void runWhenIdle(Runnable runnable) {
+        void runWhenIdle(Runnable runnable) {
             this.runnable = runnable;
         }
     }

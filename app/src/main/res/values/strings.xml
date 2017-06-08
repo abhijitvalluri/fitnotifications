@@ -10,6 +10,8 @@
     <string name="manual_setup_instructions">Setup Instructions</string>
     <string name="faqs">Frequently asked questions</string>
     <string name="smart_dinosaurs">Smart Dinosaurs Entertainment</string>
+    <string name="donate">Donate</string>
+    <string name="support_dev">Support the developer!</string>
     <string name="whats_new">What\'s new</string>
     <string name="disclaimer">Disclaimer</string>
     <string name="opensource">Open source licenses</string>
@@ -53,7 +55,7 @@
     <!-- Intro Strings Activity -->
     <string name="intro_get_started_button">Get started</string>
     <string name="intro_welcome_title">Get all your notifications on your Fitbit device</string>
-    <string name="intro_welcome_desc">This app is designed for use with the Fitbit platform. It requires the official Fitbit app, and is compatible with Fitbit Alta, Blaze and Surge. We are not affiliated with Fitbit, Inc.</string>
+    <string name="intro_welcome_desc">This app is designed for use with the Fitbit platform. It requires the official Fitbit app, and is compatible with most Fitbit devices. We are not affiliated with Fitbit, Inc.</string>
 
     <string name="intro_enable_access_title">First, enable notification access</string>
     <string name="intro_enable_access_desc">You must enable notification access for this app and the official Fitbit app. Click the button below, and then enable access for both apps in the next screen.</string>
@@ -71,10 +73,14 @@
     <string name="intro_setup_fitbit_title1">Setup notifications in Fitbit app: Step 1</string>
     <string name="intro_setup_fitbit_title2">Setup notifications in Fitbit app: Step 2</string>
     <string name="intro_setup_fitbit_title3">Setup notifications in Fitbit app: Step 3</string>
-    <string name="intro_setup_fitbit_desc1">First, go into device settings by clicking the device icon in the Fitbit app.</string>
-    <string name="intro_setup_fitbit_toast_text1">Only Fitbit Alta, Blaze, Surge and Charge 2 models are compatible!</string>
-    <string name="intro_setup_fitbit_toast_button">Compatible Fitbit devices</string>
-
+    <string name="intro_setup_fitbit_desc1">First, go into device settings by clicking the device icon in the Fitbit app.
+                                            \n\n<b>Compatible Fitbit devices:</b>\nFitbit Alta, Alta HR, Charge 2, Blaze, Surge.
+                                            Limited compatibility with Fitbit Flex 2 (lights up the LEDs).</string>
+    <string name="intro_setup_issues_title">Setup issues?</string>
+    <string name="intro_setup_issues_message">Looks like you already finished setup once.
+                                              \n\nIf you are still having issues with notifications, try rebooting the phone and setup again.
+                                              If that does not work, try reinstalling the app.</string>
+    <string name="intro_setup_issues_ok">Got it!</string>
     <string name="intro_setup_fitbit_desc2">Select \'Call and Text Notifications\' under \'General\'. Then, Select \'Text Notifications\' under \'Settings\'.</string>
     <string name="intro_setup_fitbit_desc3">Choose \'Fit Notifications\'. Then, sync your Fitbit device within the Fitbit app. Do not choose this app for Call/Calendar Notifications, otherwise you will NOT get any notifications.</string>
     <string name="intro_setup_fitbit_button3">Open Fitbit app</string>

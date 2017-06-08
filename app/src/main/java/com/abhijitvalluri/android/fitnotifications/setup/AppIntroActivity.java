@@ -307,6 +307,16 @@ public class AppIntroActivity extends IntroActivity {
                         R.transition.left_out).toBundle();
         mPackageManager = getPackageManager();
 
+        boolean setupDone = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.done_first_launch_key), false);
+        if (setupDone) { // Setup already finished once. So, this is repeat setup
+            new AlertDialog.Builder(AppIntroActivity.this)
+                    .setTitle(getString(R.string.intro_setup_issues_title))
+                    .setMessage(getString(R.string.intro_setup_issues_message))
+                    .setPositiveButton(R.string.intro_setup_issues_ok, null)
+                    .create()
+                    .show();
+        }
+
         // Introduction slide
         addIntroSlide();
 
@@ -325,16 +335,6 @@ public class AppIntroActivity extends IntroActivity {
                 .image(R.drawable.step_one)
                 .background(R.color.fitbitColor_intro)
                 .backgroundDark(R.color.fitbitColorDark_intro)
-                .buttonCtaLabel(R.string.intro_setup_fitbit_toast_button)
-                .buttonCtaClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Toast.makeText(
-                              AppIntroActivity.this,
-                              getString(R.string.intro_setup_fitbit_toast_text1), Toast.LENGTH_LONG)
-                             .show();
-                    }
-                })
                 .build());
 
         // Step 2
