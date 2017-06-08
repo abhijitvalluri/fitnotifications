@@ -337,13 +337,15 @@
        We will attempt to resolve this issue in an update.</p>
     ]]></string>
     <string name="whats_new_text"><![CDATA[
-    <p>Changes in <b>version 2.9:</b></p>
+    <br />
+    <p>Changes in <b>version 2.9.3:</b></p>
     <ul>
-        <li>Improved transliterations for miscellaneous characters including currency symbols.<br /><br /></li>
-        <li>Improved Notification parsing for some third-party apps including WhatsApp, Telegram, Gmail, Google Calendar.<br /><br /></li>
-        <li><b>New per-app setting!</b> Discard ongoing notifications. Disable this setting so that certain ongoing notifications, like music playback will be sent to the Fitbit.</li>
+        <li>Fixed a bug with the app widget not updating the service state, and other minor bug fixes.<br /><br /></li>
+        <li><b>Support the developer!</b> You can now <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer from within the app!</li>
     </ul>
-    <p>To change the new per-app setting, go to the \'Setup Apps\' option on the main screen and click the \'gear\' icon next to the app name.</p>
+    <p>Donations are not necessary, but they are definitely appreciated! This app will continue to remain <b><i>free, and ad-free!</b></i> However, it takes
+       significant amount of time and effort to develop this and it is difficult to allocate time for it, especially as I work during my limited free time.</p>
+    <p>So, please do consider donating! Thanks!</p>
 
     ]]></string>
     <string name="opensource_text"><![CDATA[
