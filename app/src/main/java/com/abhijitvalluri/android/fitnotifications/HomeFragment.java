@@ -16,11 +16,14 @@
 
 package com.abhijitvalluri.android.fitnotifications;
 
+import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
+import android.appwidget.AppWidgetManager;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -43,6 +46,7 @@ import android.widget.Toast;
 import com.abhijitvalluri.android.fitnotifications.services.NLService;
 import com.abhijitvalluri.android.fitnotifications.setup.AppIntroActivity;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
+import com.abhijitvalluri.android.fitnotifications.widget.ServiceToggle;
 
 import java.util.Set;
 
@@ -268,6 +272,14 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    private void updateWidget() {
+        Intent i = new Intent(getActivity(), ServiceToggle.class);
+        i.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        int[] ids = AppWidgetManager.getInstance(getContext()).getAppWidgetIds(new ComponentName(getContext(), ServiceToggle.class));
+        i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        getActivity().sendBroadcast(i);
+    }
+
     private void initializeServiceButtons() {
         boolean serviceEnabled = NLService.isEnabled();
 
@@ -280,6 +292,7 @@ public class HomeFragment extends Fragment {
                 public void onClick(View v) {
                     mContext.stopService(new Intent(mContext, NLService.class));
                     NLService.setEnabled(false);
+                    updateWidget();
                     initializeServiceButtons();
                 }
             });
@@ -293,6 +306,7 @@ public class HomeFragment extends Fragment {
                     mContext.startService(new Intent(mContext, NLService.class)); // TODO: Check if I should use the same intent I used to start the service
                                                                                   // otherwise it may not stop the correct service.
                     NLService.setEnabled(true);
+                    updateWidget();
                     initializeServiceButtons();
                 }
             });
