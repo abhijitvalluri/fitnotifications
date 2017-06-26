@@ -16,7 +16,6 @@
 
 package com.abhijitvalluri.android.fitnotifications;
 
-import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -25,6 +24,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -34,18 +34,22 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.NotificationCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.RemoteViews;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.abhijitvalluri.android.fitnotifications.services.NLService;
 import com.abhijitvalluri.android.fitnotifications.setup.AppIntroActivity;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
+import com.abhijitvalluri.android.fitnotifications.utils.DebugLog;
 import com.abhijitvalluri.android.fitnotifications.widget.ServiceToggle;
 
 import java.util.Set;
@@ -69,6 +73,11 @@ public class HomeFragment extends Fragment {
     private TextView mNotificationAccessTV;
     private TextView mServiceStateTV;
     private TextView mBannerTV;
+    private Switch mEnableLogs;
+    private Button mSendLogs;
+    private TextView mLogStatus;
+
+    private SharedPreferences mPreferences;
     private Boolean mIsDonateBanner = false;
 
     private Bundle LAUNCH_ACTIVITY_ANIM_BUNDLE;
@@ -99,7 +108,64 @@ public class HomeFragment extends Fragment {
             mBannerTV.setText(R.string.rate_app);
         }
 
+        mEnableLogs = (Switch) v.findViewById(R.id.enableLogSwitch);
+        mSendLogs = (Button) v.findViewById(R.id.sendLogsButton);
+        mLogStatus = (TextView) v.findViewById(R.id.logStatus);
         mContext = getContext();
+
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        boolean enableLogs = mPreferences.getBoolean(getString(R.string.enable_debug_logs), false);
+        mEnableLogs.setChecked(enableLogs);
+        mSendLogs.setEnabled(enableLogs);
+
+        mEnableLogs.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mPreferences.edit().putBoolean(getString(R.string.enable_debug_logs), isChecked).apply();
+                mSendLogs.setEnabled(isChecked);
+                NLService.onEnableDebugLogsUpdated(isChecked);
+                DebugLog log = DebugLog.get(getActivity());
+                int status = isChecked ? log.init() : log.deInit();
+                updateLogStatus(status);
+                if (isChecked) {
+                    new AlertDialog.Builder(getActivity())
+                            .setTitle("Warning: Storage Usage!")
+                            .setMessage("Please note that enabling logging will use storage space on your phone. We will limit log file size to 10 MB.\n\n" +
+                                    "If you enable logging for too long, then old log contents will be over-written to stay within the 10 MB file size limit. " +
+                                    "To avoid this, and preserve debugging information, please enable logs for only a brief period during troubleshooting.")
+                            .setPositiveButton(android.R.string.ok, null)
+                            .create().show();
+                }
+            }
+        });
+
+        mSendLogs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AlertDialog.Builder(getActivity())
+                        .setTitle("Send logs to developer?")
+                        .setMessage("If you send logs to the developer now, the app will stop collecting logs immediately and send whatever logs are present. It will then delete the logs from your phone. Do you want to proceed?")
+                        .setPositiveButton("SEND", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                DebugLog log = DebugLog.get(getActivity());
+                                mEnableLogs.setChecked(false);
+                                startActivity(log.emailLogIntent());
+                            }
+                        })
+                        .setNegativeButton("CANCEL", null)
+                        .create().show();
+            }
+        });
+
+        DebugLog log = DebugLog.get(getActivity());
+
+        if (log.getFileStatus() == DebugLog.STATUS_LOG_OPENED) {
+            updateLogStatus(log.getWriteStatus());
+        } else {
+            updateLogStatus(log.getFileStatus());
+        }
+
         initializeSettings();
         initializeButtons();
 
@@ -110,6 +176,22 @@ public class HomeFragment extends Fragment {
         activateTextViewLinks();
 
         return v;
+    }
+
+    private void updateLogStatus(int status) {
+        switch (status) {
+            case DebugLog.STATUS_LOG_OPENED:
+                mLogStatus.setText("STATUS: Log opened successfully");
+                break;
+            case DebugLog.STATUS_IO_EXCEPTION:
+                mLogStatus.setText("STATUS: Error opening log");
+                break;
+            case DebugLog.STATUS_WRITE_OK:
+                mLogStatus.setText("STATUS: Writing logs...");
+                break;
+            case DebugLog.STATUS_UNINITIALIZED:
+                mLogStatus.setText("STATUS: Logs cleared and uninitialized");
+        }
     }
 
     @Override

@@ -124,6 +124,7 @@
 
     <!-- Preference keys -->
     <string name="show_enabled_apps_key">ShowEnabledApps</string>
+    <string name="enable_debug_logs">enableDebugLogs</string>
 
     <!-- Widget strings -->
     <string name="widget_button">Fit Notification Service Toggle</string>
@@ -338,10 +339,11 @@
     ]]></string>
     <string name="whats_new_text"><![CDATA[
     <br />
-    <p>Changes in <b>version 2.9.3:</b></p>
+    <p>Changes in <b>version 2.9.5-BETA:</b></p>
     <ul>
-        <li>Fixed a bug with the app widget not updating the service state, and other minor bug fixes.<br /><br /></li>
-        <li><b>Support the developer!</b> You can now <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer from within the app!</li>
+        <li><b>New troubleshooting feature!</b> Enable debugging logs to collect data about the app\'s operation to identify issues with forwarding notifications. No personal data will be collected, such as the contents of the notification. You can email the logs to the developer and see the contents of the logs yourself from the email.<br /><br /></li>
+        <li><b>New feature for scheduling app notifications</b> You can now choose the days of the week when you want to enable notifications for each app individually.<br /><br /></li>
+        <li><b>Support the developer!</b> You can now <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer! Visit my website for more details.</li>
     </ul>
     <p>Donations are not necessary, but they are definitely appreciated! This app will continue to remain <b><i>free, and ad-free!</b></i> However, it takes
        significant amount of time and effort to develop this and it is difficult to allocate time for it, especially as I work during my limited free time.</p>

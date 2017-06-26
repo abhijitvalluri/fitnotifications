@@ -173,6 +173,7 @@ public class AppSelectionsStore {
         values.put(AppChoiceTable.Cols.DISCARD_EMPTY_NOTIFICATIONS, appSelection.isDiscardEmptyNotifications() ? 1 : 0);
         values.put(AppChoiceTable.Cols.DISCARD_ONGOING_NOTIFICATIONS, appSelection.isDiscardOngoingNotifications() ? 1 : 0);
         values.put(AppChoiceTable.Cols.ALL_DAY_SCHEDULE, appSelection.isAllDaySchedule() ? 1 : 0);
+        values.put(AppChoiceTable.Cols.DAYS_OF_WEEK, appSelection.getDaysOfWeek());
 
         return values;
     }

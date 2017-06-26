@@ -7,9 +7,9 @@ android {
     defaultConfig {
         applicationId "com.abhijitvalluri.android.fitnotifications"
         minSdkVersion 19
-        targetSdkVersion 25
-        versionCode 25
-        versionName "2.9.3"
+        targetSdkVersion 23
+        versionCode 26
+        versionName "2.9.5-BETA"
     }
     compileOptions {
         encoding "UTF-8"

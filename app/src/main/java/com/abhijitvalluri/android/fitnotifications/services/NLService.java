@@ -42,9 +42,11 @@ import com.abhijitvalluri.android.fitnotifications.SettingsActivity;
 import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
 import com.abhijitvalluri.android.fitnotifications.utils.AppSelectionsStore;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
+import com.abhijitvalluri.android.fitnotifications.utils.DebugLog;
 import com.abhijitvalluri.android.fitnotifications.utils.TranslitUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -74,11 +76,14 @@ public class NLService extends NotificationListenerService {
     private static boolean mTransliterateNotif;
     private static boolean mSplitNotification;
     private static boolean mDisplayAppName;
+    private static boolean mEnableDebugLogs;
     private static int mFitbitNotifCharLimit;
     private static int mNumSplitNotifications;
     private static int mPlaceholderNotifDismissDelayMillis;
     private static int mRelayedNotifDismissDelayMillis;
     private static int mNotifLimitDurationMillis;
+    private DebugLog mDebugLog;
+
 
     private TranslitUtil translitUtil;
 
@@ -91,6 +96,7 @@ public class NLService extends NotificationListenerService {
         super.onCreate();
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mAppSelectionsStore = AppSelectionsStore.get(this);
+        mDebugLog = DebugLog.get(this);
         mLastNotificationTimeMap = new HashMap<>();
 
         mSelectedAppsPackageNames = mAppSelectionsStore.getSelectedAppsPackageNames();
@@ -192,8 +198,16 @@ public class NLService extends NotificationListenerService {
         mDisplayAppName = displayAppName;
     }
 
+    public static void onEnableDebugLogsUpdated(boolean enableDebugLogs) {
+        mEnableDebugLogs = enableDebugLogs;
+    }
+
     @Override
     public void onNotificationPosted(final StatusBarNotification sbn) {
+        if (mEnableDebugLogs) {
+            mDebugLog.writeLog("++++++++++++");
+            mDebugLog.writeLog("Entered onNotificationPosted. Notification from: " + sbn.getPackageName());
+        }
 
         if (!mIsServiceEnabled) {
             return;
@@ -203,12 +217,20 @@ public class NLService extends NotificationListenerService {
             return;
         }
 
+        if (mEnableDebugLogs) {
+            mDebugLog.writeLog("Service is enabled");
+        }
+
         Notification notification = sbn.getNotification();
         final String appPackageName = sbn.getPackageName();
         Bundle extras = notification.extras;
 
         if (!appNotificationsActive(appPackageName)) {
             return;
+        }
+
+        if (mEnableDebugLogs) {
+            mDebugLog.writeLog(appPackageName + " is selected");
         }
 
         String filterText = null;
@@ -222,6 +244,10 @@ public class NLService extends NotificationListenerService {
                 discardEmptyNotifications = appSelection.isDiscardEmptyNotifications();
                 discardOngoingNotifications = appSelection.isDiscardOngoingNotifications();
             }
+        }
+
+        if (mEnableDebugLogs) {
+            mDebugLog.writeLog("Discard Empty: " + discardEmptyNotifications + ", Discard Ongoing: " + discardOngoingNotifications);
         }
 
         // DISREGARD SPAMMY NOTIFICATIONS
@@ -240,11 +266,29 @@ public class NLService extends NotificationListenerService {
         // "generic" extractor will never return null as the notificationText
         // and app-specific extractors will return null for notifications that should be skipped
         if (titleAndText == null || titleAndText[1] == null || (titleAndText[1].length() == 0 && discardEmptyNotifications)) {
+            if (mEnableDebugLogs) {
+                mDebugLog.writeLog("Extractor gave null title or null text or is empty");
+                mDebugLog.writeLog("titleAndText: " + (titleAndText == null ? "null" : "not null"));
+                if (titleAndText != null) {
+                    mDebugLog.writeLog("titleAndText[1]: " + (titleAndText[1] == null ? "null" : "not null"));
+                    if (titleAndText[1] != null) {
+                        mDebugLog.writeLog("titleAndText[1].length(): " + titleAndText[1].length());
+                    }
+                }
+            }
             return;
+        }
+
+        if (mEnableDebugLogs) {
+            mDebugLog.writeLog("Extractor gave non null titleAndText and non-empty too");
         }
 
         if (anyMatchesFilter(filterText, titleAndText)) {
             return;
+        }
+
+        if (mEnableDebugLogs) {
+            mDebugLog.writeLog("Unfiltered and undiscarded");
         }
 
         if (mLimitNotifications) {
@@ -254,6 +298,10 @@ public class NLService extends NotificationListenerService {
                 return;
             }
             mLastNotificationTimeMap.put(appPackageName, currentTimeMillis);
+        }
+
+        if (mEnableDebugLogs) {
+            mDebugLog.writeLog("Unlimited");
         }
 
         CharSequence notificationTitle = titleAndText[0];
@@ -271,6 +319,10 @@ public class NLService extends NotificationListenerService {
         RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.custom_notification);
         contentView.setTextViewText(
                 R.id.customNotificationText, getString(R.string.notification_text));
+
+        if (mEnableDebugLogs) {
+            mDebugLog.writeLog("Constructing notification");
+        }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
@@ -324,6 +376,11 @@ public class NLService extends NotificationListenerService {
                 }
             }, mRelayedNotifDismissDelayMillis);
         }
+
+        if (mEnableDebugLogs) {
+            mDebugLog.writeLog("Notification sent");
+            mDebugLog.writeLog("------------");
+        }
     }
 
     @NonNull
@@ -375,6 +432,15 @@ public class NLService extends NotificationListenerService {
             return false;
         }
 
+        // Day of week check: Check if today is selected in the schedule
+        // Get current time
+        Calendar cal = Calendar.getInstance();
+        int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK) - 1; // 0 is Sunday, 6 is Saturday
+        if ((appSelection.getDaysOfWeek() & (1 << dayOfWeek)) == 0) { // Today is not in schedule
+            return false;
+        }
+        // If we reach here, then today is okay by the schedule
+
         if (appSelection.isAllDaySchedule()) {
             return true;
         }
@@ -387,11 +453,10 @@ public class NLService extends NotificationListenerService {
             return true;
         }
 
-        // Get current time
-        Calendar cal = Calendar.getInstance();
         int hour = cal.get(Calendar.HOUR_OF_DAY);
         int minute = cal.get(Calendar.MINUTE);
         int currTime = hour * 60 + minute;
+
 
         if (startTime < stopTime) {
             // Schedule is within one day

@@ -43,6 +43,7 @@ public class AppSelectionCursorWrapper extends CursorWrapper {
         int discardEmptyNotif = getInt(getColumnIndex(AppChoiceTable.Cols.DISCARD_EMPTY_NOTIFICATIONS));
         int discardOngoingNotif = getInt(getColumnIndex(AppChoiceTable.Cols.DISCARD_ONGOING_NOTIFICATIONS));
         int allDaySchedule    = getInt(getColumnIndex(AppChoiceTable.Cols.ALL_DAY_SCHEDULE));
+        int daysOfWeek    = getInt(getColumnIndex(AppChoiceTable.Cols.DAYS_OF_WEEK));
 
         return new AppSelection(appPackageName,
                                 appName,
@@ -54,6 +55,7 @@ public class AppSelectionCursorWrapper extends CursorWrapper {
                                 stopTimeMinute,
                                 discardEmptyNotif != 0,
                                 discardOngoingNotif != 0,
-                                allDaySchedule != 0);
+                                allDaySchedule != 0,
+                                daysOfWeek);
     }
 }

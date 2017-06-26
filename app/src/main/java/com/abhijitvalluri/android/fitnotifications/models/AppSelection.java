@@ -35,6 +35,7 @@ public class AppSelection implements Parcelable {
     private boolean mDiscardEmptyNotifications;
     private boolean mDiscardOngoingNotifications;
     private boolean mAllDaySchedule;
+    private int mDaysOfWeek;
 
     public AppSelection(String appPackageName, String appName) {
         mAppPackageName = appPackageName;
@@ -46,6 +47,7 @@ public class AppSelection implements Parcelable {
         mStopTimeMinute = 59;
         mAllDaySchedule = true;
         mDiscardOngoingNotifications = true;
+        mDaysOfWeek = 127;
     }
 
     public AppSelection(String appPackageName,
@@ -58,7 +60,8 @@ public class AppSelection implements Parcelable {
                         int stopTimeMinute,
                         boolean discardEmptyNotifications,
                         boolean discardOngoingNotifications,
-                        boolean allDaySchedule) {
+                        boolean allDaySchedule,
+                        int daysOfWeek) {
         mAppPackageName = appPackageName;
         mAppName = appName;
         mIsSelected = isSelected;
@@ -70,6 +73,7 @@ public class AppSelection implements Parcelable {
         mDiscardEmptyNotifications = discardEmptyNotifications;
         mDiscardOngoingNotifications = discardOngoingNotifications;
         mAllDaySchedule = allDaySchedule;
+        mDaysOfWeek = daysOfWeek;
     }
 
     public boolean isSelected() {
@@ -160,6 +164,14 @@ public class AppSelection implements Parcelable {
         return mStopTimeHour * 60 + mStopTimeMinute;
     }
 
+    public int getDaysOfWeek() {
+        return mDaysOfWeek;
+    }
+
+    public void setDaysOfWeek(int daysOfWeek) {
+        mDaysOfWeek = daysOfWeek;
+    }
+
     private AppSelection(Parcel in) {
         mAppPackageName = in.readString();
         mAppName = in.readString();
@@ -171,12 +183,8 @@ public class AppSelection implements Parcelable {
         mStopTimeMinute = in.readInt();
         mDiscardEmptyNotifications = in.readByte() != 0x00;
         mAllDaySchedule = in.readByte() != 0x00;
-        if (in.dataAvail() > 0) {
-            mDiscardOngoingNotifications = in.readByte() != 0x00;
-        }
-        else {
-            mDiscardOngoingNotifications = true;
-        }
+        mDiscardOngoingNotifications = in.readByte() != 0x00;
+        mDaysOfWeek = in.readInt();
     }
 
     @Override
@@ -197,6 +205,7 @@ public class AppSelection implements Parcelable {
         dest.writeByte((byte) (mDiscardEmptyNotifications ? 0x01 : 0x00));
         dest.writeByte((byte) (mAllDaySchedule ? 0x01 : 0x00));
         dest.writeByte((byte) (mDiscardOngoingNotifications ? 0x01 : 0x00));
+        dest.writeInt(mDaysOfWeek);
     }
 
     @SuppressWarnings("unused")

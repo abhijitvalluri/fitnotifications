@@ -19,6 +19,7 @@ package com.abhijitvalluri.android.fitnotifications;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateFormat;
 import android.view.MenuItem;
@@ -38,25 +39,43 @@ import com.abhijitvalluri.android.fitnotifications.utils.Func;
 public class AppSettingsActivity extends AppCompatActivity implements TimePickerFragment.TimePickerListener {
 
     public static final int START_TIME_REQUEST = 0;
-    public static final int STOP_TIME_REQUEST = 1;
     public static final String APP_SELECTION_EXTRA = "appSelectionExtra";
 
-    public static final String STATE_APP_SELECTION = "appSelection";
-    public static final String STATE_START_TIME_HOUR = "startTimeHour";
-    public static final String STATE_START_TIME_MINUTE = "startTimeMinute";
-    public static final String STATE_STOP_TIME_HOUR = "stopTimeHour";
-    public static final String STATE_STOP_TIME_MINUTE = "stopTimeMinute";
-    public static final String STATE_DISCARD_EMPTY_NOTIFICATIONS = "discardEmptyNotifications";
-    public static final String STATE_DISCARD_ONGOING_NOTIFICATIONS = "discardOngoingNotifications";
-    public static final String STATE_ALL_DAY_SCHEDULE = "allDaySchedule";
+    private static final int STOP_TIME_REQUEST = 1;
+    private static final String STATE_APP_SELECTION = "appSelection";
+    private static final String STATE_START_TIME_HOUR = "startTimeHour";
+    private static final String STATE_START_TIME_MINUTE = "startTimeMinute";
+    private static final String STATE_STOP_TIME_HOUR = "stopTimeHour";
+    private static final String STATE_STOP_TIME_MINUTE = "stopTimeMinute";
+    private static final String STATE_DISCARD_EMPTY_NOTIFICATIONS = "discardEmptyNotifications";
+    private static final String STATE_DISCARD_ONGOING_NOTIFICATIONS = "discardOngoingNotifications";
+    private static final String STATE_ALL_DAY_SCHEDULE = "allDaySchedule";
+    private static final String STATE_DAYS_OF_WEEK = "daysOfWeek";
 
     private static final String DIALOG_TIME = "dialogTime";
+
+    private static final int SUNDAY     = 0b0000001;
+    private static final int MONDAY     = 0b0000010;
+    private static final int TUESDAY    = 0b0000100;
+    private static final int WEDNESDAY  = 0b0001000;
+    private static final int THURSDAY   = 0b0010000;
+    private static final int FRIDAY     = 0b0100000;
+    private static final int SATURDAY   = 0b1000000;
 
     private AppSelection mAppSelection;
     private EditText mFilterText;
     private TextView mNextDay;
     private Button mStartTimeButton;
     private Button mStopTimeButton;
+
+    private Button mSundayBtn;
+    private Button mMondayBtn;
+    private Button mTuesdayBtn;
+    private Button mWednesdayBtn;
+    private Button mThursdayBtn;
+    private Button mFridayBtn;
+    private Button mSaturdayBtn;
+    private int mDaysOfWeek;
 
     private int mStartTimeHour;
     private int mStartTimeMinute;
@@ -86,6 +105,14 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         mFilterText.setHorizontallyScrolling(false);
         mFilterText.setMaxLines(5);
 
+        mSundayBtn = (Button) findViewById(R.id.button_sunday);
+        mMondayBtn = (Button) findViewById(R.id.button_monday);
+        mTuesdayBtn = (Button) findViewById(R.id.button_tuesday);
+        mWednesdayBtn = (Button) findViewById(R.id.button_wednesday);
+        mThursdayBtn = (Button) findViewById(R.id.button_thursday);
+        mFridayBtn = (Button) findViewById(R.id.button_friday);
+        mSaturdayBtn = (Button) findViewById(R.id.button_saturday);
+
         if (savedInstanceState == null) {
             mAppSelection = getIntent().getParcelableExtra(APP_SELECTION_EXTRA);
             mStartTimeHour = mAppSelection.getStartTimeHour();
@@ -95,6 +122,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
             mDiscardEmptyNotifications = mAppSelection.isDiscardEmptyNotifications();
             mDiscardOngoingNotifications = mAppSelection.isDiscardOngoingNotifications();
             mAllDaySchedule = mAppSelection.isAllDaySchedule();
+            mDaysOfWeek = mAppSelection.getDaysOfWeek();
         } else {
             mAppSelection = savedInstanceState.getParcelable(STATE_APP_SELECTION);
             mStartTimeHour = savedInstanceState.getInt(STATE_START_TIME_HOUR);
@@ -104,6 +132,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
             mDiscardEmptyNotifications = savedInstanceState.getBoolean(STATE_DISCARD_EMPTY_NOTIFICATIONS);
             mDiscardOngoingNotifications = savedInstanceState.getBoolean(STATE_DISCARD_ONGOING_NOTIFICATIONS);
             mAllDaySchedule = savedInstanceState.getBoolean(STATE_ALL_DAY_SCHEDULE);
+            mDaysOfWeek = savedInstanceState.getInt(STATE_DAYS_OF_WEEK);
         }
 
         discardEmptySwitch.setChecked(mDiscardEmptyNotifications);
@@ -113,6 +142,8 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
 
         allDaySwitch.setChecked(mAllDaySchedule);
         setupScheduleSettings();
+        setupWeekdayButtons();
+        setupWeekdayButtonsOnClickListeners();
 
         discardEmptySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -163,6 +194,145 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         });
     }
 
+    private void setupWeekdayButtonsOnClickListeners() {
+        mSundayBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ((mDaysOfWeek & SUNDAY) > 0) { // This means Sunday was already selected. Now, turn it off.
+                    mDaysOfWeek &= ~SUNDAY;
+                    mSundayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
+                } else { // AppSettingsActivity.this means Sunday was already off. Now, turn it on.
+                    mDaysOfWeek |= SUNDAY;
+                    mSundayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
+                }
+            }
+        });
+
+        mMondayBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ((mDaysOfWeek & MONDAY) > 0) {
+                    mDaysOfWeek &= ~MONDAY;
+                    mMondayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
+                } else {
+                    mDaysOfWeek |= MONDAY;
+                    mMondayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
+                }
+            }
+        });
+
+        mTuesdayBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ((mDaysOfWeek & TUESDAY) > 0) {
+                    mDaysOfWeek &= ~TUESDAY;
+                    mTuesdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
+                } else {
+                    mDaysOfWeek |= TUESDAY;
+                    mTuesdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
+                }
+            }
+        });
+
+        mWednesdayBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ((mDaysOfWeek & WEDNESDAY) > 0) {
+                    mDaysOfWeek &= ~WEDNESDAY;
+                    mWednesdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
+                } else {
+                    mDaysOfWeek |= WEDNESDAY;
+                    mWednesdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
+                }
+            }
+        });
+
+        mThursdayBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ((mDaysOfWeek & THURSDAY) > 0) {
+                    mDaysOfWeek &= ~THURSDAY;
+                    mThursdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
+                } else {
+                    mDaysOfWeek |= THURSDAY;
+                    mThursdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
+                }
+            }
+        });
+
+        mFridayBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ((mDaysOfWeek & FRIDAY) > 0) {
+                    mDaysOfWeek &= ~FRIDAY;
+                    mFridayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
+                } else {
+                    mDaysOfWeek |= FRIDAY;
+                    mFridayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
+                }
+            }
+        });
+
+        mSaturdayBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ((mDaysOfWeek & SATURDAY) > 0) {
+                    mDaysOfWeek &= ~SATURDAY;
+                    mSaturdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
+                } else {
+                    mDaysOfWeek |= SATURDAY;
+                    mSaturdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
+                }
+            }
+        });
+
+    }
+
+    private void setupWeekdayButtons() {
+        if ((mDaysOfWeek & SUNDAY) > 0) {
+            mSundayBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.button_bg_round_active));
+        } else {
+            mSundayBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.button_bg_round_inactive));
+        }
+
+        if ((mDaysOfWeek & MONDAY) > 0) {
+            mMondayBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.button_bg_round_active));
+        } else {
+            mMondayBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.button_bg_round_inactive));
+        }
+
+        if ((mDaysOfWeek & TUESDAY) > 0) {
+            mTuesdayBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.button_bg_round_active));
+        } else {
+            mTuesdayBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.button_bg_round_inactive));
+        }
+
+        if ((mDaysOfWeek & WEDNESDAY) > 0) {
+            mWednesdayBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.button_bg_round_active));
+        } else {
+            mWednesdayBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.button_bg_round_inactive));
+        }
+
+        if ((mDaysOfWeek & THURSDAY) > 0) {
+            mThursdayBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.button_bg_round_active));
+        } else {
+            mThursdayBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.button_bg_round_inactive));
+        }
+
+        if ((mDaysOfWeek & FRIDAY) > 0) {
+            mFridayBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.button_bg_round_active));
+        } else {
+            mFridayBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.button_bg_round_inactive));
+        }
+
+        if ((mDaysOfWeek & SATURDAY) > 0) {
+            mSaturdayBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.button_bg_round_active));
+        } else {
+            mSaturdayBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.button_bg_round_inactive));
+        }
+
+    }
+
     private void setupScheduleSettings() {
         if (mAllDaySchedule) {
             mStartTimeButton.setEnabled(false);
@@ -208,6 +378,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         outState.putBoolean(STATE_DISCARD_EMPTY_NOTIFICATIONS, mDiscardEmptyNotifications);
         outState.putBoolean(STATE_ALL_DAY_SCHEDULE, mAllDaySchedule);
         outState.putBoolean(STATE_DISCARD_ONGOING_NOTIFICATIONS, mDiscardOngoingNotifications);
+        outState.putInt(STATE_DAYS_OF_WEEK, mDaysOfWeek);
 
         super.onSaveInstanceState(outState);
     }
@@ -233,6 +404,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         mAppSelection.setDiscardEmptyNotifications(mDiscardEmptyNotifications);
         mAppSelection.setDiscardOngoingNotifications(mDiscardOngoingNotifications);
         mAppSelection.setAllDaySchedule(mAllDaySchedule);
+        mAppSelection.setDaysOfWeek(mDaysOfWeek);
 
         Intent intent = new Intent();
         intent.putExtra(APP_SELECTION_EXTRA, mAppSelection);

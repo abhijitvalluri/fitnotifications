@@ -129,6 +129,24 @@
 
     </LinearLayout>
 
+    <Switch
+        android:id="@+id/enableLogSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+    <Button
+        android:id="@+id/sendLogsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:visibility="gone"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/logStatus"
+        android:visibility="gone"/>
+
     <Space
         android:layout_width="match_parent"
         android:layout_height="0dp"
