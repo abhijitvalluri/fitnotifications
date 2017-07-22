@@ -139,13 +139,20 @@
         android:id="@+id/sendLogsButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:enabled="false"
         android:visibility="gone"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/logStatus"
         android:visibility="gone"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin_landscape"
+        android:textSize="16sp"
+        android:text="Note: Rotate screen to portrait mode for logging options"/>
 
     <Space
         android:layout_width="match_parent"

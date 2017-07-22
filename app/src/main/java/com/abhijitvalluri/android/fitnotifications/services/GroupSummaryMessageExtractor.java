@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.abhijitvalluri.android.fitnotifications.R;
+import com.abhijitvalluri.android.fitnotifications.utils.DebugLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,26 +24,26 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
     private static final Pattern NEW_MESSAGES_MULTIPLE_CHATS = Pattern.compile("\\d+ (new )?messages from \\d+ chats");
     private static final Pattern PHOTO_MESSAGE = Pattern.compile("(sent you a photo|\uD83D\uDCF7 Photo)");
 
-    private final Pattern[] allNewMessagesPatterns;
-    private final Pattern[] newMessagesMultipleChatsPatterns;
-    private final Pattern[] photoMessagePatterns;
+    private final Pattern[] mAllNewMessagesPatterns;
+    private final Pattern[] mNewMessagesMultipleChatsPatterns;
+    private final Pattern[] mPhotoMessagePatterns;
 
     // some apps (Telegram) put new messages at the beginning of EXTRA_TEXT_LINES, other (WhatsApp) at the end
-    private final boolean newMessagesFirst;
-    private int lastSeenMessageHash = 0;
+    private final boolean mNewMessagesFirst;
+    private int mLastSeenMessageHash = 0;
 
 
     public GroupSummaryMessageExtractor(boolean newMessagesFirst) {
-        this.newMessagesFirst = newMessagesFirst;
+        mNewMessagesFirst = newMessagesFirst;
 
-        allNewMessagesPatterns = new Pattern[] { NEW_MESSAGES, NEW_MESSAGES_MULTIPLE_CHATS };
-        newMessagesMultipleChatsPatterns = new Pattern[] { NEW_MESSAGES_MULTIPLE_CHATS };
-        photoMessagePatterns = new Pattern[] { PHOTO_MESSAGE };
+        mAllNewMessagesPatterns = new Pattern[] { NEW_MESSAGES, NEW_MESSAGES_MULTIPLE_CHATS };
+        mNewMessagesMultipleChatsPatterns = new Pattern[] { NEW_MESSAGES_MULTIPLE_CHATS };
+        mPhotoMessagePatterns = new Pattern[] { PHOTO_MESSAGE };
     }
 
 
     public GroupSummaryMessageExtractor(Resources res, boolean newMessagesFirst) {
-        this.newMessagesFirst = newMessagesFirst;
+        mNewMessagesFirst = newMessagesFirst;
 
         // avoid doubling the patterns in case of missing translation
         Pattern newMessagesPatternLocalized =
@@ -53,17 +54,17 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
 
 
         // always check against the English version too (e.g. Telegram lacks Russian translation)
-        allNewMessagesPatterns = new Pattern[] {
+        mAllNewMessagesPatterns = new Pattern[] {
                 NEW_MESSAGES, NEW_MESSAGES_MULTIPLE_CHATS,
                 newMessagesPatternLocalized, newMessagesMultipleChatsPatternLocalized
         };
 
-        newMessagesMultipleChatsPatterns = new Pattern[] {
+        mNewMessagesMultipleChatsPatterns = new Pattern[] {
                 NEW_MESSAGES_MULTIPLE_CHATS,
                 newMessagesMultipleChatsPatternLocalized
         };
 
-        photoMessagePatterns = new Pattern[] {
+        mPhotoMessagePatterns = new Pattern[] {
                 PHOTO_MESSAGE,
                 getLocalizedPattern(PHOTO_MESSAGE, res.getString(R.string.notification_message_photo))
         };
@@ -85,50 +86,77 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
 
     @Override
     public CharSequence[] getTitleAndText(String appPackageName, Bundle extras, int notificationFlags) {
+        DebugLog debugLog = getDebugLog();
+        if (isLoggingEnabled()) {
+            debugLog.writeLog("Entered GroupSummaryMessageExtractor getTitleAndText method.");
+            debugLog.writeLog("NotificationFlags = " + notificationFlags);
+        }
+
         CharSequence notificationTitle = extras.getCharSequence(Notification.EXTRA_TITLE);
         CharSequence notificationText = null;
 
         // we only process "summary" notifications
         if ((notificationFlags & Notification.FLAG_GROUP_SUMMARY) != 0) {
+            if (isLoggingEnabled()) {
+                debugLog.writeLog("Notification is a group summary. Processing.");
+            }
+
             notificationText = extras.getCharSequence(Notification.EXTRA_TEXT);
 
             // 1. regular text - use the generic approach
-            if (notificationText == null || !matchesAnyPattern(notificationText, allNewMessagesPatterns)) {
-                lastSeenMessageHash = hash(notificationTitle, notificationText);
+            if (notificationText == null || !matchesAnyPattern(notificationText, mAllNewMessagesPatterns)) {
+                if (isLoggingEnabled()) {
+                    debugLog.writeLog("Regular text. Using generic approach.");
+                }
+                mLastSeenMessageHash = hash(notificationTitle, notificationText);
                 return super.getTitleAndText(appPackageName, extras, notificationFlags);
             }
 
             CharSequence[] lines = extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
             if (lines == null) {
-                lastSeenMessageHash = hash(notificationTitle, notificationText);
+                if (isLoggingEnabled()) {
+                    debugLog.writeLog("EXTRA text lines is null. Using generic approach.");
+                }
+                mLastSeenMessageHash = hash(notificationTitle, notificationText);
                 return super.getTitleAndText(appPackageName, extras, notificationFlags);
             }
 
-            int newestMessageIndex = newMessagesFirst ? 0 : lines.length - 1;
+            int newestMessageIndex = mNewMessagesFirst ? 0 : lines.length - 1;
 
-            if (matchesAnyPattern(notificationText, newMessagesMultipleChatsPatterns)) {
+            if (matchesAnyPattern(notificationText, mNewMessagesMultipleChatsPatterns)) {
                 // 2. "N new messages from M chats" - pick both title and new text from EXTRA_TEXT_LINES
                 // texts in EXTRA_TEXT_LINES have sender as the prefix
+                if (isLoggingEnabled()) {
+                    debugLog.writeLog("N new messages from M chats style.");
+                }
                 int pos = findFirstNewMessage(lines, null);
 
                 if (pos < 0) {
-                    notificationText = buildMultiMessage(lines, -pos - 1, newMessagesFirst ? -1 : 1);
+                    notificationText = buildMultiMessage(lines, -pos - 1, mNewMessagesFirst ? -1 : 1);
                 }
                 else {
-                    notificationText = buildMessage(lines, pos, newMessagesFirst ? -1 : 1, true);
+                    notificationText = buildMessage(lines, pos, mNewMessagesFirst ? -1 : 1, true);
                     notificationTitle = getSender(lines[newestMessageIndex]);
                 }
 
-                lastSeenMessageHash = hash(lines[newestMessageIndex], 0);
+                mLastSeenMessageHash = hash(lines[newestMessageIndex], 0);
             }
             else {
                 // 3. "N new messages" - pick new text from EXTRA_TEXT_LINES
                 // texts in EXTRA_TEXT_LINES are from one sender - no prefix
+                if (isLoggingEnabled()) {
+                    debugLog.writeLog("N new messages style.");
+                }
                 int pos = findFirstNewMessage(lines, notificationTitle);
-                notificationText = buildMessage(lines, pos, newMessagesFirst ? -1 : 1, false);
+                notificationText = buildMessage(lines, pos, mNewMessagesFirst ? -1 : 1, false);
 
-                lastSeenMessageHash = hash(notificationTitle, lines[newestMessageIndex]);
+                mLastSeenMessageHash = hash(notificationTitle, lines[newestMessageIndex]);
             }
+        } else {
+            if (isLoggingEnabled()) {
+                debugLog.writeLog("Notification is not a group summary. Ignoring this causes a bug for some users. Use a generic approach instead.");
+            }
+            return super.getTitleAndText(appPackageName, extras, notificationFlags);
         }
 
         return new CharSequence[] { notificationTitle, notificationText };
@@ -156,7 +184,7 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
         // and there could be several we haven't shown yet - scan until we find the last seen one
         int pos = 0;
         int step = 1;
-        if (newMessagesFirst) {
+        if (mNewMessagesFirst) {
             pos = lines.length - 1;
             step = -1;
         }
@@ -165,7 +193,7 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
         String previousSender = null;
         for (; 0 <= pos && pos < lines.length; pos += step) {
             int messageHash = title == null ? hash(lines[pos], 0) : hash(title, lines[pos]);
-            if (messageHash == lastSeenMessageHash) {
+            if (messageHash == mLastSeenMessageHash) {
                 break;
             }
 
@@ -181,7 +209,7 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
 
         if (pos < 0 || pos == lines.length) {
             // the last seen message was not found - consider all messages new
-            pos = newMessagesFirst ? lines.length - 1 : 0;
+            pos = mNewMessagesFirst ? lines.length - 1 : 0;
         }
         else {
             // advance to the first new message
@@ -197,7 +225,7 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
         StringBuilder sb = new StringBuilder();
         for (; 0 <= pos && pos < lines.length; pos += step) {
             CharSequence message = senderPrefixPresent ? stripSender(lines[pos]) : lines[pos];
-            if (!matchesAnyPattern(message, photoMessagePatterns) || !endsWith(sb, message)) {
+            if (!matchesAnyPattern(message, mPhotoMessagePatterns) || !endsWith(sb, message)) {
                 if (sb.length() > 0) {
                     sb.append(' ');
                 }
@@ -233,7 +261,7 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
             }
 
             CharSequence message = stripSender(lines[pos]);
-            if (!matchesAnyPattern(message, photoMessagePatterns) || !endsWith(senderMessages, message)) {
+            if (!matchesAnyPattern(message, mPhotoMessagePatterns) || !endsWith(senderMessages, message)) {
                 senderMessages.append(' ').append(message);
             }
         }

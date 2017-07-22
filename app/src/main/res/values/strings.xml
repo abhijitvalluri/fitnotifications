@@ -339,7 +339,7 @@
     ]]></string>
     <string name="whats_new_text"><![CDATA[
     <br />
-    <p>Changes in <b>version 2.9.5-BETA:</b></p>
+    <p>Changes in <b>version 2.9.6-BETA:</b></p>
     <ul>
         <li><b>New troubleshooting feature!</b> Enable debugging logs to collect data about the app\'s operation to identify issues with forwarding notifications. No personal data will be collected, such as the contents of the notification. You can email the logs to the developer and see the contents of the logs yourself from the email.<br /><br /></li>
         <li><b>New feature for scheduling app notifications</b> You can now choose the days of the week when you want to enable notifications for each app individually.<br /><br /></li>

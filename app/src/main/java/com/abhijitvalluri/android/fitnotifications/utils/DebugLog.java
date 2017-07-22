@@ -3,6 +3,7 @@ package com.abhijitvalluri.android.fitnotifications.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 
 import java.io.File;
@@ -140,13 +141,13 @@ public class DebugLog {
         return mFileStatus;
     }
 
-    public Intent emailLogIntent() {
+    public Intent emailLogIntent(Context context) {
         Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         intent.setType("application/octet-stream");
 
         String subject = "Fit Notification Logs";
         ArrayList<Uri> attachments = new ArrayList<>();
-        attachments.add(Uri.fromFile(mLogFile));
+        attachments.add(FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".provider", mLogFile));
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
         intent.putExtra(Intent.EXTRA_EMAIL, new String[] { "android@abhijitvalluri.com" });
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, attachments);

@@ -46,7 +46,6 @@ import com.abhijitvalluri.android.fitnotifications.utils.DebugLog;
 import com.abhijitvalluri.android.fitnotifications.utils.TranslitUtil;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -62,8 +61,8 @@ public class NLService extends NotificationListenerService {
 
     private static final Integer NOTIFICATION_ID = (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
 
-    private static final MessageExtractor DEFAULT_EXTRACTOR = new GenericMessageExtractor();
-    private final Map<String, MessageExtractor> messageExtractors = new TreeMap<>();
+    private static final MessageExtractor sDefaultExtractor = new GenericMessageExtractor();
+    private final Map<String, MessageExtractor> mMessageExtractors = new TreeMap<>();
 
     private final Handler mHandler = new Handler();
 
@@ -145,13 +144,13 @@ public class NLService extends NotificationListenerService {
         translitUtil = new TranslitUtil(res);
 
         // Telegram
-        messageExtractors.put("org.telegram.messenger", new GroupSummaryMessageExtractor(res, true));
+        mMessageExtractors.put("org.telegram.messenger", new GroupSummaryMessageExtractor(res, true));
         // WhatsApp
-        messageExtractors.put("com.whatsapp", new GroupSummaryMessageExtractor(res, false));
+        mMessageExtractors.put("com.whatsapp", new GroupSummaryMessageExtractor(res, false));
         // Google Calendar
-        messageExtractors.put("com.google.android.calendar", new BasicMessageExtractor());
+        mMessageExtractors.put("com.google.android.calendar", new BasicMessageExtractor());
         // GMail
-        messageExtractors.put("com.google.android.gm", new IgnoreSummaryMessageExtractor());
+        mMessageExtractors.put("com.google.android.gm", new IgnoreSummaryMessageExtractor());
     }
 
     @Override
@@ -385,8 +384,17 @@ public class NLService extends NotificationListenerService {
 
     @NonNull
     private MessageExtractor getMessageExtractor(String appPackageName) {
-        MessageExtractor extractor = messageExtractors.get(appPackageName);
-        return extractor == null ? DEFAULT_EXTRACTOR : extractor;
+        MessageExtractor extractor = mMessageExtractors.get(appPackageName);
+
+        if (extractor == null) {
+            sDefaultExtractor.setDebugLog(mDebugLog);
+            sDefaultExtractor.setLoggingEnabled(mEnableDebugLogs);
+            return sDefaultExtractor;
+        } else {
+            extractor.setDebugLog(mDebugLog);
+            extractor.setLoggingEnabled(mEnableDebugLogs);
+            return extractor;
+        }
     }
 
     @Override

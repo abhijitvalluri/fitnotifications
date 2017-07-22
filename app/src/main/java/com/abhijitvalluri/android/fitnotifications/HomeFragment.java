@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -116,13 +117,25 @@ public class HomeFragment extends Fragment {
         mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         boolean enableLogs = mPreferences.getBoolean(getString(R.string.enable_debug_logs), false);
         mEnableLogs.setChecked(enableLogs);
-        mSendLogs.setEnabled(enableLogs);
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mSendLogs.setVisibility((enableLogs ? View.VISIBLE : View.GONE));
+            mLogStatus.setVisibility((enableLogs ? View.VISIBLE : View.GONE));
+        } else {
+            mSendLogs.setVisibility(View.GONE);
+            mLogStatus.setVisibility(View.GONE);
+        }
 
         mEnableLogs.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mPreferences.edit().putBoolean(getString(R.string.enable_debug_logs), isChecked).apply();
-                mSendLogs.setEnabled(isChecked);
+                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    mSendLogs.setVisibility((isChecked ? View.VISIBLE : View.GONE));
+                    mLogStatus.setVisibility((isChecked ? View.VISIBLE : View.GONE));
+                } else {
+                    mSendLogs.setVisibility(View.GONE);
+                    mLogStatus.setVisibility(View.GONE);
+                }
                 NLService.onEnableDebugLogsUpdated(isChecked);
                 DebugLog log = DebugLog.get(getActivity());
                 int status = isChecked ? log.init() : log.deInit();
@@ -150,7 +163,7 @@ public class HomeFragment extends Fragment {
                             public void onClick(DialogInterface dialog, int which) {
                                 DebugLog log = DebugLog.get(getActivity());
                                 mEnableLogs.setChecked(false);
-                                startActivity(log.emailLogIntent());
+                                startActivity(log.emailLogIntent(getContext()));
                             }
                         })
                         .setNegativeButton("CANCEL", null)

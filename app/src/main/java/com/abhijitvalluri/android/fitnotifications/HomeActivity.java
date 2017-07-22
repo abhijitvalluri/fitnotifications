@@ -231,7 +231,7 @@ public class HomeActivity extends AppCompatActivity {
                 }
                 break;
             default:
-                // something unexpected has happened DebugLog it may be?
+                // something unexpected has happened Log it may be?
                 return;
         }
 

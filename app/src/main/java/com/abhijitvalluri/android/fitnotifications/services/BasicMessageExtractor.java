@@ -4,19 +4,26 @@ import android.app.Notification;
 import android.os.Build;
 import android.os.Bundle;
 
+import com.abhijitvalluri.android.fitnotifications.utils.DebugLog;
+
 /**
  * A basic extractor that just retrieves notification title and text from "extras".
  * No special logic is applied apart from merging "text" and "big text".
  */
-class BasicMessageExtractor implements MessageExtractor {
+class BasicMessageExtractor extends MessageExtractor {
 
     @Override
     public CharSequence[] getTitleAndText(String appPackageName, Bundle extras, int notificationFlags) {
+        DebugLog debugLog = getDebugLog();
+        if (isLoggingEnabled()) {
+            debugLog.writeLog("Entered BasicMessageExtractor getTitleAndText method. This is just the original logic.");
+            debugLog.writeLog("NotificationFlags = " + notificationFlags);
+        }
+
         CharSequence notificationTitle = extras.getCharSequence(Notification.EXTRA_TITLE);
-
         CharSequence notificationText = extras.getCharSequence(Notification.EXTRA_TEXT);
-
         CharSequence notificationBigText = null;
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             notificationBigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
         }
