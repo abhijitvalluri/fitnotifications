@@ -156,7 +156,7 @@ public class DebugLog {
         return mFileStatus;
     }
 
-    public Intent emailLogIntent(Context context) {
+    public Intent emailLogIntent(Context context, String logcat) {
         Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         intent.setType("application/octet-stream");
 
@@ -165,6 +165,7 @@ public class DebugLog {
         attachments.add(FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".provider", mLogFile));
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
         intent.putExtra(Intent.EXTRA_EMAIL, new String[] { "android@abhijitvalluri.com" });
+        intent.putExtra(Intent.EXTRA_TEXT, logcat);
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, attachments);
 
         return intent;

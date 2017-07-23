@@ -53,6 +53,9 @@ import com.abhijitvalluri.android.fitnotifications.utils.Constants;
 import com.abhijitvalluri.android.fitnotifications.utils.DebugLog;
 import com.abhijitvalluri.android.fitnotifications.widget.ServiceToggle;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Set;
 
 /**
@@ -163,7 +166,23 @@ public class HomeFragment extends Fragment {
                             public void onClick(DialogInterface dialog, int which) {
                                 DebugLog log = DebugLog.get(getActivity());
                                 mEnableLogs.setChecked(false);
-                                startActivity(log.emailLogIntent(getContext()));
+
+                                StringBuilder logcat=new StringBuilder();
+                                try {
+                                    Process process = Runtime.getRuntime().exec("logcat -d");
+                                    BufferedReader bufferedReader = new BufferedReader(
+                                            new InputStreamReader(process.getInputStream()));
+
+                                    String line;
+                                    while ((line = bufferedReader.readLine()) != null) {
+                                        logcat.append(line).append('\n');
+                                    }
+                                } catch (IOException e) {
+                                    logcat.append("IOException when accessing logcat. Exception: ")
+                                          .append(e.getMessage());
+                                }
+
+                                startActivity(log.emailLogIntent(getContext(), logcat.toString()));
                             }
                         })
                         .setNegativeButton("CANCEL", null)
