@@ -47,6 +47,7 @@ import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
 import com.abhijitvalluri.android.fitnotifications.services.NLService;
 import com.abhijitvalluri.android.fitnotifications.utils.AppSelectionsStore;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
+import com.abhijitvalluri.android.fitnotifications.utils.DebugLog;
 import com.abhijitvalluri.android.fitnotifications.utils.Func;
 
 import java.util.ArrayList;
@@ -130,6 +131,15 @@ public class AppChoicesActivity extends AppCompatActivity {
             mRecyclerView.setAdapter(mAdapter);
             mRecyclerView.getLayoutManager().onRestoreInstanceState(listState);
             mSetupComplete = getSetupStatus(savedInstanceState);
+
+            DebugLog log = DebugLog.get(getApplicationContext());
+            if (log.isEnabled()) {
+                log.writeLog("Restoring state may cause problems for some users");
+                log.writeLog("Number of applications: " + mAppSelections.size());
+                log.writeLog("Loading Text View text: " + mLoadingView.getText());
+                log.writeLog("Loading Text View status: " + mLoadingView.getVisibility());
+                log.writeLog("Setup status: " + (mSetupComplete ? "true" : "false"));
+            }
         } else {
             mLoadingView.setText(getString(R.string.app_list_loading_text));
             mRecyclerView.setVisibility(View.GONE);
@@ -265,10 +275,19 @@ public class AppChoicesActivity extends AppCompatActivity {
     }
 
     private Void appListTask() {
-        List<ResolveInfo> packages = Func.getInstalledPackages(mPackageManager);
+        DebugLog log = DebugLog.get(getApplicationContext());
+        List<ResolveInfo> packages = Func.getInstalledPackages(mPackageManager, getApplicationContext());
+
+        if (log.isEnabled()) {
+            log.writeLog("Number of packages retrieved from getInstalledPackages: " + packages.size());
+        }
 
         // getAppSelectionsSubList is also needed for the subsequent calls to contains()
         List<AppSelection> appSelections = mAppSelectionsStore.getAppSelections();
+
+        if (log.isEnabled()) {
+            log.writeLog("Number of apps in App selection store: " + appSelections.size());
+        }
 
         for (ResolveInfo info : packages) {
             String appPackageName = info.activityInfo.packageName;
@@ -279,11 +298,19 @@ public class AppChoicesActivity extends AppCompatActivity {
             }
         }
 
+        if (log.isEnabled()) {
+            log.writeLog("Number of apps in App selection store after additions: " + mAppSelectionsStore.size());
+        }
+
         // Remove uninstalled apps from the database.
         for (AppSelection appSelection : appSelections) {
             if (isUninstalled(appSelection.getAppPackageName(), packages)) {
                 mAppSelectionsStore.deleteAppSelection(appSelection);
             }
+        }
+
+        if (log.isEnabled()) {
+            log.writeLog("Number of apps in App selection store after deletions: " + mAppSelectionsStore.size());
         }
 
         return null;
@@ -346,6 +373,11 @@ public class AppChoicesActivity extends AppCompatActivity {
 
     private void setupAdapter() {
         mAppSelections = mAppSelectionsStore.getAppSelections();
+
+        DebugLog log = DebugLog.get(getApplicationContext());
+        if (log.isEnabled()) {
+            log.writeLog("In setupAdapter: number of apps is: " + mAppSelections.size());
+        }
 
         if (mShowOnlyEnabledApps) {
             List<AppSelection> appSelectionsSubList = new ArrayList<>();

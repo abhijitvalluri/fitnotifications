@@ -75,7 +75,6 @@ public class NLService extends NotificationListenerService {
     private static boolean mTransliterateNotif;
     private static boolean mSplitNotification;
     private static boolean mDisplayAppName;
-    private static boolean mEnableDebugLogs;
     private static int mFitbitNotifCharLimit;
     private static int mNumSplitNotifications;
     private static int mPlaceholderNotifDismissDelayMillis;
@@ -197,13 +196,9 @@ public class NLService extends NotificationListenerService {
         mDisplayAppName = displayAppName;
     }
 
-    public static void onEnableDebugLogsUpdated(boolean enableDebugLogs) {
-        mEnableDebugLogs = enableDebugLogs;
-    }
-
     @Override
     public void onNotificationPosted(final StatusBarNotification sbn) {
-        if (mEnableDebugLogs) {
+        if (mDebugLog.isEnabled()) {
             mDebugLog.writeLog("++++++++++++");
             mDebugLog.writeLog("Entered onNotificationPosted. Notification from: " + sbn.getPackageName());
         }
@@ -216,7 +211,7 @@ public class NLService extends NotificationListenerService {
             return;
         }
 
-        if (mEnableDebugLogs) {
+        if (mDebugLog.isEnabled()) {
             mDebugLog.writeLog("Service is enabled");
         }
 
@@ -228,7 +223,7 @@ public class NLService extends NotificationListenerService {
             return;
         }
 
-        if (mEnableDebugLogs) {
+        if (mDebugLog.isEnabled()) {
             mDebugLog.writeLog(appPackageName + " is selected");
         }
 
@@ -245,7 +240,7 @@ public class NLService extends NotificationListenerService {
             }
         }
 
-        if (mEnableDebugLogs) {
+        if (mDebugLog.isEnabled()) {
             mDebugLog.writeLog("Discard Empty: " + discardEmptyNotifications + ", Discard Ongoing: " + discardOngoingNotifications);
         }
 
@@ -265,7 +260,7 @@ public class NLService extends NotificationListenerService {
         // "generic" extractor will never return null as the notificationText
         // and app-specific extractors will return null for notifications that should be skipped
         if (titleAndText == null || titleAndText[1] == null || (titleAndText[1].length() == 0 && discardEmptyNotifications)) {
-            if (mEnableDebugLogs) {
+            if (mDebugLog.isEnabled()) {
                 mDebugLog.writeLog("Extractor gave null title or null text or is empty");
                 mDebugLog.writeLog("titleAndText: " + (titleAndText == null ? "null" : "not null"));
                 if (titleAndText != null) {
@@ -278,7 +273,7 @@ public class NLService extends NotificationListenerService {
             return;
         }
 
-        if (mEnableDebugLogs) {
+        if (mDebugLog.isEnabled()) {
             mDebugLog.writeLog("Extractor gave non null titleAndText and non-empty too");
         }
 
@@ -286,7 +281,7 @@ public class NLService extends NotificationListenerService {
             return;
         }
 
-        if (mEnableDebugLogs) {
+        if (mDebugLog.isEnabled()) {
             mDebugLog.writeLog("Unfiltered and undiscarded");
         }
 
@@ -299,7 +294,7 @@ public class NLService extends NotificationListenerService {
             mLastNotificationTimeMap.put(appPackageName, currentTimeMillis);
         }
 
-        if (mEnableDebugLogs) {
+        if (mDebugLog.isEnabled()) {
             mDebugLog.writeLog("Unlimited");
         }
 
@@ -319,7 +314,7 @@ public class NLService extends NotificationListenerService {
         contentView.setTextViewText(
                 R.id.customNotificationText, getString(R.string.notification_text));
 
-        if (mEnableDebugLogs) {
+        if (mDebugLog.isEnabled()) {
             mDebugLog.writeLog("Constructing notification");
         }
 
@@ -376,7 +371,7 @@ public class NLService extends NotificationListenerService {
             }, mRelayedNotifDismissDelayMillis);
         }
 
-        if (mEnableDebugLogs) {
+        if (mDebugLog.isEnabled()) {
             mDebugLog.writeLog("Notification sent");
             mDebugLog.writeLog("------------");
         }
@@ -388,11 +383,11 @@ public class NLService extends NotificationListenerService {
 
         if (extractor == null) {
             sDefaultExtractor.setDebugLog(mDebugLog);
-            sDefaultExtractor.setLoggingEnabled(mEnableDebugLogs);
+            sDefaultExtractor.setLoggingEnabled(mDebugLog.isEnabled());
             return sDefaultExtractor;
         } else {
             extractor.setDebugLog(mDebugLog);
-            extractor.setLoggingEnabled(mEnableDebugLogs);
+            extractor.setLoggingEnabled(mDebugLog.isEnabled());
             return extractor;
         }
     }

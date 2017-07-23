@@ -103,7 +103,7 @@ public class AppIntroActivity extends IntroActivity {
     }
 
     private boolean isFitbitAppInstalled() {
-        List<String> packageNames = Func.getInstalledPackageNames(mPackageManager);
+        List<String> packageNames = Func.getInstalledPackageNames(mPackageManager, getApplicationContext());
         return packageNames.contains(Constants.FITBIT_PACKAGE_NAME);
     }
 

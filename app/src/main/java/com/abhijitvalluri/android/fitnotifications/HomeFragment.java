@@ -136,9 +136,9 @@ public class HomeFragment extends Fragment {
                     mSendLogs.setVisibility(View.GONE);
                     mLogStatus.setVisibility(View.GONE);
                 }
-                NLService.onEnableDebugLogsUpdated(isChecked);
+
                 DebugLog log = DebugLog.get(getActivity());
-                int status = isChecked ? log.init() : log.deInit();
+                int status = isChecked ? log.enable() : log.disable();
                 updateLogStatus(status);
                 if (isChecked) {
                     new AlertDialog.Builder(getActivity())

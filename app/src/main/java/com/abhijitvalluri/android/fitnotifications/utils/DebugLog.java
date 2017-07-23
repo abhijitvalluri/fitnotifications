@@ -35,6 +35,7 @@ public class DebugLog {
     private int mFileStatus;
     private int mWriteStatus;
     private DateFormat mDateFormat;
+    private boolean mEnabled;
 
 
     public static DebugLog get(Context context) {
@@ -59,7 +60,21 @@ public class DebugLog {
         return mWriteStatus;
     }
 
-    public int init() {
+    public boolean isEnabled() {
+        return mEnabled;
+    }
+
+    public int enable() {
+        mEnabled = true;
+        return init();
+    }
+
+    public int disable() {
+        mEnabled = false;
+        return deInit();
+    }
+
+    private int init() {
         if (mFileStatus == STATUS_LOG_OPENED) {
             return mFileStatus;
         }
@@ -122,7 +137,7 @@ public class DebugLog {
         return mFileStatus;
     }
 
-    public int deInit() {
+    private int deInit() {
         if (mLog != null) {
             try {
                 Date date = new Date();

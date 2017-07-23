@@ -16,7 +16,9 @@
 
 package com.abhijitvalluri.android.fitnotifications.utils;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 
@@ -30,19 +32,45 @@ import java.util.List;
  */
 public class Func {
 
-    public static List<String> getInstalledPackageNames(PackageManager pm) {
+    public static List<String> getInstalledPackageNames(PackageManager pm, Context context) {
         List<String> packageNames = new ArrayList<>();
-        for (ResolveInfo info : getInstalledPackages(pm)) {
+        for (ResolveInfo info : getInstalledPackages(pm, context)) {
             packageNames.add(info.activityInfo.packageName);
+        }
+
+        DebugLog log = DebugLog.get(context);
+        if (log.isEnabled()) {
+            log.writeLog("In getInstalledPackageNames: Got " + packageNames.size() + " apps via getInstalledPackages.");
         }
 
         return packageNames;
     }
 
-    public static List<ResolveInfo> getInstalledPackages(PackageManager pm) {
+    public static List<ResolveInfo> getInstalledPackages(PackageManager pm, Context context) {
+        DebugLog log = DebugLog.get(context);
+        if (log.isEnabled()) {
+            log.writeLog("Getting installed packages. Will try a few different methods to see if I receive a suitable app list.");
+        }
+
         Intent startupIntent = new Intent(Intent.ACTION_MAIN);
         startupIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        return pm.queryIntentActivities(startupIntent, 0);
+        List<ResolveInfo> resolveInfos = pm.queryIntentActivities(startupIntent, 0);
+
+        if (log.isEnabled()) {
+            log.writeLog("Got " + resolveInfos.size() + " apps via queryIntentActivities.");
+        }
+
+        List<ApplicationInfo> appInfos = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+        if (log.isEnabled()) {
+            log.writeLog("Got " + appInfos.size() + " apps via getInstalledApplications with GET_META_DATA.");
+        }
+
+        appInfos = pm.getInstalledApplications(0);
+        if (log.isEnabled()) {
+            log.writeLog("Got " + appInfos.size() + " apps via getInstalledApplications with no flags");
+        }
+
+        return resolveInfos;
     }
 
     public static Date convertHourMinute2Date(int hour, int minute) {
