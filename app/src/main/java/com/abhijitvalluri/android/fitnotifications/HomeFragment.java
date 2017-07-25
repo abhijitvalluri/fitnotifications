@@ -54,7 +54,6 @@ import com.abhijitvalluri.android.fitnotifications.utils.DebugLog;
 import com.abhijitvalluri.android.fitnotifications.widget.ServiceToggle;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Set;
 
@@ -177,8 +176,8 @@ public class HomeFragment extends Fragment {
                                     while ((line = bufferedReader.readLine()) != null) {
                                         logcat.append(line).append('\n');
                                     }
-                                } catch (IOException e) {
-                                    logcat.append("IOException when accessing logcat. Exception: ")
+                                } catch (Exception e) {
+                                    logcat.append("Exception when accessing logcat. Exception: ")
                                           .append(e.getMessage());
                                 }
 

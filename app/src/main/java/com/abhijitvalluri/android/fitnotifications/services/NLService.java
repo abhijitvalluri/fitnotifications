@@ -35,7 +35,6 @@ import android.service.notification.StatusBarNotification;
 import android.support.annotation.NonNull;
 import android.support.v7.app.NotificationCompat;
 import android.widget.RemoteViews;
-import android.widget.Toast;
 
 import com.abhijitvalluri.android.fitnotifications.R;
 import com.abhijitvalluri.android.fitnotifications.SettingsActivity;
@@ -129,8 +128,6 @@ public class NLService extends NotificationListenerService {
         mNumSplitNotifications = preferences.getInt(
                 getString(R.string.num_split_notifications_key), Constants.DEFAULT_NUM_NOTIF);
         mDisplayAppName = preferences.getBoolean(getString(R.string.display_app_name_key), true);
-
-        Toast.makeText(this, getString(R.string.notification_service_started), Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -400,7 +397,7 @@ public class NLService extends NotificationListenerService {
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
-        super.onNotificationRemoved(sbn);
+        // Do nothing
     }
 
     /**

@@ -16,6 +16,10 @@
 
 package com.abhijitvalluri.android.fitnotifications.database;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Database Schema to store the Fit Notification app's app selection choices.
  */
@@ -36,6 +40,22 @@ public class AppSelectionDbSchema {
             public static final String DISCARD_ONGOING_NOTIFICATIONS = "discardOngoingNotifications";
             public static final String ALL_DAY_SCHEDULE = "allDaySchedule";
             public static final String DAYS_OF_WEEK = "daysOfWeek";
+
+            public static final ArrayList<String> NAME_LIST = new ArrayList<>(Arrays.asList(
+                    "_id",
+                    APP_PACKAGE_NAME,
+                    APP_NAME,
+                    SELECTION,
+                    FILTER_TEXT,
+                    START_TIME_HOUR,
+                    START_TIME_MINUTE,
+                    STOP_TIME_HOUR,
+                    STOP_TIME_MINUTE,
+                    DISCARD_EMPTY_NOTIFICATIONS,
+                    DISCARD_ONGOING_NOTIFICATIONS,
+                    ALL_DAY_SCHEDULE,
+                    DAYS_OF_WEEK
+            ));
         }
     }
 }
