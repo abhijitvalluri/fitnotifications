@@ -8,7 +8,7 @@ android {
         applicationId "com.abhijitvalluri.android.fitnotifications"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 29
+        versionCode 30
         versionName "2.9.8-BETA"
     }
     compileOptions {

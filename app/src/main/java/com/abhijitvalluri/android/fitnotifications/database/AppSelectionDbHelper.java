@@ -33,7 +33,7 @@ import java.util.HashMap;
  * Helper class for the Database
  */
 public class AppSelectionDbHelper extends SQLiteOpenHelper {
-    private static final int VERSION = 6;
+    private static final int VERSION = 7;
     private static final String DATABASE_NAME = "fitNotificationAppSelection.db";
     private HashMap<String, String> mDbAlterCommands;
     private Context mContext;
@@ -95,6 +95,7 @@ public class AppSelectionDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        Log.d("DB_CREATE", "Creating table " + AppChoiceTable.NAME);
         db.execSQL("create table " + AppChoiceTable.NAME + "(" +
                 " _id integer primary key autoincrement, " +
                 AppChoiceTable.Cols.APP_PACKAGE_NAME + ", " +
@@ -107,9 +108,10 @@ public class AppSelectionDbHelper extends SQLiteOpenHelper {
                 AppChoiceTable.Cols.STOP_TIME_MINUTE + ", " +
                 AppChoiceTable.Cols.DISCARD_EMPTY_NOTIFICATIONS + ", " +
                 AppChoiceTable.Cols.DISCARD_ONGOING_NOTIFICATIONS + ", " +
-                AppChoiceTable.Cols.ALL_DAY_SCHEDULE +
+                AppChoiceTable.Cols.ALL_DAY_SCHEDULE + ", " +
                 AppChoiceTable.Cols.DAYS_OF_WEEK +
                 ")"
+                // ALERT!!! Make sure you have a comma to separate all names! Had a bug because I forgot it of ALL_DAY_SCHEDULE
         );
     }
 
