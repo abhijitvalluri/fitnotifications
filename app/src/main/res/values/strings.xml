@@ -339,9 +339,9 @@
     ]]></string>
     <string name="whats_new_text"><![CDATA[
     <br />
-    <p>Changes in <b>version 2.9.7-BETA:</b></p>
+    <p>Changes in <b>version 2.9.8-BETA:</b></p>
     <ul>
-        <li>Improved debugging log collection for troubleshooting purposes. No personal data will be collected, such as the contents of the notification. You can email the logs to the developer and see the contents of the logs yourself from the email.<br /><br /></li>
+        <li>Bug fixes: Resolves some issues reported by users.<br /><br /></li>
     </ul>
     <p><b>Support the developer!</b> You can <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer by visiting the donation web page! More details on the website.</p>
 

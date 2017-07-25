@@ -16,6 +16,7 @@
 
 package com.abhijitvalluri.android.fitnotifications;
 
+import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
@@ -28,10 +29,12 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -289,13 +292,27 @@ public class AppChoicesActivity extends AppCompatActivity {
             log.writeLog("Number of apps in App selection store: " + appSelections.size());
         }
 
-        for (ResolveInfo info : packages) {
-            String appPackageName = info.activityInfo.packageName;
-            String appName = info.loadLabel(mPackageManager).toString();
+        try {
+            for (ResolveInfo info : packages) {
+                String appPackageName = info.activityInfo.packageName;
+                String appName = info.loadLabel(mPackageManager).toString();
 
-            if (!mAppSelectionsStore.contains(appPackageName) && !appPackageName.equals(Constants.PACKAGE_NAME)) {
-                mAppSelectionsStore.addAppSelection(new AppSelection(appPackageName, appName));
+                if (!mAppSelectionsStore.contains(appPackageName) && !appPackageName.equals(Constants.PACKAGE_NAME)) {
+                    mAppSelectionsStore.addAppSelection(new AppSelection(appPackageName, appName));
+                }
             }
+        } catch (Exception e) {
+            Log.e("DB_INSERT", "Error inserting appSelection entry into database. Exception: " + e.getMessage());
+            AppChoicesActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    new AlertDialog.Builder(AppChoicesActivity.this)
+                            .setTitle("Error processing apps")
+                            .setMessage("There was an error while processing the apps. Please enable logs and send them to the developer.")
+                            .setPositiveButton(android.R.string.ok, null)
+                            .create().show();
+                }
+            });
         }
 
         if (log.isEnabled()) {

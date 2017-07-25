@@ -19,6 +19,7 @@ package com.abhijitvalluri.android.fitnotifications.utils;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.abhijitvalluri.android.fitnotifications.database.AppSelectionCursorWrapper;
@@ -133,10 +134,10 @@ public class AppSelectionsStore {
         }
     }
 
-    public void addAppSelection(AppSelection appSelection) {
+    public void addAppSelection(AppSelection appSelection) throws SQLException {
         ContentValues values = getContentValues(appSelection);
 
-        mDatabase.insert(AppChoiceTable.NAME, null, values);
+        mDatabase.insertOrThrow(AppChoiceTable.NAME, null, values);
     }
 
     public void updateAppSelection(AppSelection appSelection) {
