@@ -130,7 +130,7 @@
 
     <Switch
         android:id="@+id/enableLogSwitch"
-        android:text="Enable Debugging Log Collection"
+        android:text="@string/enable_logging"
         android:textSize="18sp"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"

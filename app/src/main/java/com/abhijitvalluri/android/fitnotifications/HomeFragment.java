@@ -103,20 +103,28 @@ public class HomeFragment extends Fragment {
         mNotificationAccessTV = (TextView) v.findViewById(R.id.notificationAccessTV);
         mServiceStateTV = (TextView) v.findViewById(R.id.serviceStateText);
         mBannerTV = (TextView) v.findViewById(R.id.rate_app);
-        if (!mIsDonateBanner && Math.random() <= 0.1) {
-            mIsDonateBanner = true;
-            mBannerTV.setText(R.string.support_dev);
-        } else {
-            mIsDonateBanner = false;
-            mBannerTV.setText(R.string.rate_app);
-        }
-
         mEnableLogs = (Switch) v.findViewById(R.id.enableLogSwitch);
         mSendLogs = (Button) v.findViewById(R.id.sendLogsButton);
         mLogStatus = (TextView) v.findViewById(R.id.logStatus);
-        mContext = getContext();
 
+        mContext = getContext();
         mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        if (!mIsDonateBanner && Math.random() < 0.5) {
+            mIsDonateBanner = true;
+            if (mPreferences.getBoolean(getString(R.string.probably_donated), false)) {
+                mBannerTV.setVisibility(View.GONE);
+            } else {
+                mBannerTV.setText(R.string.support_dev);
+            }
+        } else {
+            mIsDonateBanner = false;
+            if (mPreferences.getBoolean(getString(R.string.probably_rated_app), false)) {
+                mBannerTV.setVisibility(View.GONE);
+            } else {
+                mBannerTV.setText(R.string.rate_app);
+            }
+        }
+
         boolean enableLogs = mPreferences.getBoolean(getString(R.string.enable_debug_logs), false);
         mEnableLogs.setChecked(enableLogs);
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -281,6 +289,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (mIsDonateBanner) {
+                    mPreferences.edit().putBoolean(getString(R.string.probably_donated), true).apply();
                     startActivity(HomeActivity.userDonationIntent());
                 } else {
                     Uri uri = Uri.parse("market://details?id=" + Constants.PACKAGE_NAME);
@@ -290,6 +299,7 @@ public class HomeFragment extends Fragment {
                     gotoPlayStore.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
                             Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
                     try {
+                        mPreferences.edit().putBoolean(getString(R.string.probably_rated_app), true).apply();
                         startActivity(gotoPlayStore);
                     } catch (ActivityNotFoundException e) {
                         startActivity(new Intent(Intent.ACTION_VIEW,

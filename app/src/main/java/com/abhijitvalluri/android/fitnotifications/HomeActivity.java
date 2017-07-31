@@ -108,21 +108,9 @@ public class HomeActivity extends AppCompatActivity {
                     APP_INTRO_FIRST_LAUNCH_INTENT,
                     LAUNCH_ACTIVITY_ANIM_BUNDLE);
         }
-
-        if (mPreferences.getBoolean(getString(R.string.transliterate_notification_key), false) &&
-            !mPreferences.getBoolean(getString(R.string.requested_transliteration_improvement), false)) {
-            new AlertDialog.Builder(HomeActivity.this)
-                    .setTitle(getString(R.string.transliteration_feature))
-                    .setMessage(getString(R.string.transliteration_feature_text))
-                    .setPositiveButton(android.R.string.ok, null)
-                    .create()
-                    .show();
-            mPreferences.edit().putBoolean(getString(R.string.requested_transliteration_improvement), true).apply();
-        }
-
     }
 
-    private void sendFeedbackToImproveTransliteration() {
+    private void sendFeedback() {
         String uriText =
                 "mailto:android@abhijitvalluri.com" +
                         "?subject=" + Uri.encode(getString(R.string.email_subject)) +
@@ -163,7 +151,7 @@ public class HomeActivity extends AppCompatActivity {
             isInfoFragment = true;
         }
 
-        if (menuItem.getItemId() != R.id.nav_improve_transliteration &&
+        if (menuItem.getItemId() != R.id.send_feedback &&
             menuItem.getItemId() != R.id.nav_donate) {
             setTitle(menuItem.getTitle());
         }
@@ -173,8 +161,8 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(userDonationIntent());
                 mDrawerLayout.closeDrawers();
                 return;
-            case R.id.nav_improve_transliteration:
-                sendFeedbackToImproveTransliteration();
+            case R.id.send_feedback:
+                sendFeedback();
                 mDrawerLayout.closeDrawers();
                 return;
             case R.id.nav_home:

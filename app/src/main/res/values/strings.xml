@@ -22,11 +22,8 @@
     <string name="notification_service_started">Fit Notifications Service started</string>
     <string name="rate_app">Like our app? Then rate it!</string>
     <string name="send_email">Send Email</string>
-    <string name="email_subject">Improve Transliterations for LANGUAGE</string>
-    <string name="email_body">**STOP! READ BELOW BEFORE SENDING EMAIL!**\n\nBefore sending this email,
-                              please replace \'LANGUAGE\' in the subject with your language.
-                              Also, provide the letter and transliterated letter pairs for
-                              those letters that are not correctly transliterated.</string>
+    <string name="email_subject">Feedback for Fit Notifications app</string>
+    <string name="email_body">Please provide your feedback or suggestions here: </string>
     <string name="transliteration_feature">Transliteration Feature</string>
     <string name="transliteration_feature_text">The transliteration feature is enabled for you!
                                            This feature converts non-latin characters to latin.
@@ -51,6 +48,7 @@
 
     <!-- Home screen -->
     <string name="service_state">Notification service state: </string>
+    <string name="enable_logging">Enable logging: </string>
 
     <!-- Intro Strings Activity -->
     <string name="intro_get_started_button">Get started</string>
@@ -114,7 +112,7 @@
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     <string name="feedback">Feedback</string>
-    <string name="improve_transliteration">Improve Transliteration</string>
+    <string name="send_feedback">Send feedback</string>
 
     <!-- First launch -->
     <string name="done_first_launch_key">FirstLaunch</string>
@@ -125,6 +123,8 @@
     <!-- Preference keys -->
     <string name="show_enabled_apps_key">ShowEnabledApps</string>
     <string name="enable_debug_logs">enableDebugLogs</string>
+    <string name="probably_rated_app">probablyRatedApp</string>
+    <string name="probably_donated">probablyDonated</string>
 
     <!-- Widget strings -->
     <string name="widget_button">Fit Notification Service Toggle</string>
@@ -339,9 +339,13 @@
     ]]></string>
     <string name="whats_new_text"><![CDATA[
     <br />
-    <p>Changes in <b>version 2.9.8-BETA:</b></p>
+    <p>Changes in <b>version 2.9.8:</b></p>
     <ul>
-        <li>Bug fixes: Resolves some issues reported by users.<br /><br /></li>
+        <li><b>New per app setting:</b> You can select the days of the week, for each app, when you want
+            the notifications to be forwarded.<br /><br /></li>
+        <li><b>Enable logging for troubleshooting: </b> You can enable logs from the home screen to help
+            troubleshoot issues. Please send the logs to us to investigate difficult issues.<br /><br /></li>
+        <li>Various bugs and issues reported by users were fixed!</li>
     </ul>
     <p><b>Support the developer!</b> You can <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer by visiting the donation web page! More details on the website.</p>
 

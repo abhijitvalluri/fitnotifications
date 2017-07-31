@@ -65,9 +65,9 @@
             <menu>
                 <group android:checkableBehavior="none">
                 <item
-                        android:id="@+id/nav_improve_transliteration"
+                        android:id="@+id/send_feedback"
                         android:icon="@drawable/ic_feedback_white_24dp"
-                        android:title="@string/improve_transliteration" />
+                        android:title="@string/send_feedback" />
                 </group>
             </menu>
         </item>
