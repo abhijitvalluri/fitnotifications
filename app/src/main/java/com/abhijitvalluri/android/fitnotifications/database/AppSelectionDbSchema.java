@@ -41,7 +41,7 @@ public class AppSelectionDbSchema {
             public static final String ALL_DAY_SCHEDULE = "allDaySchedule";
             public static final String DAYS_OF_WEEK = "daysOfWeek";
 
-            public static final ArrayList<String> NAME_LIST = new ArrayList<>(Arrays.asList(
+            static final ArrayList<String> NAME_LIST = new ArrayList<>(Arrays.asList(
                     "_id",
                     APP_PACKAGE_NAME,
                     APP_NAME,

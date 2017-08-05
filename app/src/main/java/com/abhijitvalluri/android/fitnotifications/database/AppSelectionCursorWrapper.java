@@ -43,7 +43,14 @@ public class AppSelectionCursorWrapper extends CursorWrapper {
         int discardEmptyNotif = getInt(getColumnIndex(AppChoiceTable.Cols.DISCARD_EMPTY_NOTIFICATIONS));
         int allDaySchedule    = getInt(getColumnIndex(AppChoiceTable.Cols.ALL_DAY_SCHEDULE));
         int discardOngoingNotif = getInt(getColumnIndex(AppChoiceTable.Cols.DISCARD_ONGOING_NOTIFICATIONS));
-        int daysOfWeek    = getInt(getColumnIndex(AppChoiceTable.Cols.DAYS_OF_WEEK));
+        int daysOfWeek;
+        // TODO: Super weird bug during db upgrade is causing this column to NOT be present in db even after adding it
+        // But this happens only on first run. After that, it appears to be fine.
+        if (getColumnIndex(AppChoiceTable.Cols.DAYS_OF_WEEK) == -1) {
+            daysOfWeek = 127;
+        } else {
+            daysOfWeek = getInt(getColumnIndex(AppChoiceTable.Cols.DAYS_OF_WEEK));
+        }
 
         return new AppSelection(appPackageName,
                                 appName,

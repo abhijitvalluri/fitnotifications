@@ -40,6 +40,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.abhijitvalluri.android.fitnotifications.setup.AppIntroActivity;
+import com.abhijitvalluri.android.fitnotifications.utils.AppSelectionsStore;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
 
 /**
@@ -101,6 +102,9 @@ public class HomeActivity extends AppCompatActivity {
             fragmentManager.beginTransaction().replace(R.id.flContent, frag).commit();
 
             mPreferences.edit().putInt(getString(R.string.version_key), Constants.VERSION_CODE).apply();
+
+            // Open the database to update it in case the version is incremented.
+            AppSelectionsStore store = AppSelectionsStore.get(this);
         }
 
         if (!mPreferences.getBoolean(getString(R.string.done_first_launch_key), false)) { // This is the first launch

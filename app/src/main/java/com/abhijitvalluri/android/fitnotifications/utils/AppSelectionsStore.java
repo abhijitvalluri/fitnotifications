@@ -21,6 +21,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.abhijitvalluri.android.fitnotifications.database.AppSelectionCursorWrapper;
 import com.abhijitvalluri.android.fitnotifications.database.AppSelectionDbHelper;
@@ -52,7 +54,12 @@ public class AppSelectionsStore {
 
     private AppSelectionsStore(Context context) {
         Context c = context.getApplicationContext();
-        mDatabase = new AppSelectionDbHelper(c).getWritableDatabase();
+        try {
+            mDatabase = new AppSelectionDbHelper(c).getWritableDatabase();
+        } catch (SQLException e) {
+            Log.wtf("DB_OPEN_ERROR", "Unable to open the database for read/write: " + e.getMessage());
+            Toast.makeText(c, "ERROR! Unable to store app settings because there is no free space! Please create more free space!", Toast.LENGTH_LONG).show();
+        }
     }
 
     public ArrayList<AppSelection> getAppSelections() {
