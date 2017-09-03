@@ -18,11 +18,14 @@ package com.abhijitvalluri.android.fitnotifications;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -112,6 +115,28 @@ public class HomeActivity extends AppCompatActivity {
                     APP_INTRO_FIRST_LAUNCH_INTENT,
                     LAUNCH_ACTIVITY_ANIM_BUNDLE);
         }
+
+        createNotificationChannel();
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            String id = Constants.NOTIFICATION_CHANNEL_ID;
+            CharSequence name = getString(R.string.notification_channel_name);
+            String desc = getString(R.string.notification_channel_desc);
+            int importance = NotificationManager.IMPORTANCE_MIN;
+            NotificationChannel channel = new NotificationChannel(id, name, importance);
+            channel.canBypassDnd();
+            channel.setSound(null, null);
+            channel.setShowBadge(false);
+            channel.setDescription(desc);
+            channel.enableLights(false);
+            channel.enableVibration(false);
+            manager.deleteNotificationChannel(id);
+            manager.createNotificationChannel(channel);
+        }
+
     }
 
     private void sendFeedback() {

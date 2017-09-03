@@ -31,5 +31,6 @@ public class Constants {
     public static final Integer NOTIFICATION_ID = (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
     public static final int DEFAULT_NUM_NOTIF = 100;
     public static final int DEFAULT_DELAY_SECONDS = 5;
+    public static final String NOTIFICATION_CHANNEL_ID = "fitNotifications_channel_001";
     public static final Date TODAY = new Date();
 }

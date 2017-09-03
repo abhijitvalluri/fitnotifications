@@ -199,6 +199,10 @@ public class AppIntroActivity extends IntroActivity {
                                 .setContentTitle("Sample Notification Title")
                                 .setContent(contentView);
 
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            builder.setChannelId(Constants.NOTIFICATION_CHANNEL_ID);
+                        }
+
                         // Creates an explicit intent for the SettingsActivity in the app
                         Intent settingsIntent = new Intent(AppIntroActivity.this, SettingsActivity.class);
 

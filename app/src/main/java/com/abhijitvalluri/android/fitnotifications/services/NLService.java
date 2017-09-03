@@ -34,6 +34,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.NonNull;
 import android.support.v7.app.NotificationCompat;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.abhijitvalluri.android.fitnotifications.R;
@@ -91,6 +92,7 @@ public class NLService extends NotificationListenerService {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.d("NLS", "onCreate");
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mAppSelectionsStore = AppSelectionsStore.get(this);
         mDebugLog = DebugLog.get(this);
@@ -133,6 +135,7 @@ public class NLService extends NotificationListenerService {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
+        Log.d("NLS", "attachBaseContext");
 
         // base context is needed to access Resources
         Resources res = getResources();
@@ -151,6 +154,7 @@ public class NLService extends NotificationListenerService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d("NLS", "onStartCommand");
         return Service.START_STICKY;
     }
 
@@ -195,6 +199,7 @@ public class NLService extends NotificationListenerService {
 
     @Override
     public void onNotificationPosted(final StatusBarNotification sbn) {
+        Log.d("NLS", "onNotificationPosted(1)");
         if (mDebugLog.isEnabled()) {
             mDebugLog.writeLog("++++++++++++");
             mDebugLog.writeLog("Entered onNotificationPosted. Notification from: " + sbn.getPackageName());
@@ -328,6 +333,10 @@ public class NLService extends NotificationListenerService {
             builder.setVisibility(Notification.VISIBILITY_SECRET);
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setChannelId(Constants.NOTIFICATION_CHANNEL_ID);
+        }
+
         if (mSplitNotification && notificationText.length() > mFitbitNotifCharLimit) {
             List<String> slices = sliceNotificationText(notificationText);
             for (int i = 0; i < slices.size(); i++) {
@@ -392,11 +401,13 @@ public class NLService extends NotificationListenerService {
     @Override
     public void onNotificationPosted(StatusBarNotification sbn,
                                      NotificationListenerService.RankingMap rankingMap) {
+        Log.d("NLS", "onNotificationPosted(2)");
         onNotificationPosted(sbn);
     }
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
+        Log.d("NLS", "onNotificationRemoved");
         // Do nothing
     }
 
@@ -548,5 +559,33 @@ public class NLService extends NotificationListenerService {
 
     public static boolean isEnabled() {
         return mIsServiceEnabled;
+    }
+
+    @Override
+    public void onLowMemory() {
+        Log.d("NLS", "onLowMemory");
+        super.onLowMemory();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d("NLS", "onDestroy");
+        super.onDestroy();
+    }
+
+    @Override
+    public boolean stopService(Intent i) {
+        Log.d("NLS", "stopService");
+        return super.stopService(i);
+    }
+
+    @Override
+    public void onListenerConnected() {
+        Log.d("NLS", "onListenerConnected");
+    }
+
+    @Override
+    public void onListenerDisconnected() {
+        Log.d("NLS", "onListenerDisconnected");
     }
 }

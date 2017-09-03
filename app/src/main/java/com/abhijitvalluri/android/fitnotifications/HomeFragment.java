@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -345,6 +346,10 @@ public class HomeFragment extends Fragment {
                         .setExtras(newExtra)
                         .setContentTitle("Sample Notification Title")
                         .setContent(contentView);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    builder.setChannelId(Constants.NOTIFICATION_CHANNEL_ID);
+                }
 
                 // Creates an explicit intent for the SettingsActivity in the app
                 Intent settingsIntent = new Intent(mContext, SettingsActivity.class);

@@ -2,6 +2,7 @@ package com.abhijitvalluri.android.fitnotifications.services;
 
 import android.app.Notification;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -154,9 +155,15 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
             }
         } else {
             if (isLoggingEnabled()) {
-                debugLog.writeLog("Notification is not a group summary. Ignoring this causes a bug for some users. Use a generic approach instead.");
+                debugLog.writeLog("Notification is not a group summary.");
             }
-            return super.getTitleAndText(appPackageName, extras, notificationFlags);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT_WATCH) { // < 20, i.e. == 19
+                if (isLoggingEnabled()) {
+                    debugLog.writeLog("App is running on Kitkat device. " +
+                            "No group summary available on SDK 19. Use generic extractor");
+                }
+                return super.getTitleAndText(appPackageName, extras, notificationFlags);
+            }
         }
 
         return new CharSequence[] { notificationTitle, notificationText };

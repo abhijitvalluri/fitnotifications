@@ -131,6 +131,11 @@
     <string name="widget_on_text">ON</string>
     <string name="widget_off_text">OFF</string>
 
+    <!-- Notification Channel strings -->
+    <string name="notification_channel_name">Placeholder notification 1</string>
+    <string name="notification_channel_desc">This is the placeholder notification channel for the Fit
+    Notifications app. These notifications are essential for the proper functioning of the app.</string>
+
     <!-- Settings Menu - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
     <!-- Misc. -->
     <string name="dismiss_after">after</string>
