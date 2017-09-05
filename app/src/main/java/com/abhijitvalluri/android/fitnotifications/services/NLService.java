@@ -34,7 +34,6 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.NonNull;
 import android.support.v7.app.NotificationCompat;
-import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.abhijitvalluri.android.fitnotifications.R;
@@ -92,7 +91,6 @@ public class NLService extends NotificationListenerService {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("NLS", "onCreate");
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mAppSelectionsStore = AppSelectionsStore.get(this);
         mDebugLog = DebugLog.get(this);
@@ -100,7 +98,7 @@ public class NLService extends NotificationListenerService {
 
         mSelectedAppsPackageNames = mAppSelectionsStore.getSelectedAppsPackageNames();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        mIsServiceEnabled = true;
+        mIsServiceEnabled = preferences.getBoolean(getString(R.string.notification_listener_service_state_key), true);
 
         // FIXME: preferences keys should not be "translatable" ?
         mDismissPlaceholderNotif = preferences.getBoolean(
@@ -135,13 +133,14 @@ public class NLService extends NotificationListenerService {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        Log.d("NLS", "attachBaseContext");
 
         // base context is needed to access Resources
         Resources res = getResources();
 
         translitUtil = new TranslitUtil(res);
 
+        //LINE
+        mMessageExtractors.put("jp.naver.line.android", new GroupSummaryMessageExtractor(res, true));
         // Telegram
         mMessageExtractors.put("org.telegram.messenger", new GroupSummaryMessageExtractor(res, true));
         // WhatsApp
@@ -154,7 +153,6 @@ public class NLService extends NotificationListenerService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("NLS", "onStartCommand");
         return Service.START_STICKY;
     }
 
@@ -199,7 +197,6 @@ public class NLService extends NotificationListenerService {
 
     @Override
     public void onNotificationPosted(final StatusBarNotification sbn) {
-        Log.d("NLS", "onNotificationPosted(1)");
         if (mDebugLog.isEnabled()) {
             mDebugLog.writeLog("++++++++++++");
             mDebugLog.writeLog("Entered onNotificationPosted. Notification from: " + sbn.getPackageName());
@@ -351,7 +348,13 @@ public class NLService extends NotificationListenerService {
             }
         } else { // Do not split the notification
             builder.setContentText(notificationText);
-            mNotificationManager.notify(NOTIFICATION_ID, builder.build());
+            final Notification notif = builder.build();
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mNotificationManager.notify(NOTIFICATION_ID, notif);
+                }
+            }, 500);
         }
 
         if (mDismissPlaceholderNotif) {
@@ -401,13 +404,11 @@ public class NLService extends NotificationListenerService {
     @Override
     public void onNotificationPosted(StatusBarNotification sbn,
                                      NotificationListenerService.RankingMap rankingMap) {
-        Log.d("NLS", "onNotificationPosted(2)");
         onNotificationPosted(sbn);
     }
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
-        Log.d("NLS", "onNotificationRemoved");
         // Do nothing
     }
 
@@ -559,33 +560,5 @@ public class NLService extends NotificationListenerService {
 
     public static boolean isEnabled() {
         return mIsServiceEnabled;
-    }
-
-    @Override
-    public void onLowMemory() {
-        Log.d("NLS", "onLowMemory");
-        super.onLowMemory();
-    }
-
-    @Override
-    public void onDestroy() {
-        Log.d("NLS", "onDestroy");
-        super.onDestroy();
-    }
-
-    @Override
-    public boolean stopService(Intent i) {
-        Log.d("NLS", "stopService");
-        return super.stopService(i);
-    }
-
-    @Override
-    public void onListenerConnected() {
-        Log.d("NLS", "onListenerConnected");
-    }
-
-    @Override
-    public void onListenerDisconnected() {
-        Log.d("NLS", "onListenerDisconnected");
     }
 }

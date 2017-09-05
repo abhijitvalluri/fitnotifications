@@ -99,6 +99,11 @@ public class HomeActivity extends AppCompatActivity {
                 && mPreferences.getBoolean(getString(R.string.done_first_launch_key), false)) {
             // App has been updated
 
+            // Set Dismiss Placeholder notification to true by default for the benefit of users
+            mPreferences.edit()
+                        .putBoolean(getString(R.string.dismiss_placeholder_notif_key), true)
+                        .putInt(getString(R.string.placeholder_dismiss_delay_key), 2).apply();
+
             navDrawer.setCheckedItem(R.id.nav_whats_new);
             setTitle(R.string.whats_new);
             frag = InfoFragment.newInstance(getString(R.string.whats_new_text));
@@ -125,15 +130,12 @@ public class HomeActivity extends AppCompatActivity {
             String id = Constants.NOTIFICATION_CHANNEL_ID;
             CharSequence name = getString(R.string.notification_channel_name);
             String desc = getString(R.string.notification_channel_desc);
-            int importance = NotificationManager.IMPORTANCE_MIN;
+            int importance = NotificationManager.IMPORTANCE_LOW;
             NotificationChannel channel = new NotificationChannel(id, name, importance);
-            channel.canBypassDnd();
-            channel.setSound(null, null);
             channel.setShowBadge(false);
             channel.setDescription(desc);
             channel.enableLights(false);
             channel.enableVibration(false);
-            manager.deleteNotificationChannel(id);
             manager.createNotificationChannel(channel);
         }
 

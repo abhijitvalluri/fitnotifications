@@ -419,6 +419,7 @@ public class HomeFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     mContext.stopService(new Intent(mContext, NLService.class));
+                    mPreferences.edit().putBoolean(getString(R.string.notification_listener_service_state_key), false).apply();
                     NLService.setEnabled(false);
                     updateWidget();
                     initializeServiceButtons();
@@ -431,8 +432,8 @@ public class HomeFragment extends Fragment {
             mServiceButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mContext.startService(new Intent(mContext, NLService.class)); // TODO: Check if I should use the same intent I used to start the service
-                                                                                  // otherwise it may not stop the correct service.
+                    mContext.startService(new Intent(mContext, NLService.class));
+                    mPreferences.edit().putBoolean(getString(R.string.notification_listener_service_state_key), true).apply();
                     NLService.setEnabled(true);
                     updateWidget();
                     initializeServiceButtons();

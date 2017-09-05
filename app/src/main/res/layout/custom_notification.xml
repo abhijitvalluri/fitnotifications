@@ -7,7 +7,7 @@
         android:padding="10dp"
         android:contentDescription="@string/app_name"
         android:src="@mipmap/ic_launcher"
-        android:layout_width="wrap_content"
+        android:layout_width="64dp"
         android:layout_height="match_parent" />
     <TextView
         android:id="@+id/customNotificationText"

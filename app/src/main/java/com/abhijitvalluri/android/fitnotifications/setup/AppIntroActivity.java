@@ -256,6 +256,8 @@ public class AppIntroActivity extends IntroActivity {
                     @Override
                     public void onClick(View v) {
                         startService(new Intent(AppIntroActivity.this, NLService.class));
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                        preferences.edit().putBoolean(getString(R.string.notification_listener_service_state_key), true).apply();
                         NLService.setEnabled(true);
                         nextSlide();
                     }
@@ -278,7 +280,6 @@ public class AppIntroActivity extends IntroActivity {
                         @Override
                         public void onClick(View v) {
                             AlertDialog dialog = new AlertDialog.Builder(AppIntroActivity.this)
-                                    .setTitle(getString(R.string.intro_dnd_mode_button))
                                     .setPositiveButton("Configure", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
@@ -290,10 +291,16 @@ public class AppIntroActivity extends IntroActivity {
                                         }
                                     })
                                     .setNegativeButton("CANCEL", null).create();
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                dialog.setTitle(getString(R.string.intro_dnd_mode_button_oreo));
+                                dialog.setMessage(getString(R.string.intro_dnd_mode_oreo_message));
+                            }
+                            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                dialog.setTitle(getString(R.string.intro_dnd_mode_button_nougat));
                                 dialog.setMessage(getString(R.string.intro_dnd_mode_nougat_message));
                             } else {
-                                dialog.setMessage(getString(R.string.intro_dnd_mode_message));
+                                dialog.setTitle(getString(R.string.intro_dnd_mode_button_marshmallow));
+                                dialog.setMessage(getString(R.string.intro_dnd_mode_marshmallow_message));
                             }
                             dialog.show();
                         }

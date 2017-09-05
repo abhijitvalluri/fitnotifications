@@ -22,6 +22,8 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.widget.RemoteViews;
 
@@ -71,13 +73,16 @@ public class ServiceToggle extends AppWidgetProvider {
         if (TOGGLE_CLICKED.equals(intent.getAction())) {
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.service_toggle_widget);
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
             if (NLService.isEnabled()) {
+                preferences.edit().putBoolean(context.getString(R.string.notification_listener_service_state_key), false).apply();
                 NLService.setEnabled(false);
                 views.setImageViewResource(R.id.widgetToggleButton, R.drawable.ic_speaker_notes_off_white_48dp);
                 views.setInt(R.id.widgetToggleButton, "setBackgroundResource", R.drawable.round_rectangle_red);
                 views.setTextViewText(R.id.widgetToggleText, context.getString(R.string.widget_off_text));
                 views.setTextColor(R.id.widgetToggleText, ContextCompat.getColor(context, R.color.red));
             } else {
+                preferences.edit().putBoolean(context.getString(R.string.notification_listener_service_state_key), true).apply();
                 NLService.setEnabled(true);
                 views.setImageViewResource(R.id.widgetToggleButton,R.drawable.ic_speaker_notes_white_48dp);
                 views.setInt(R.id.widgetToggleButton, "setBackgroundResource", R.drawable.round_rectangle_green);

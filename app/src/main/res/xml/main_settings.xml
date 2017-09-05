@@ -8,12 +8,12 @@
             android:title="@string/dismiss_placeholder_notif"
             android:summary="@string/dismiss_placeholder_notif_summary"
             android:key="@string/dismiss_placeholder_notif_key"
-            android:defaultValue="false" />
+            android:defaultValue="true" />
         <com.abhijitvalluri.android.fitnotifications.alobar.preference.NumberPickerPreference
             android:title="@string/placeholder_dismiss_delay"
             android:key="@string/placeholder_dismiss_delay_key"
-            android:defaultValue="5"
-            app:minValue="5"
+            android:defaultValue="1"
+            app:minValue="1"
             app:maxValue="60"
             app:beforeText="@string/dismiss_after"
             app:afterText="@string/seconds"
@@ -31,8 +31,8 @@
         <com.abhijitvalluri.android.fitnotifications.alobar.preference.NumberPickerPreference
             android:title="@string/relayed_dismiss_delay"
             android:key="@string/relayed_dismiss_delay_key"
-            android:defaultValue="5"
-            app:minValue="5"
+            android:defaultValue="1"
+            app:minValue="1"
             app:maxValue="60"
             app:beforeText="@string/dismiss_after"
             app:afterText="@string/seconds"

@@ -72,6 +72,54 @@
 Ū   U
 Ž   Z
 
+# Farsi (Persian) numerals
+۱  1
+۲  2
+۳  3
+۴  4
+۵  5
+۶  6
+۷  7
+۸  8
+۹  9
+۰  0
+
+# Farsi (Persian) characters
+آ  aa
+ا  a
+ب  b
+پ  p
+ت  t
+ث  s
+ج  j
+چ  ch
+ح  h
+خ  kh
+د  d
+ذ  z
+ر  r
+ز  z
+س  s
+ش  sh
+ص  s
+ض  z
+ط  t
+ظ  z
+ع  aa
+غ  gh
+ف  f
+ق  gh
+ك  k
+ک  k
+گ  g
+ل  l
+م  m
+ن  n
+و  v
+ه  h
+ي  y
+ی  y
+
 # Some popular emojis, see http://www.unicode.org/emoji/charts/emoji-list.html
 U+263A      :-)
 U+1F60A     :-)

@@ -93,16 +93,26 @@
     <string name="intro_dnd_mode_title">Do not disturb mode on Android 6.0+</string>
     <string name="intro_dnd_mode_desc">If you enable do not disturb mode, then no notifications will be forwarded to your Fitbit device, by default. To change that, you need to follow specific instructions by clicking below.</string>
     <string name="intro_dnd_mode_button">Extra Instructions</string>
-    <string name="intro_dnd_mode_message">
-    Click on configure below. In the next screen, choose \"Notifications\" and enable \"Treat as priority\".\n\n
-    Now, when you use silent mode, enable \"Priority Only\". Doing so will allow you to get notifications via the app on your Fitbit device, but it will not
+    <string name="intro_dnd_mode_button_oreo">Extra Instructions for Android 8</string>
+    <string name="intro_dnd_mode_button_nougat">Extra Instructions for Android 7</string>
+    <string name="intro_dnd_mode_button_marshmallow">Extra Instructions for Android 6</string>
+
+    <string name="intro_dnd_mode_marshmallow_message">
+    Click on configure below. In the next screen, choose \"Notifications\" and enable \"Treat as priority\".\n
+    \nNow, when you use silent mode, enable \"Priority Only\". Doing so will allow you to get notifications via the app on your Fitbit device, but it will not
     make any notification sound on the phone as this app doesn\'t cause notification sounds or vibrations anyway.
     </string>
-
     <string name="intro_dnd_mode_nougat_message">
-    Click on configure below. In the next screen, choose \"Notifications\". Then, disable \"Show silently\" setting and enable \"Override Do Not Disturb\".\n\n
-    Now, when you use silent mode, enable \"Priority Only\". Doing so will allow you to get notifications via the app on your Fitbit device, but it will not
+    Click on configure below. In the next screen, choose \"Notifications\". Then, disable \"Show silently\" setting and enable \"Override Do Not Disturb\".\n
+    \nNow, when you use silent mode, enable \"Priority Only\". Doing so will allow you to get notifications via the app on your Fitbit device, but it will not
     make any notification sound on the phone as this app doesn\'t cause notification sounds or vibrations anyway.
+    </string>
+    <string name="intro_dnd_mode_oreo_message">
+    Click on configure below. In the next screen, choose \"App notifications\". Select the \"Placeholder notification\" category and enable
+    \"Override Do Not Disturb\".\n
+    \nNow, when you use silent mode, enable \"Priority Only\". Doing so will allow you to get notifications via the app on your Fitbit device.\n
+    \nNote: You can configure other options in Android Oreo to make the notifications flexible. But, DON\'T reduce the Importance
+    of the notification to \"Low\" as that will disable notification forwarding to your Fitbit device!
     </string>
 
     <string name="intro_done_title">Done! Test your setup now!</string>
@@ -132,9 +142,12 @@
     <string name="widget_off_text">OFF</string>
 
     <!-- Notification Channel strings -->
-    <string name="notification_channel_name">Placeholder notification 1</string>
+    <string name="notification_channel_name">Placeholder notification</string>
     <string name="notification_channel_desc">This is the placeholder notification channel for the Fit
     Notifications app. These notifications are essential for the proper functioning of the app.</string>
+
+    <!-- Notification Listener Service state key -->
+    <string name="notification_listener_service_state_key">NlsState</string>
 
     <!-- Settings Menu - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
     <!-- Misc. -->
@@ -344,13 +357,14 @@
     ]]></string>
     <string name="whats_new_text"><![CDATA[
     <br />
-    <p>Changes in <b>version 2.9.8:</b></p>
+    <p>Changes in <b>version 2.9.9 (Android Oreo Beta):</b></p>
     <ul>
-        <li><b>New per app setting:</b> You can select the days of the week, for each app, when you want
-            the notifications to be forwarded.<br /><br /></li>
-        <li><b>Enable logging for troubleshooting: </b> You can enable logs from the home screen to help
-            troubleshoot issues. Please send the logs to us to investigate difficult issues.<br /><br /></li>
-        <li>Various bugs and issues reported by users were fixed!</li>
+        <li>Made app compatible with Android Oreo. Implemented new Android Oreo Notification Channel (Placeholder Notification).<br/><br/>
+        Learn more about <a href=\"https://www.androidcentral.com/notification-channels\">Notification Channels</a> feature of Android Oreo.
+        We recommend that you DO NOT set the \"Importance\" of the notification category to \"Low\" as this will disable notification forwarding.<br /><br /></li>
+        <li>Remember previous Notification service state (enabled/disabled) between phone reboots.<br /><br /></li>
+        <li>Add new Farsi transliterations.<br/><br/></li>
+        <li>New app icon, and other bug fixes and improvements.</li>
     </ul>
     <p><b>Support the developer!</b> You can <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer by visiting the donation web page! More details on the website.</p>
 

@@ -1,1 +1,0 @@
-Launcer icon and web icon generated using Roman Nurik's github Android Asset Studio tool at: https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html
