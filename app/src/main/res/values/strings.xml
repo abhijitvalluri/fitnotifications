@@ -357,11 +357,13 @@
     ]]></string>
     <string name="whats_new_text"><![CDATA[
     <br />
-    <p>Changes in <b>version 2.9.9 (Android Oreo Beta):</b></p>
+    <p>Changes in <b>version 2.9.10 (Android Oreo):</b></p>
     <ul>
+        <li><b>Improved Do Not Disturb \"Priority Only\" mode support</b>: Now, only \"priority\" notifications are
+            forwarded to your Fitbit device in \"Priority Only\" mode.<br/><br/></li>
         <li>Made app compatible with Android Oreo. Implemented new Android Oreo Notification Channel (Placeholder Notification).<br/><br/>
-        Learn more about <a href=\"https://www.androidcentral.com/notification-channels\">Notification Channels</a> feature of Android Oreo.
-        We recommend that you DO NOT set the \"Importance\" of the notification category to \"Low\" as this will disable notification forwarding.<br /><br /></li>
+            Learn more about <a href=\"https://www.androidcentral.com/notification-channels\">Notification Channels</a> feature of Android Oreo.
+            We recommend that you DO NOT set the \"Importance\" of the notification category to \"Low\" as this will disable notification forwarding.<br /><br /></li>
         <li>Remember previous Notification service state (enabled/disabled) between phone reboots.<br /><br /></li>
         <li>Add new Farsi transliterations.<br/><br/></li>
         <li>New app icon, and other bug fixes and improvements.</li>

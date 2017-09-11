@@ -79,14 +79,13 @@ public class NLService extends NotificationListenerService {
     private static int mPlaceholderNotifDismissDelayMillis;
     private static int mRelayedNotifDismissDelayMillis;
     private static int mNotifLimitDurationMillis;
+
     private DebugLog mDebugLog;
-
-
     private TranslitUtil translitUtil;
-
     private NotificationManager mNotificationManager;
     private AppSelectionsStore mAppSelectionsStore;
     private Map<String, Long> mLastNotificationTimeMap;
+    private int mInterruptionFilter;
 
     @Override
     public void onCreate() {
@@ -95,6 +94,8 @@ public class NLService extends NotificationListenerService {
         mAppSelectionsStore = AppSelectionsStore.get(this);
         mDebugLog = DebugLog.get(this);
         mLastNotificationTimeMap = new HashMap<>();
+        mInterruptionFilter = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+                              ? getCurrentInterruptionFilter() : 0;
 
         mSelectedAppsPackageNames = mAppSelectionsStore.getSelectedAppsPackageNames();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -404,12 +405,35 @@ public class NLService extends NotificationListenerService {
     @Override
     public void onNotificationPosted(StatusBarNotification sbn,
                                      NotificationListenerService.RankingMap rankingMap) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
+            mInterruptionFilter == INTERRUPTION_FILTER_PRIORITY) {
+            String packageName = sbn.getPackageName();
+            String rankingKey = null;
+            for (String s : rankingMap.getOrderedKeys()) {
+                if (s.contains(packageName)) {
+                    rankingKey = s;
+                    break;
+                }
+            }
+
+            Ranking ranking = new Ranking();
+            if (rankingKey != null && rankingMap.getRanking(rankingKey, ranking)) {
+                if (!ranking.matchesInterruptionFilter()) {
+                    return;
+                }
+            }
+        }
         onNotificationPosted(sbn);
     }
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
         // Do nothing
+    }
+
+    @Override
+    public void onInterruptionFilterChanged(int interruptionFilter) {
+        mInterruptionFilter = interruptionFilter;
     }
 
     /**

@@ -104,6 +104,12 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
 
             notificationText = extras.getCharSequence(Notification.EXTRA_TEXT);
 
+            if (notificationText == null && notificationTitle == null) {
+                // Don't process if both are null
+                // NOTE: may fix bug due to null text and title in LINE app's notifications
+                return null;
+            }
+
             // 1. regular text - use the generic approach
             if (notificationText == null || !matchesAnyPattern(notificationText, mAllNewMessagesPatterns)) {
                 if (isLoggingEnabled()) {

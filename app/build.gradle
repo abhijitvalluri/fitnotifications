@@ -8,8 +8,8 @@ android {
         applicationId "com.abhijitvalluri.android.fitnotifications"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 33
-        versionName "2.9.9-oreo-beta"
+        versionCode 34
+        versionName "2.9.10-oreo-beta"
     }
     compileOptions {
         encoding "UTF-8"
