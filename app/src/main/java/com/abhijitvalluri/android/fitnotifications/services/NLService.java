@@ -140,8 +140,6 @@ public class NLService extends NotificationListenerService {
 
         translitUtil = new TranslitUtil(res);
 
-        //LINE
-        mMessageExtractors.put("jp.naver.line.android", new GroupSummaryMessageExtractor(res, true));
         // Telegram
         mMessageExtractors.put("org.telegram.messenger", new GroupSummaryMessageExtractor(res, true));
         // WhatsApp

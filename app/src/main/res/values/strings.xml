@@ -357,7 +357,7 @@
     ]]></string>
     <string name="whats_new_text"><![CDATA[
     <br />
-    <p>Changes in <b>version 2.9.10 (Android Oreo):</b></p>
+    <p>Changes in <b>version 2.9.11 Beta (Android Oreo):</b></p>
     <ul>
         <li><b>Improved Do Not Disturb \"Priority Only\" mode support</b>: Now, only \"priority\" notifications are
             forwarded to your Fitbit device in \"Priority Only\" mode.<br/><br/></li>
@@ -367,6 +367,7 @@
         <li>Remember previous Notification service state (enabled/disabled) between phone reboots.<br /><br /></li>
         <li>Add new Farsi transliterations.<br/><br/></li>
         <li>New app icon, and other bug fixes and improvements.</li>
+        <li>Fixed issue with \"Line\" app notifications</li>
     </ul>
     <p><b>Support the developer!</b> You can <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer by visiting the donation web page! More details on the website.</p>
 
