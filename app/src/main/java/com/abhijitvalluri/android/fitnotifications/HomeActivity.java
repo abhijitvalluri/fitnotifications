@@ -99,10 +99,12 @@ public class HomeActivity extends AppCompatActivity {
                 && mPreferences.getBoolean(getString(R.string.done_first_launch_key), false)) {
             // App has been updated
 
-            // Set Dismiss Placeholder notification to true by default for the benefit of users
-            mPreferences.edit()
-                        .putBoolean(getString(R.string.dismiss_placeholder_notif_key), true)
-                        .putInt(getString(R.string.placeholder_dismiss_delay_key), 2).apply();
+            if (mPreferences.getInt(getString(R.string.placeholder_dismiss_delay_key), 0) < 5) {
+                // Set default Dismiss Placeholder notification delay to 7. Low delays can cause
+                // problems with relaying notifications.
+                mPreferences.edit()
+                            .putInt(getString(R.string.placeholder_dismiss_delay_key), 7).apply();
+            }
 
             navDrawer.setCheckedItem(R.id.nav_whats_new);
             setTitle(R.string.whats_new);

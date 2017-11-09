@@ -300,7 +300,7 @@
         <li><b>NOTE:</b> If you use a device running Android 6.0 or above and you enable \"Do Not Disturb\" mode, also
             called silent mode, then please follow the additional instructions below.</li>
     </ol>
-    <p style=\"font-size:70%;\">* You must have a compatible Fitbit device, such as Fitbit Alta, Blaze or Surge.</p>
+    <p style=\"font-size:70%;\">* You must have a compatible Fitbit device, such as Fitbit Alta, Alta HR, Charge 2, Blaze or Surge.</p>
     <p>Future updates will further refine the feature set of this app! Please provide feedback on Google Play if
        there are any issues and if you like this app, kindly provide or update your review!</p>
 
@@ -324,7 +324,7 @@
     ]]></string>
     <string name="faqs_text"><![CDATA[
     <p><b>Q. Is my Fitbit device supported?</b></p>
-    <p>This app can only work with Fitbit Alta, Blaze and Surge, i.e. those devices where you can set a text notification.
+    <p>This app can only work with Fitbit Alta, Alta HR, Blaze, Surge, and Charge 2, i.e. those devices where you can set a text notification.
        Unfortunately, Fitbit, Inc. has recently changed the behavior for 3rd party call notifications on Charge and Charge HR.
        Hence those devices are not compatible with this app. Fitbit, Inc. may modify the behavior of text notifications at any
        time for the compatible devices. This is not in our control.</p>
@@ -342,10 +342,14 @@
        test the functionality while you troubleshoot the problem.</p>
     <p>Other reasons as to why the app is not working include:</p>
     <ul>
-        <li>low battery on your Fitbit device: the Fitbit app may disable Notifications if your Fitbit device has low battery.</li>
+        <li>Low battery on your Fitbit device: the Fitbit app may disable Notifications if your Fitbit device has low battery.</li>
         <li>Your Fitbit device may require a reboot to enable notifications, due to errors. Refer to the Fitbit website to find out how to reboot your device.</li>
         <li>You may need to reselect \'Fit Notifications\' as described in Step 5 in the instructions.</li>
     </ul>
+    <p><b>Fit Notifications app settings that can cause issues with notification forwarding:</b></p>
+    <p>Some users have experienced issues receiving notifications when they enable the \"Dismiss placeholder notification\"
+       setting within this app. If you are experiencing issues with notifications, please try increasing the \"Dismiss\" delay,
+       or try disabling this setting completely.</p>
     <p><b>Q. Can this app function if I use task killers on my phone?</b></p>
     <p>Please note that task killers may interfere with the proper functioning of this app. It is recommended that you disable task
        killers or at least allow them to keep the \'Fit Notifications\' service running.</p>
@@ -357,17 +361,14 @@
     ]]></string>
     <string name="whats_new_text"><![CDATA[
     <br />
-    <p>Changes in <b>version 2.9.11 Beta (Android Oreo):</b></p>
+    <p>Changes in <b>version 2.9.12:</b></p>
     <ul>
-        <li><b>Improved Do Not Disturb \"Priority Only\" mode support</b>: Now, only \"priority\" notifications are
-            forwarded to your Fitbit device in \"Priority Only\" mode.<br/><br/></li>
-        <li>Made app compatible with Android Oreo. Implemented new Android Oreo Notification Channel (Placeholder Notification).<br/><br/>
-            Learn more about <a href=\"https://www.androidcentral.com/notification-channels\">Notification Channels</a> feature of Android Oreo.
-            We recommend that you DO NOT set the \"Importance\" of the notification category to \"Low\" as this will disable notification forwarding.<br /><br /></li>
-        <li>Remember previous Notification service state (enabled/disabled) between phone reboots.<br /><br /></li>
-        <li>Add new Farsi transliterations.<br/><br/></li>
-        <li>New app icon, and other bug fixes and improvements.</li>
-        <li>Fixed issue with \"Line\" app notifications</li>
+        <li>Fixed an issue with the \'Dismiss placeholder notification\' setting in the app. Some users
+            were not able to receive notifications on the Fitbit device if the delay to dismiss placeholder
+            notifications was set too low. This issue can be resolved by either increasing the delay to
+            5 seconds or more, or by disabling this setting.</li><br/><br/>
+
+        <li>General improvements and stability updates.</li>
     </ul>
     <p><b>Support the developer!</b> You can <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer by visiting the donation web page! More details on the website.</p>
 
