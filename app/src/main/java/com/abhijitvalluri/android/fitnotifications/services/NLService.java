@@ -552,23 +552,27 @@ public class NLService extends NotificationListenerService {
                 }
             }
 
-
+            StringBuilder notificationText = new StringBuilder();
             for (CharSequence item : items) {
                 if (item != null) {
-                    String tmp = item.toString();
+                    notificationText.append(item).append(' ');
+                }
+            }
 
-                    // First check for negative filters
-                    for (String filterText : negativeFilters) {
-                        if (tmp.contains(filterText)) {
-                            return true;
-                        }
+            if (notificationText.length() != 0) {
+                String tmp = notificationText.toString();
+
+                // First check for negative filters
+                for (String filterText : negativeFilters) {
+                    if (tmp.contains(filterText)) {
+                        return true;
                     }
+                }
 
-                    // Now check for positive filters
-                    for (String filterText : positiveFilters) {
-                        if (!tmp.contains(filterText)) {
-                            return true;
-                        }
+                // Now check for positive filters
+                for (String filterText : positiveFilters) {
+                    if (!tmp.contains(filterText)) {
+                        return true;
                     }
                 }
             }

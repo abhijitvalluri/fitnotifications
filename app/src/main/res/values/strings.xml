@@ -164,6 +164,7 @@
     <string name="relayed_notif_settings">Relayed Notification Settings</string>
     <string name="limit_notif_settings">Notification Limit Settings</string>
     <string name="debug_settings">Troubleshooting Settings</string>
+    <string name="dnd_settings">Do Not Disturb Settings</string>
     <string name="notification_service_settings">Notification Service Settings</string>
 
     <!-- Placeholder Notification Settings -->
@@ -203,12 +204,13 @@
         <item quantity="other">One notification relayed every %1$d seconds for each enabled app. Additional notifications are discarded.</item>
     </plurals>
 
-    <!-- Notification Service Settings - - - - - - - - - -->
-    <string name="forward_priority_only_notifications_title">Forward only Priority notifications in DND mode</string>
+    <!-- DND Settings - - - - - - - - - - - - - - - - -  -->
+    <string name="forward_priority_only_notifications_title">Forward only Priority notifications</string>
     <string name="forward_priority_only_notifications_summary">When enabled, forward notifications for only "Priority mode" apps in "Do Not Disturb" mode.
     (You must enable "Override Do Not Disturb" setting for this app and the Priority mode apps)</string>
     <string name="forward_priority_only_notifications_key">forwardPriorityOnlyNotifications</string>
 
+    <!-- Notification Service Settings - - - - - - - - - -->
     <string name="disable_forward_screen_on_title">Disable notifications when screen on</string>
     <string name="enable_forward_screen_on_summary">Send notifications to Fitbit device even if screen is on</string>
     <string name="disable_forward_screen_on_summary">Do not send notifications to Fitbit device if screen is on</string>
@@ -366,14 +368,18 @@
     ]]></string>
     <string name="whats_new_text"><![CDATA[
     <br />
-    <p>Changes in <b>version 2.9.12:</b></p>
+    <p>Changes in <b>version 2.9.14:</b></p>
     <ul>
-        <li>Fixed an issue with the \'Dismiss placeholder notification\' setting in the app. Some users
-            were not able to receive notifications on the Fitbit device if the delay to dismiss placeholder
-            notifications was set too low. This issue can be resolved by either increasing the delay to
-            5 seconds or more, or by disabling this setting.</li><br/><br/>
+        <li><b>New feature!</b> Now, you can set an inclusive filter, along with exclusive filters
+        for notification text. Using exclusive filters, you can filter out any notification that
+        contains the specified text. Using an inclusive filter, you can only allow notifications
+        that contain the specified text. This can be setup per app.</li><br/>
 
-        <li>General improvements and stability updates.</li>
+        <li><b>New feature!</b> When using "Do Not Disturb" mode on your phone, you can specify
+        if you want to forward only "Priority" mode notifications or all notifications. This setting
+        can be set from the app\'s settings page.</li><br/>
+
+        <li>Additional general improvements and fixes.</li>
     </ul>
     <p><b>Support the developer!</b> You can <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer by visiting the donation web page! More details on the website.</p>
 
