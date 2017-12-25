@@ -43,6 +43,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -172,9 +174,6 @@ public class HomeFragment extends Fragment {
                         .setPositiveButton("SEND", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                DebugLog log = DebugLog.get(getActivity());
-                                mEnableLogs.setChecked(false);
-
                                 StringBuilder logcat=new StringBuilder();
                                 try {
                                     Process process = Runtime.getRuntime().exec("logcat -d");
@@ -190,7 +189,7 @@ public class HomeFragment extends Fragment {
                                           .append(e.getMessage());
                                 }
 
-                                startActivity(log.emailLogIntent(getContext(), logcat.toString()));
+                                sendDebugLogEmail(logcat);
                             }
                         })
                         .setNegativeButton("CANCEL", null)
@@ -216,6 +215,58 @@ public class HomeFragment extends Fragment {
         activateTextViewLinks();
 
         return v;
+    }
+
+    private void sendDebugLogEmail(final StringBuilder body) {
+        final LinearLayout layout = new LinearLayout(getContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(32,16,32,16);
+
+
+        final TextView title = new TextView(getContext());
+        title.setText("Explain the problem below:");
+        title.setTextSize(18);
+        final EditText input = new EditText(getContext());
+        layout.addView(title);
+        layout.addView(input);
+
+        final AlertDialog dialog = new AlertDialog.Builder(getContext())
+                .setTitle("Send Logs: Step 1")
+                .setView(layout)
+                .setPositiveButton(android.R.string.ok, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+
+                Button button = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                button.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        String issue = input.getText().toString();
+                        issue = issue.trim();
+                        if (issue.isEmpty()) {
+                            Toast.makeText(getContext(), "You must describe the problem you are facing to proceed!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            body.insert(0, "\n\n------\n\n");
+                            body.insert(0, issue);
+
+                            DebugLog log = DebugLog.get(getActivity());
+                            startActivity(log.emailLogIntent(getContext(), body.toString()));
+
+                            mEnableLogs.setChecked(false);
+                            dialog.dismiss();
+                        }
+                    }
+                });
+            }
+        });
+
+        dialog.show();
     }
 
     private void updateLogStatus(int status) {

@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateFormat;
 import android.view.MenuItem;
@@ -27,6 +28,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -93,6 +95,8 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         Switch discardEmptySwitch;
         Switch discardOngoingSwitch;
         Switch allDaySwitch;
+        ImageButton filterTextInfo;
+        TextView filterTextDescription;
 
         mFilterText = (EditText) findViewById(R.id.filter_text);
         mStartTimeButton = (Button) findViewById(R.id.start_time);
@@ -101,6 +105,22 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         discardEmptySwitch = (Switch) findViewById(R.id.discard_empty);
         discardOngoingSwitch = (Switch) findViewById(R.id.discard_ongoing);
         allDaySwitch = (Switch) findViewById(R.id.all_day);
+        filterTextInfo = findViewById(R.id.filter_text_info);
+        filterTextDescription = findViewById(R.id.filter_text_desc);
+
+        filterTextInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showFilterTextInstructions();
+            }
+        });
+
+        filterTextDescription.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showFilterTextInstructions();
+            }
+        });
 
         mFilterText.setHorizontallyScrolling(false);
         mFilterText.setMaxLines(5);
@@ -192,6 +212,25 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
                 setupScheduleSettings();
             }
         });
+    }
+
+    private void showFilterTextInstructions() {
+        new AlertDialog.Builder(AppSettingsActivity.this)
+                .setTitle("Filter Text Instructions")
+                .setMessage("You can set both positive and negative filters. To create a positive " +
+                        "filter, start the text with a plus (+) sign. So, if you want to only " +
+                        "forward notifications containing the word 'John', then your filter text " +
+                        "should be '+John' (without the quotes '  ').\n\n" +
+                        "To create a negative filter, start the text with a minus (-) sign. So, if you " +
+                        "don't want to forward notifications containing the word 'Smith', then " +
+                        "create a filter with the text '-Smith'.\n\n" +
+                        "For backwards compatibility, any filter that does not contain a '+' or '-' sign " +
+                        "at the start is treated as a negative filter.\n\n" +
+                        "NOTE: To filter a plus sign at the start of your positive filter do the following: '++John'. " +
+                        "This will forward only those notifications that contain the phrase '+John'.")
+                .setPositiveButton(android.R.string.ok, null)
+                .create()
+                .show();
     }
 
     private void setupWeekdayButtonsOnClickListeners() {

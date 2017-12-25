@@ -204,6 +204,11 @@
     </plurals>
 
     <!-- Notification Service Settings - - - - - - - - - -->
+    <string name="forward_priority_only_notifications_title">Forward only Priority notifications in DND mode</string>
+    <string name="forward_priority_only_notifications_summary">When enabled, forward notifications for only "Priority mode" apps in "Do Not Disturb" mode.
+    (You must enable "Override Do Not Disturb" setting for this app and the Priority mode apps)</string>
+    <string name="forward_priority_only_notifications_key">forwardPriorityOnlyNotifications</string>
+
     <string name="disable_forward_screen_on_title">Disable notifications when screen on</string>
     <string name="enable_forward_screen_on_summary">Send notifications to Fitbit device even if screen is on</string>
     <string name="disable_forward_screen_on_summary">Do not send notifications to Fitbit device if screen is on</string>
@@ -252,7 +257,7 @@
 
     <!-- App Settings Activity - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
     <string name="filter_heading">Filter Text</string>
-    <string name="filter_desc">All notifications from this app containing the specified text will be filtered out and not displayed on your Fitbit. Separate multiple patterns with a semicolon (;).</string>
+    <string name="filter_desc">Separate multiple patterns with a semicolon (;). Filters can either be exclusive or inclusive. Only notifications that satisfy the filters will be allowed. Click the info button for more details.</string>
     <string name="discard_empty_notifications">Discard empty notifications</string>
     <string name="discard_ongoing_notifications">Discard ongoing notifications</string>
     <string name="schedule_heading">Notification Schedule</string>

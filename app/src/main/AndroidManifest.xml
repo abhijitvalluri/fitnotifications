@@ -3,10 +3,10 @@
           package="com.abhijitvalluri.android.fitnotifications">
 
     <application
-        android:resizeableActivity="false"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:resizeableActivity="false"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <provider
@@ -18,33 +18,38 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths"/>
         </provider>
-        <activity android:name=".HomeActivity"
-                  android:theme="@style/HomeTheme">
+
+        <activity
+            android:name=".HomeActivity"
+            android:theme="@style/HomeTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SENDTO"/>
+
                 <category android:name="android.intent.category.DEFAULT"/>
+
                 <data android:scheme="sms"/>
             </intent-filter>
         </activity>
         <activity
             android:name=".AppChoicesActivity"
             android:label="@string/app_choices_activity_title"
-            android:parentActivityName=".HomeActivity" />
+            android:parentActivityName=".HomeActivity"/>
         <activity
             android:name=".setup.AppIntroActivity"
-            android:theme="@style/IntroTheme"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/IntroTheme"/>
         <activity
             android:name=".SettingsActivity"
             android:label="@string/settings_menu"
-            android:parentActivityName=".HomeActivity" />
+            android:parentActivityName=".HomeActivity"/>
         <activity
             android:name=".AppSettingsActivity"
-            android:parentActivityName=".AppChoicesActivity" />
+            android:parentActivityName=".AppChoicesActivity"/>
 
         <service
             android:name=".services.NLService"
@@ -55,13 +60,18 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".widget.ServiceToggle" >
+        <receiver android:name=".widget.ServiceToggle">
             <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
-            <meta-data android:name="android.appwidget.provider"
-                       android:resource="@xml/service_toggle_widget" />
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/service_toggle_widget"/>
         </receiver>
+
+        <activity android:name=".AppScheduleActivity">
+        </activity>
     </application>
 
 </manifest>

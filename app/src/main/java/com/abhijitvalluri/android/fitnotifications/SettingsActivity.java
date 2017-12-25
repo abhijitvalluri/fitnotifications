@@ -236,6 +236,9 @@ public class SettingsActivity extends AppCompatActivity {
                 boolean enable = mPreferences.getBoolean(key, true);
                 updateDisplayAppNameSummary(key, enable);
                 NLService.onDisplayAppNameUpdated(enable);
+            } else if (key.equals(getString(R.string.forward_priority_only_notifications_key))) {
+                boolean forwardOnlyPriorityNotifs = mPreferences.getBoolean(key, false);
+                NLService.onForwardOnlyPriorityNotifSettingUpdated(forwardOnlyPriorityNotifs);
             }
         }
 

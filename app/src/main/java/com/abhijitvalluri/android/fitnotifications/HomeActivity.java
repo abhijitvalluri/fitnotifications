@@ -40,6 +40,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.abhijitvalluri.android.fitnotifications.setup.AppIntroActivity;
@@ -144,16 +148,59 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void sendFeedback() {
-        String uriText =
-                "mailto:android@abhijitvalluri.com" +
-                        "?subject=" + Uri.encode(getString(R.string.email_subject)) +
-                        "&body=" + Uri.encode(getString(R.string.email_body));
+        final LinearLayout layout = new LinearLayout(HomeActivity.this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(32,16,32,16);
 
-        Uri uri = Uri.parse(uriText);
+        final TextView title = new TextView(HomeActivity.this);
+        title.setText("Enter your feedback below:");
+        title.setTextSize(18);
+        final EditText input = new EditText(HomeActivity.this);
+        layout.addView(title);
+        layout.addView(input);
 
-        Intent sendIntent = new Intent(Intent.ACTION_SENDTO);
-        sendIntent.setData(uri);
-        startActivity(Intent.createChooser(sendIntent, "Select app to send email"));
+        final AlertDialog dialog = new AlertDialog.Builder(HomeActivity.this)
+            .setTitle("Send Feedback: Step 1")
+            .setView(layout)
+            .setPositiveButton(android.R.string.ok, null)
+            .setNegativeButton(android.R.string.cancel, null)
+            .create();
+
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+
+                Button button = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                button.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        String feedback = input.getText().toString();
+                        feedback = feedback.trim();
+                        if (feedback.isEmpty()) {
+                            Toast.makeText(HomeActivity.this, "You must type some feedback to proceed!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            feedback += "\n\n";
+                            String uriText =
+                                    "mailto:android@abhijitvalluri.com" +
+                                            "?subject=" + Uri.encode(getString(R.string.email_subject)) +
+                                            "&body=" + Uri.encode(feedback);
+
+                            Uri uri = Uri.parse(uriText);
+
+                            Intent sendIntent = new Intent(Intent.ACTION_SENDTO);
+                            sendIntent.setData(uri);
+                            startActivity(Intent.createChooser(sendIntent, "Step 2: Select app to send feedback"));
+
+                            dialog.dismiss();
+                        }
+                    }
+                });
+            }
+        });
+
+        dialog.show();
     }
 
     private void setupDrawerContent(NavigationView navigationView) {

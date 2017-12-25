@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         applicationId "com.abhijitvalluri.android.fitnotifications"
@@ -24,7 +24,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    testOptions { 
+    testOptions {
         unitTests.returnDefaultValues = true
     }
     lintOptions {
@@ -36,6 +36,7 @@ android {
 }
 
 dependencies {
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     compile project(':icu4j')
     compile fileTree(include: ['*.jar'], dir: 'libs')
 

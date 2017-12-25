@@ -69,6 +69,7 @@ public class NLService extends NotificationListenerService {
     private static boolean mIsServiceEnabled;
     private static boolean mDismissPlaceholderNotif;
     private static boolean mDismissRelayedNotif;
+    private static boolean mForwardOnlyPriorityNotifs;
     private static boolean mLimitNotifications;
     private static boolean mDisableWhenScreenOn;
     private static boolean mTransliterateNotif;
@@ -106,6 +107,8 @@ public class NLService extends NotificationListenerService {
                                         getString(R.string.dismiss_placeholder_notif_key), false);
         mDismissRelayedNotif = preferences.getBoolean(
                                         getString(R.string.dismiss_relayed_notif_key), false);
+        mForwardOnlyPriorityNotifs = preferences.getBoolean(
+                                        getString(R.string.forward_priority_only_notifications_key), false);
         mPlaceholderNotifDismissDelayMillis = preferences.getInt(
                 getString(R.string.placeholder_dismiss_delay_key), Constants.DEFAULT_DELAY_SECONDS)
                 *1000;
@@ -162,6 +165,10 @@ public class NLService extends NotificationListenerService {
     public static void onPlaceholderNotifSettingUpdated(boolean dismissNotif, int delaySeconds) {
         mDismissPlaceholderNotif = dismissNotif;
         mPlaceholderNotifDismissDelayMillis = delaySeconds * 1000;
+    }
+
+    public static void onForwardOnlyPriorityNotifSettingUpdated(boolean forwardOnlyPriorityNotifs) {
+        mForwardOnlyPriorityNotifs = forwardOnlyPriorityNotifs;
     }
 
     public static void onSplitNotificationSettingUpdated(boolean enabled,
@@ -275,7 +282,7 @@ public class NLService extends NotificationListenerService {
             mDebugLog.writeLog("Extractor gave non null titleAndText and non-empty too");
         }
 
-        if (anyMatchesFilter(filterText, titleAndText)) {
+        if (isFiltered(filterText, titleAndText)) {
             return;
         }
 
@@ -403,21 +410,24 @@ public class NLService extends NotificationListenerService {
     @Override
     public void onNotificationPosted(StatusBarNotification sbn,
                                      NotificationListenerService.RankingMap rankingMap) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
-            mInterruptionFilter == INTERRUPTION_FILTER_PRIORITY) {
-            String packageName = sbn.getPackageName();
-            String rankingKey = null;
-            for (String s : rankingMap.getOrderedKeys()) {
-                if (s.contains(packageName)) {
-                    rankingKey = s;
-                    break;
-                }
-            }
 
-            Ranking ranking = new Ranking();
-            if (rankingKey != null && rankingMap.getRanking(rankingKey, ranking)) {
-                if (!ranking.matchesInterruptionFilter()) {
-                    return;
+        if (mForwardOnlyPriorityNotifs) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
+                    mInterruptionFilter == INTERRUPTION_FILTER_PRIORITY) {
+                String packageName = sbn.getPackageName();
+                String rankingKey = null;
+                for (String s : rankingMap.getOrderedKeys()) {
+                    if (s.contains(packageName)) {
+                        rankingKey = s;
+                        break;
+                    }
+                }
+
+                Ranking ranking = new Ranking();
+                if (rankingKey != null && rankingMap.getRanking(rankingKey, ranking)) {
+                    if (!ranking.matchesInterruptionFilter()) {
+                        return;
+                    }
                 }
             }
         }
@@ -518,21 +528,52 @@ public class NLService extends NotificationListenerService {
      * Checks if any of the <code>CharSequence</code> items contains the provided <code>filter</code>
      * text.
      */
-    private static boolean anyMatchesFilter(String filter, CharSequence ... items) {
+    private static boolean isFiltered(String filter, CharSequence ... items) {
         if (filter != null && !filter.isEmpty()) {
             String[] parts = filter.split("\\s*;\\s*");
+
+            ArrayList<String> positiveFilters = new ArrayList<>();
+            ArrayList<String> negativeFilters = new ArrayList<>();
+
+            for (String filterText : parts) {
+                String tmp = filterText.trim();
+                if (tmp.length() > 0) {
+                    if (tmp.charAt(0) == '+') {
+                        if (tmp.length() > 1) {
+                            positiveFilters.add(tmp.substring(1));
+                        }
+                    } else if (tmp.charAt(0) == '-') {
+                        if (tmp.length() > 1) {
+                            negativeFilters.add(tmp.substring(1));
+                        }
+                    } else {
+                        negativeFilters.add(tmp);
+                    }
+                }
+            }
+
 
             for (CharSequence item : items) {
                 if (item != null) {
                     String tmp = item.toString();
-                    for (String filterText : parts) {
-                        if (filterText.length() > 0 && tmp.contains(filterText)) {
+
+                    // First check for negative filters
+                    for (String filterText : negativeFilters) {
+                        if (tmp.contains(filterText)) {
+                            return true;
+                        }
+                    }
+
+                    // Now check for positive filters
+                    for (String filterText : positiveFilters) {
+                        if (!tmp.contains(filterText)) {
                             return true;
                         }
                     }
                 }
             }
         }
+
         return false;
     }
 

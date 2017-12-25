@@ -61,6 +61,12 @@
     <PreferenceCategory
         android:title="@string/notification_service_settings">
         <SwitchPreference
+            android:title="@string/forward_priority_only_notifications_title"
+            android:summary="@string/forward_priority_only_notifications_summary"
+            android:key="@string/forward_priority_only_notifications_key"
+            android:defaultValue="false" />
+
+        <SwitchPreference
             android:title="@string/disable_forward_screen_on_title"
             android:summary="@string/disable_forward_screen_on_summary"
             android:key="@string/disable_forward_screen_on_key"
