@@ -243,5 +243,13 @@
     <string name="all_day">常に通知する</string>
     <string name="next_day">(翌日)</string>
     <string name="schedule_disabled">全時刻</string>
-    
+    <string name="schedule_sunday">日</string>
+    <string name="schedule_monday">月</string>
+    <string name="schedule_tuesday">火</string>
+    <string name="schedule_wednesday">水</string>
+    <string name="schedule_thursday">木</string>
+    <string name="schedule_friday">金</string>
+    <string name="schedule_saturday">土</string>
+
+
 </resources>

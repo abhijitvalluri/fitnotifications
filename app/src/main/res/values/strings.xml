@@ -271,6 +271,13 @@
     <string name="all_day">All day schedule</string>
     <string name="next_day">(Next day)</string>
     <string name="schedule_disabled">All day</string>
+    <string name="schedule_sunday">S</string>
+    <string name="schedule_monday">M</string>
+    <string name="schedule_tuesday">T</string>
+    <string name="schedule_wednesday">W</string>
+    <string name="schedule_thursday">T</string>
+    <string name="schedule_friday">F</string>
+    <string name="schedule_saturday">S</string>
 
     <!-- Notification summary patterns  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <string name="new_messages_summary_pattern">\\d+ new messages</string>
