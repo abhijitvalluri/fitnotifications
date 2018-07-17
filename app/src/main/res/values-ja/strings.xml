@@ -5,7 +5,7 @@
     <string name="other_app_icon">App icon of an installed app</string>
     <string name="about_app">アプリについて</string>
     <string name="app_info">Fit Notifications Menu</string>
-    <string name="instructions">最初のセットアップを開始</string>
+    <string name="instructions">初期セットアップを開始</string>
     <string name="instructions_heading">Setup</string>
     <string name="manual_setup_instructions">セットアップ手順</string>
     <string name="faqs">よくある質問</string>
@@ -125,8 +125,8 @@
     <!-- First launch -->
     <string name="done_first_launch_key">FirstLaunch</string>
     <string name="version_key">AppVersion</string>
-    <string name="setup_incomplete">Setup is incomplete! Please review the interactive setup once, even if you successfully configured a previous version of the app. </string>
-    <string name="setup_incomplete_title">Incomplete Setup</string>
+    <string name="setup_incomplete">セットアップが完了していません。以前のバージョンのアプリで正常に設定した場合でも、初期セットアップをもう一度実行してください。</string>
+    <string name="setup_incomplete_title">セットアップが未完了</string>
 
     <!-- Preference keys -->
     <string name="show_enabled_apps_key">ShowEnabledApps</string>
