@@ -108,7 +108,7 @@
     通知音やバイブレーションが動作することはありません。
     </string>
     <string name="intro_dnd_mode_oreo_message">
-    下部の「CONFIGURE」をクリックしてください。次の画面で、「アプリの通知」を選択します。「Placeholder notification」カテゴリを選択し、「[通知を非表示]をオーバーライドする」を有効にします。\n
+    下部の「CONFIGURE」をクリックしてください。次の画面で、「アプリの通知」を選択します。「プレースホルダ通知（Placeholder notification）」カテゴリを選択し、「[通知を非表示]をオーバーライドする」を有効にします。\n
     \nサイレントモードを使用する場合は、「優先する通知のみ」を有効にしてください。そのようにすれば、Fitbitデバイスが通知を受け取れます。\n
     \n注意：Android Oreoでは通知の設定を変更できますが、Fitbitデバイスに通知が送られなくなるので、通知の重要度を「低」にしないでください
     </string>
@@ -140,7 +140,7 @@
     <string name="widget_off_text">OFF</string>
 
     <!-- Notification Channel strings -->
-    <string name="notification_channel_name">Placeholder notification</string>
+    <string name="notification_channel_name">プレースホルダ通知</string>
     <string name="notification_channel_desc">これは、Fit Notificationアプリのプレースホルダ通知のチャンネルです。
     この通知はアプリが適切に動作するために必要です。</string>
 
