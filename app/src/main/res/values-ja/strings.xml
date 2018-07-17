@@ -103,13 +103,13 @@
     make any notification sound on the phone as this app doesn\'t cause notification sounds or vibrations anyway.
     </string>
     <string name="intro_dnd_mode_nougat_message">
-    Click on configure below. In the next screen, choose \"Notifications\". Then, disable \"Show silently\" setting and enable \"Override Do Not Disturb\".\n
-    \nNow, when you use silent mode, enable \"Priority Only\". Doing so will allow you to get notifications via the app on your Fitbit device, but it will not
-    make any notification sound on the phone as this app doesn\'t cause notification sounds or vibrations anyway.
+    下部の「CONFIGURE」をクリックしてください。次の画面で、「通知」を選択します。「マナーモードで表示」を無効にし、「[通知を非表示]をオーバーライドする」を有効にします。\n
+    \nサイレントモードを使用する場合は、「優先する通知のみ」を有効にしてください。そのようにすれば、Fitbitデバイスが通知を受け取れますが、
+    通知音やバイブレーションが動作することはありません。
     </string>
     <string name="intro_dnd_mode_oreo_message">
     下部の「CONFIGURE」をクリックしてください。次の画面で、「アプリの通知」を選択します。「Placeholder notification」カテゴリを選択し、「[通知を非表示]をオーバーライドする」を有効にします。\n
-    \nサイレントモードを使用する場合は、「優先のみ」を有効にしてください。そのようにすれば、Fitbitデバイスが通知を受け取れます。\n
+    \nサイレントモードを使用する場合は、「優先する通知のみ」を有効にしてください。そのようにすれば、Fitbitデバイスが通知を受け取れます。\n
     \n注意：Android Oreoでは通知の設定を変更できますが、Fitbitデバイスに通知が送られなくなるので、通知の重要度を「低」にしないでください
     </string>
 
