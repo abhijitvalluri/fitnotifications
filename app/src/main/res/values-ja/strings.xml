@@ -3,19 +3,19 @@
     <string name="app_name">Fit Notifications</string>
     <string name="app_icon">Fit Notifications App Icon</string>
     <string name="other_app_icon">App icon of an installed app</string>
-    <string name="about_app">About app</string>
+    <string name="about_app">アプリについて</string>
     <string name="app_info">Fit Notifications Menu</string>
-    <string name="instructions">Start interactive setup</string>
+    <string name="instructions">最初のセットアップを開始</string>
     <string name="instructions_heading">Setup</string>
-    <string name="manual_setup_instructions">Setup Instructions</string>
-    <string name="faqs">Frequently asked questions</string>
+    <string name="manual_setup_instructions">セットアップ手順</string>
+    <string name="faqs">よくある質問</string>
     <string name="smart_dinosaurs">Smart Dinosaurs Entertainment</string>
-    <string name="donate">Donate</string>
-    <string name="support_dev">Support the developer!</string>
-    <string name="whats_new">What\'s new</string>
+    <string name="donate">寄付</string>
+    <string name="support_dev">開発者を支援する!</string>
+    <string name="whats_new">新機能・変更点</string>
     <string name="disclaimer">Disclaimer</string>
-    <string name="opensource">Open source licenses</string>
-    <string name="credits">Credits</string>
+    <string name="opensource">オープンソースライセンス</string>
+    <string name="credits">クレジット</string>
     <string name="app_choices">アプリのセットアップ</string>
     <string name="app_choices_activity_title">アプリの選択</string>
     <string name="enabled_apps_filter_menu">有効化したアプリ</string>
@@ -30,25 +30,25 @@
                                            Does it have issues with your language? If so, you can
                                            help fix it by sending us feedback from the side menu bar!\n\nYou can turn off the
                                            feature by going to the settings page in this app.</string>
-    <string name="placeholder_notification_text">[Placeholder notification] Click to enable auto-dismiss.</string>
-    <string name="notification_text">[Placeholder notification] Click to enable auto-dismiss. You can enable auto-dismiss for the relayed notification as well.</string>
-    <string name="test_notification">Test Notification</string>
-    <string name="test_notification_sent">Test notification sent</string>
-    <string name="notification_access_enable_textView">Enable Notification Access</string>
-    <string name="notification_access_disable_textView">Disable Notification Access</string>
+    <string name="placeholder_notification_text">[Placeholder notification] クリックすると自動非表示を有効にできます</string>
+    <string name="notification_text">[Placeholder notification]クリックすると自動非表示を有効にできます。中継された通知も自動非表示にすることもできます</string>
+    <string name="test_notification">テスト通知</string>
+    <string name="test_notification_sent">テスト通知を送信しました</string>
+    <string name="notification_access_enable_textView">通知アクセスの有効化</string>
+    <string name="notification_access_disable_textView">通知アクセスの無効化</string>
     <string name="enable_notification_access">通知アクセスの有効化</string>
-    <string name="disable_notification_access">Disable Notification Access</string>
+    <string name="disable_notification_access">通知アクセスの無効化</string>
     <string name="start_service_info_text">Starting the notification service&#8230;</string>
     <string name="start_service">サービスの開始</string>
-    <string name="turn_on_service">TURN ON</string>
-    <string name="turn_off_service">TURN OFF</string>
+    <string name="turn_on_service">ONにする</string>
+    <string name="turn_off_service">OFFにする</string>
     <string name="service_on">ON</string>
     <string name="service_off">OFF</string>
     <string name="search_menu">アプリの検索</string>
 
     <!-- Home screen -->
-    <string name="service_state">Notification service state: </string>
-    <string name="enable_logging">Enable logging: </string>
+    <string name="service_state">通知サービスの状態: </string>
+    <string name="enable_logging">ログの有効化: </string>
 
     <!-- Intro Strings Activity -->
     <string name="intro_get_started_button">開始する</string>
@@ -64,9 +64,9 @@
     <string name="intro_enable_access_success_title">通知アクセスは有効です！</string>
     <string name="intro_enable_access_success_desc">このアプリが動作するには通知アクセスが必要です。既に有効にしているので、次のステップに進みましょう！</string>
 
-    <string name="intro_get_fitbit_title">Install the official Fitbit app!</string>
-    <string name="intro_get_fitbit_desc">Looks like you don\'t have the official Fitbit app installed. We\'ll need that, so let\'s install it by clicking the button below.</string>
-    <string name="intro_get_fitbit_button">Install Fitbit app</string>
+    <string name="intro_get_fitbit_title">Fitbit 公式アプリをインストールしてください！</string>
+    <string name="intro_get_fitbit_desc">Fitbit 公式アプリをインストールしていません。下のボタンをクリックしてインストールしてください。</string>
+    <string name="intro_get_fitbit_button">Fitbitアプリをインストール</string>
 
     <string name="intro_setup_fitbit_title1">Fitbitアプリの通知設定: ステップ1</string>
     <string name="intro_setup_fitbit_title2">Fitbitアプリの通知設定: ステップ2</string>
@@ -74,11 +74,11 @@
     <string name="intro_setup_fitbit_desc1">Fitbitアプリでデバイスアイコンをクリックし、デバイス設定に入ります
                                             \n\n<b>サポートしているデバイス:</b>\nFitbit Alta, Alta HR, Charge 2, Blaze, Surge.
                                             Fitbit Flex 2 は一部のみサポートしています(LEDの点灯)。</string>
-    <string name="intro_setup_issues_title">Setup issues?</string>
-    <string name="intro_setup_issues_message">Looks like you already finished setup once.
-                                              \n\nIf you are still having issues with notifications, try rebooting the phone and setup again.
-                                              If that does not work, try reinstalling the app.</string>
-    <string name="intro_setup_issues_ok">Got it!</string>
+    <string name="intro_setup_issues_title">セットアップに問題がありましたか？</string>
+    <string name="intro_setup_issues_message">セットアップは、一度完了しています。
+                                              \n\n通知に問題がある場合は、スマホを再起動してセットアップを再度実行してください。
+                                              それでも解決しない場合は、アプリを再インストールしてください</string>
+    <string name="intro_setup_issues_ok">OK</string>
     <string name="intro_setup_fitbit_desc2">「一般」の下にある「通知」を選択しましょう。そして「テキストメッセージ」を選択してください。</string>
     <string name="intro_setup_fitbit_desc3">「Fit Notification」を選択してください。そしてFitbitデバイスを同期させます。通知が届かなくなるので、「カレンダーのイベント」でFit Notificationを選択してはいけません。</string>
     <string name="intro_setup_fitbit_button3">Fitbitアプリを開く</string>
@@ -113,14 +113,14 @@
     \n注意：Android Oreoでは通知の設定を変更できますが、Fitbitデバイスに通知が送られなくなるので、通知の重要度を「低」にしないでください
     </string>
 
-    <string name="intro_done_title">Done! Test your setup now!</string>
-    <string name="intro_done_desc">Click the button below to send a test notification. You will see it on your device if the setup was successful! That\'s the basics! Check out the settings page for additional features!</string>
+    <string name="intro_done_title">準備完了！設定を確認してください！</string>
+    <string name="intro_done_desc">下のボタンをクリックしてテスト通知を送信してください。セットアップが完了している場合は、端末に通知が表示されます！ここでは基本設定を行いました。その他の機能については設定ページをご覧ください。</string>
 
     <!-- Side bar -->
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
-    <string name="feedback">Feedback</string>
-    <string name="send_feedback">Send feedback</string>
+    <string name="feedback">フィードバック</string>
+    <string name="send_feedback">フィードバックを送る</string>
 
     <!-- First launch -->
     <string name="done_first_launch_key">FirstLaunch</string>
