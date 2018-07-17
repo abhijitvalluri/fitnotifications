@@ -31,7 +31,7 @@
                                            help fix it by sending us feedback from the side menu bar!\n\nYou can turn off the
                                            feature by going to the settings page in this app.</string>
     <string name="placeholder_notification_text">[Placeholder notification] クリックすると自動非表示を有効にできます</string>
-    <string name="notification_text">[Placeholder notification]クリックすると自動非表示を有効にできます。中継された通知も自動非表示にすることもできます</string>
+    <string name="notification_text">[Placeholder notification]クリックすると自動非表示を有効にできます。中継された通知を自動非表示にすることもできます</string>
     <string name="test_notification">テスト通知</string>
     <string name="test_notification_sent">テスト通知を送信しました</string>
     <string name="notification_access_enable_textView">通知アクセスの有効化</string>
