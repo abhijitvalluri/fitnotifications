@@ -123,16 +123,8 @@
     <string name="send_feedback">フィードバックを送る</string>
 
     <!-- First launch -->
-    <string name="done_first_launch_key">FirstLaunch</string>
-    <string name="version_key">AppVersion</string>
     <string name="setup_incomplete">セットアップが完了していません。以前のバージョンのアプリで正常に設定した場合でも、初期セットアップをもう一度実行してください。</string>
     <string name="setup_incomplete_title">セットアップが未完了</string>
-
-    <!-- Preference keys -->
-    <string name="show_enabled_apps_key">ShowEnabledApps</string>
-    <string name="enable_debug_logs">enableDebugLogs</string>
-    <string name="probably_rated_app">probablyRatedApp</string>
-    <string name="probably_donated">probablyDonated</string>
 
     <!-- Widget strings -->
     <string name="widget_button">Fit Notification Service Toggle</string>
@@ -143,9 +135,6 @@
     <string name="notification_channel_name">プレースホルダ通知</string>
     <string name="notification_channel_desc">これは、Fit Notificationアプリのプレースホルダ通知のチャンネルです。
     この通知はアプリが適切に動作するために必要です。</string>
-
-    <!-- Notification Listener Service state key -->
-    <string name="notification_listener_service_state_key">NlsState</string>
 
     <!-- Settings Menu - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
     <!-- Misc. -->
@@ -168,34 +157,28 @@
     <!-- Placeholder Notification Settings -->
     <string name="dismiss_placeholder_notif">プレースホルダ通知の消去</string>
     <string name="dismiss_placeholder_notif_summary">プレースホルダ通知を自動的に消去する</string>
-    <string name="dismiss_placeholder_notif_key">DismissAppNotification</string>
 
     <string name="placeholder_dismiss_delay">消去する時間</string>
     <string name="placeholder_dismiss_delay_summary0">消去しない</string>
     <plurals name="placeholder_dismiss_delay_summary">
         <item quantity="other">%1$d秒後</item>
     </plurals>
-    <string name="placeholder_dismiss_delay_key">PlaceholderDismissDelay</string>
 
     <!-- Relayed Notification Settings -->
     <string name="dismiss_relayed_notif">中継した通知の消去</string>
     <string name="dismiss_relayed_notif_summary">他のアプリから中継した通知を自動的に消去する</string>
-    <string name="dismiss_relayed_notif_key">DismissOtherNotifications</string>
 
     <string name="relayed_dismiss_delay">消去する時間</string>
     <string name="relayed_dismiss_delay_summary0">消去しない</string>
     <plurals name="relayed_dismiss_delay_summary">
         <item quantity="other">%1$d秒後</item>
     </plurals>
-    <string name="relayed_dismiss_delay_key">RelayedDismissDelay</string>
 
     <!-- Limit Notification Settings -->
     <string name="limit_notif">中継した通知の制限</string>
     <string name="limit_notif_summary">各アプリがFitbitデバイスに送信できる通知数を設定します。短時間に多くの通知がデバイスに送られる場合に使用します。</string>
-    <string name="limit_notif_key">limitNotifications</string>
 
     <string name="notif_limit_duration">期間の制限</string>
-    <string name="notif_limit_duration_key">NotiflimitDuration</string>
     <string name="notif_limit_duration_summary0">制限なくすべての通知を送信します</string>
     <plurals name="notif_limit_duration_summary">
         <item quantity="other">%1$d秒に1つの通知を中継します（1アプリごとにカウント）。それ以上の通知は破棄されます。</item>
@@ -205,33 +188,27 @@
     <string name="forward_priority_only_notifications_title">優先する通知のみ通知する</string>
     <string name="forward_priority_only_notifications_summary">有効にした場合、マナーモード時に「優先する通知」の対象となっているアプリにのみ通知します。
     （このアプリと通知を行うアプリの両方で「マナーモードをオーバライドする」を有効にする必要があります）</string>
-    <string name="forward_priority_only_notifications_key">forwardPriorityOnlyNotifications</string>
 
     <!-- Notification Service Settings - - - - - - - - - -->
     <string name="disable_forward_screen_on_title">画面がオンの時に通知を無効にする</string>
     <string name="enable_forward_screen_on_summary">画面がオンの時にもFitbitデバイスに通知を送信します</string>
     <string name="disable_forward_screen_on_summary">画面がオンの時にはFitbitデバイスに通知を送信しません</string>
-    <string name="disable_forward_screen_on_key">disableWhenScreenOn</string>
 
     <!-- Display app name setting -->
     <string name="display_app_name_title">アプリ名の表示</string>
     <string name="display_app_name_summary_enabled">Fitbitトラッカーに通知したアプリ名を表示します</string>
     <string name="display_app_name_summary_disabled">Fitbitトラッカーに通知したアプリ名を表示しません</string>
-    <string name="display_app_name_key">displayAppName</string>
 
     <!-- Transliteration settings -->
     <string name="transliterate_notification_title">ローマ字への変換</string>
     <string name="transliterate_notification_summary_enabled">非ラテン文字をラテン文字に変換します</string>
     <string name="transliterate_notification_summary_disabled">非ラテン文字をラテン文字に変換しません</string>
-    <string name="transliterate_notification_key">transliterateNotifications</string>
 
     <!-- Split notification setting -->
     <string name="split_notification_title">長い通知の分割</string>
     <string name="split_notification_summary">長い通知を細かく分割して省略せずに表示します</string>
-    <string name="split_notification_key">splitNotifications</string>
 
     <string name="notification_text_limit_title">Fitbitデバイスの文字制限</string>
-    <string name="notification_text_limit_key">characterLimit</string>
     <string name="notification_text_limit_summary_disabled">制限しない</string>
     <plurals name="notification_text_limit_summary_enabled">
         <item quantity="other">最大%1$d文字</item>
@@ -240,7 +217,6 @@
     <string name="notification_text_limit_after">文字を表示</string>
 
     <string name="num_split_notifications_title">通知を分割する個数</string>
-    <string name="num_split_notifications_key">Number of split notifications</string>
     <string name="num_split_notifications_summary_disabled">なし</string>
     <plurals name="num_split_notifications_summary_enabled">
         <item quantity="other">通知を%1$d個に分割</item>
