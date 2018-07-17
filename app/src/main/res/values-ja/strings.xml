@@ -200,7 +200,7 @@
     <string name="display_app_name_summary_disabled">Fitbitトラッカーに通知したアプリ名を表示しません</string>
 
     <!-- Transliteration settings -->
-    <string name="transliterate_notification_title">ローマ字への変換</string>
+    <string name="transliterate_notification_title">ラテン文字への変換</string>
     <string name="transliterate_notification_summary_enabled">非ラテン文字をラテン文字に変換します</string>
     <string name="transliterate_notification_summary_disabled">非ラテン文字をラテン文字に変換しません</string>
 
