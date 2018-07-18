@@ -69,9 +69,6 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/service_toggle_widget"/>
         </receiver>
-
-        <activity android:name=".AppScheduleActivity">
-        </activity>
     </application>
 
 </manifest>

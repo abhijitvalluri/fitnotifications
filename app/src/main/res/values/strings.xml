@@ -130,6 +130,10 @@
     <string name="setup_incomplete">Setup is incomplete! Please review the interactive setup once, even if you successfully configured a previous version of the app. </string>
     <string name="setup_incomplete_title">Incomplete Setup</string>
 
+    <!-- Home activity -->
+    <string name="fitbit_2_70_issues">fitbitIssueFirstNotification</string>
+    <string name="fitbit_2_70_issues_never_show_again">fitbitIssueNeverShowAgain</string>
+
     <!-- Preference keys -->
     <string name="show_enabled_apps_key">ShowEnabledApps</string>
     <string name="enable_debug_logs">enableDebugLogs</string>
@@ -368,18 +372,18 @@
     ]]></string>
     <string name="whats_new_text"><![CDATA[
     <br />
-    <p>Changes in <b>version 2.9.14:</b></p>
+    <p>Changes in <b>version 2.9.16:</b></p>
     <ul>
-        <li><b>New feature!</b> Now, you can set an inclusive filter, along with exclusive filters
-        for notification text. Using exclusive filters, you can filter out any notification that
-        contains the specified text. Using an inclusive filter, you can only allow notifications
-        that contain the specified text. This can be setup per app.</li><br/>
+        <li><b>Fixed the notifications issue due to latest Fitbit update (April 18, 2018)!</b>
+        We fixed the issue caused due to the latest update to the Fitbit app (on April 18, 2018),
+        by editing the settings on your phone for our app. This changes the behavior of the notifications a little.
+        Please note that you will receive notifications on your Fitbit tracker <b>ONLY</b> if the notification
+        makes a sound now, due to new restrictions of the Fitbit app. So, edit the settings of third party apps accordingly.</p>
 
-        <li><b>New feature!</b> When using "Do Not Disturb" mode on your phone, you can specify
-        if you want to forward only "Priority" mode notifications or all notifications. This setting
-        can be set from the app\'s settings page.</li><br/>
-
-        <li>Additional general improvements and fixes.</li>
+        <p>Also, this update reset any changes made for the \"Do Not Disturb\" mode. Please go to
+        the App settings for the \"Fit Notifications\" app in your phone\'s settings, then click
+        on \"App Notifications\" and enable \"Override Do Not Disturb\" setting under the
+        \"Placeholder notification\" choice, if you wish to do so.</li>
     </ul>
     <p><b>Support the developer!</b> You can <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer by visiting the donation web page! More details on the website.</p>
 

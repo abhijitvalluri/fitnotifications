@@ -24,10 +24,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -37,6 +39,8 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -49,6 +53,7 @@ import android.widget.Toast;
 import com.abhijitvalluri.android.fitnotifications.setup.AppIntroActivity;
 import com.abhijitvalluri.android.fitnotifications.utils.AppSelectionsStore;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
+
 
 /**
  * Main activity for the app
@@ -103,6 +108,36 @@ public class HomeActivity extends AppCompatActivity {
                 && mPreferences.getBoolean(getString(R.string.done_first_launch_key), false)) {
             // App has been updated
 
+            new AlertDialog.Builder(HomeActivity.this)
+                    .setTitle("Notifications issue with latest Fitbit app fixed!")
+                    .setMessage(Html.fromHtml("<p>We fixed the issue caused due to the latest update to " +
+                            "the Fitbit app, by editing the settings on your phone for our " +
+                            "app. This changes the behavior of the notifications. Please note that you will " +
+                            "receive notifications on your Fitbit tracker <b>ONLY</b> if the notification " +
+                            "makes a sound now, due to new restrictions of the Fitbit app. So, edit the " +
+                            "settings of third party apps accordingly.</p>" +
+                            "<p>Also, this update reset any changes made for the \"Do Not Disturb\" mode. " +
+                            "Please click on \"Verify Settings\" button below to enable \"Override Do Not " +
+                            "Disturb\", if you wish to do so."))
+                    .setPositiveButton("Verify Settings", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent intent = new Intent();
+                            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            Uri uri = Uri.fromParts("package", Constants.PACKAGE_NAME, null);
+                            intent.setData(uri);
+                            startActivity(intent);
+                        }
+                    })
+                    .setNegativeButton("Never show again", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            mPreferences.edit().putInt(getString(R.string.version_key), Constants.VERSION_CODE).apply();
+                        }
+                    })
+                    .create()
+                    .show();
+
             if (mPreferences.getInt(getString(R.string.placeholder_dismiss_delay_key), 0) < 5) {
                 // Set default Dismiss Placeholder notification delay to 7. Low delays can cause
                 // problems with relaying notifications.
@@ -114,8 +149,6 @@ public class HomeActivity extends AppCompatActivity {
             setTitle(R.string.whats_new);
             frag = InfoFragment.newInstance(getString(R.string.whats_new_text));
             fragmentManager.beginTransaction().replace(R.id.flContent, frag).commit();
-
-            mPreferences.edit().putInt(getString(R.string.version_key), Constants.VERSION_CODE).apply();
 
             // Open the database to update it in case the version is incremented.
             AppSelectionsStore store = AppSelectionsStore.get(this);
@@ -133,12 +166,25 @@ public class HomeActivity extends AppCompatActivity {
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+            try {
+                manager.deleteNotificationChannel(Constants.NOTIFICATION_CHANNEL_ID_OLD);
+                manager.deleteNotificationChannel(Constants.NOTIFICATION_CHANNEL_ID_FIX);
+
+            } catch (NullPointerException e) {
+                Log.e("FitNotificationErrors", "Error deleting notification channel. Error = " + e.getMessage());
+            }
+
             String id = Constants.NOTIFICATION_CHANNEL_ID;
             CharSequence name = getString(R.string.notification_channel_name);
             String desc = getString(R.string.notification_channel_desc);
-            int importance = NotificationManager.IMPORTANCE_LOW;
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
             NotificationChannel channel = new NotificationChannel(id, name, importance);
             channel.setShowBadge(false);
+            channel.setSound(Uri.parse("android.resource://" + getPackageName() + "/" + "raw/silent.ogg"),
+                    new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                                                 .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
+                                                 .build());
             channel.setDescription(desc);
             channel.enableLights(false);
             channel.enableVibration(false);
