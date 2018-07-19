@@ -98,8 +98,11 @@
     <string name="intro_done_desc">下のボタンをクリックしてテスト通知を送信してください。セットアップが完了している場合は、端末に通知が表示されます！ここでは基本設定を行いました。その他の機能については設定ページをご覧ください。</string>
 
     <!-- Side bar -->
+    <string name="drawer_title">オプション</string>
+    <string name="app_information">アプリの情報</string>
     <string name="feedback">フィードバック</string>
     <string name="send_feedback">フィードバックを送る</string>
+    <string name="troubleshooting">トラブルシューティング</string>
 
     <!-- First launch -->
     <string name="setup_incomplete">セットアップが完了していません。以前のバージョンのアプリで正常に設定した場合でも、初期セットアップをもう一度実行してください。</string>

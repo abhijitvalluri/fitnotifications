@@ -121,6 +121,9 @@
     <!-- Side bar -->
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
+    <string name="drawer_title">Options</string>
+    <string name="app_information">App Information</string>
+    <string name="troubleshooting">Troubleshooting</string>
     <string name="feedback">Feedback</string>
     <string name="send_feedback">Send feedback</string>
 
