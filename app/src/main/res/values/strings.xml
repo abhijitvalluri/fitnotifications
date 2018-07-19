@@ -270,6 +270,19 @@
     <!-- App Settings Activity - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
     <string name="filter_heading">Filter Text</string>
     <string name="filter_desc">Separate multiple patterns with a semicolon (;). Filters can either be exclusive or inclusive. Only notifications that satisfy the filters will be allowed. Click the info button for more details.</string>
+    <string name="filter_text_instructions_title">Filter Text Instructions</string>
+    <string name="filter_text_instructions_message">
+    You can set both positive and negative filters. To create a positive
+    filter, start the text with a plus (+) sign. So, if you want to only
+    forward notifications containing the word \'John\', then your filter text
+    should be \'+John\' (without the quotes \'  \').\n\n
+    To create a negative filter, start the text with a minus (-) sign. So, if you
+    don\'t want to forward notifications containing the word \'Smith\', then
+    create a filter with the text \'-Smith\'.\n\n
+    For backwards compatibility, any filter that does not contain a \'+\' or \'-\' sign
+    at the start is treated as a negative filter.\n\n
+    NOTE: To filter a plus sign at the start of your positive filter do the following: \'++John\'.
+    This will forward only those notifications that contain the phrase \'+John\'.</string>
     <string name="discard_empty_notifications">Discard empty notifications</string>
     <string name="discard_ongoing_notifications">Discard ongoing notifications</string>
     <string name="schedule_heading">Notification Schedule</string>

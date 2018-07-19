@@ -216,18 +216,8 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
 
     private void showFilterTextInstructions() {
         new AlertDialog.Builder(AppSettingsActivity.this)
-                .setTitle("Filter Text Instructions")
-                .setMessage("You can set both positive and negative filters. To create a positive " +
-                        "filter, start the text with a plus (+) sign. So, if you want to only " +
-                        "forward notifications containing the word 'John', then your filter text " +
-                        "should be '+John' (without the quotes '  ').\n\n" +
-                        "To create a negative filter, start the text with a minus (-) sign. So, if you " +
-                        "don't want to forward notifications containing the word 'Smith', then " +
-                        "create a filter with the text '-Smith'.\n\n" +
-                        "For backwards compatibility, any filter that does not contain a '+' or '-' sign " +
-                        "at the start is treated as a negative filter.\n\n" +
-                        "NOTE: To filter a plus sign at the start of your positive filter do the following: '++John'. " +
-                        "This will forward only those notifications that contain the phrase '+John'.")
+                .setTitle(getString(R.string.filter_text_instructions_title))
+                .setMessage(getString(R.string.filter_text_instructions_message))
                 .setPositiveButton(android.R.string.ok, null)
                 .create()
                 .show();

@@ -213,6 +213,17 @@
     <!-- App Settings Activity - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
     <string name="filter_heading">テキストのフィルタリング</string>
     <string name="filter_desc">複数のパターンを区切るにはセミコロン(;)を使用します。排他的、包含的なフィルタリングが可能です。フィルタリングを満たす通知のみが許可されます。詳細については情報ボタンを押してください</string>
+    <string name="filter_text_instructions_title">フィルタリングの説明</string>
+    <string name="filter_text_instructions_message">
+        一致と除外、両方のフィルタを設定できます。
+        一致フィルタを作成するには、プラス記号（+）でテキストを開始します。
+        したがって\'John\'という単語を含む通知のみを転送する場合は、フィルタリングのテキストを\'+John\'（引用符なし：\' \'）にする必要があります。\n\n
+        除外フィルタを作成するには、マイナス記号（-）でテキストを開始します。
+        したがって\'Smith\'という単語を含む通知を転送したくない場合は、フィルタリングのテキストを\'-Smith\'（引用符なし：\' \'）というフィルタを作成してください。\n\n
+        互換性のため、開始時に\'+\'または\'-\'記号を含まないフィルタは、除外フィルタとして扱います。\n\n
+        注意：一致フィルタの先頭にあるプラス記号をフィルタとして使いたい場合は、次のようにします。\'++John\'。
+        これにより、\'+John\'という単語を含む通知のみが転送されます。
+    </string>
     <string name="discard_empty_notifications">内容のない通知の破棄</string>
     <string name="discard_ongoing_notifications">進行中の通知の破棄</string>
     <string name="schedule_heading">通知のスケジュール設定</string>
