@@ -21,6 +21,10 @@
     <string name="enabled_apps_filter_menu">Filter Enabled Apps</string>
     <string name="notification_service_started">Fit Notifications Service started</string>
     <string name="rate_app">Like our app? Then rate it!</string>
+    <string name="feedback_step1_title">Send Feedback: Step 1</string>
+    <string name="feedback_step1_message">Enter your feedback below:</string>
+    <string name="no_feedback_message">You must type some feedback to proceed!</string>
+    <string name="select_send_feedback_app">Step 2: Select app to send feedback</string>
     <string name="send_email">Send Email</string>
     <string name="email_subject">Feedback for Fit Notifications app</string>
     <string name="email_body">Please provide your feedback or suggestions here: </string>

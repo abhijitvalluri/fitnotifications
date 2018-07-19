@@ -191,14 +191,14 @@ public class HomeActivity extends AppCompatActivity {
         layout.setPadding(32,16,32,16);
 
         final TextView title = new TextView(HomeActivity.this);
-        title.setText("Enter your feedback below:");
+        title.setText(R.string.feedback_step1_message);
         title.setTextSize(18);
         final EditText input = new EditText(HomeActivity.this);
         layout.addView(title);
         layout.addView(input);
 
         final AlertDialog dialog = new AlertDialog.Builder(HomeActivity.this)
-            .setTitle("Send Feedback: Step 1")
+            .setTitle(R.string.feedback_step1_title)
             .setView(layout)
             .setPositiveButton(android.R.string.ok, null)
             .setNegativeButton(android.R.string.cancel, null)
@@ -217,7 +217,7 @@ public class HomeActivity extends AppCompatActivity {
                         String feedback = input.getText().toString();
                         feedback = feedback.trim();
                         if (feedback.isEmpty()) {
-                            Toast.makeText(HomeActivity.this, "You must type some feedback to proceed!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(HomeActivity.this, R.string.no_feedback_message, Toast.LENGTH_SHORT).show();
                         } else {
                             feedback += "\n\n";
                             String uriText =
@@ -229,7 +229,7 @@ public class HomeActivity extends AppCompatActivity {
 
                             Intent sendIntent = new Intent(Intent.ACTION_SENDTO);
                             sendIntent.setData(uri);
-                            startActivity(Intent.createChooser(sendIntent, "Step 2: Select app to send feedback"));
+                            startActivity(Intent.createChooser(sendIntent, getString(R.string.select_send_feedback_app)));
 
                             dialog.dismiss();
                         }
