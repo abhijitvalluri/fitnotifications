@@ -113,8 +113,6 @@
     <string name="verify_settings_button">設定を確認</string>
     <string name="never_show_again_button">以降表示しない</string>
 
-    <!-- Widget strings -->
-
     <!-- Notification Channel strings -->
     <string name="notification_channel_name">プレースホルダ通知</string>
     <string name="notification_channel_desc">これは、Fit Notificationsアプリのプレースホルダ通知のチャンネルです。
