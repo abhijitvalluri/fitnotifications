@@ -236,9 +236,9 @@
     <!-- HTML Information - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <string name="about_app_text"><![CDATA[
     <p>Fit Notificationsはインストールされているアプリから、サポートされているFitbitデバイスに通知を送信できるサードパーティのアプリです。
-       アプリを正しく設定するには、セットアップの内容に従ってください</p>
-    <p>このアプリのソースコードは<a href=\"https://github.com/abhijitvalluri/fitnotifications\">Github (abhijitvalluri/fitnotifications)</a>から利用できます。Smart Dinosaurs Entertainment以外の開発者からも貢献していただいています</p>
-	<p>\'Fit Notifications\'および\'Smart Dinosaurs Entertainment\'のどちらもFitbit, Inc.との提携関係がないことにご注意ください</p>
+       アプリを正しく設定するには、セットアップの内容に従ってください。</p>
+    <p>このアプリのソースコードは<a href=\"https://github.com/abhijitvalluri/fitnotifications\">Github (abhijitvalluri/fitnotifications)</a>から利用できます。Smart Dinosaurs Entertainment以外の開発者からも貢献していただいています。</p>
+	<p>\'Fit Notifications\'および\'Smart Dinosaurs Entertainment\'のどちらもFitbit, Inc.との提携関係がないことにご注意ください。</p>
 	<h2>免責事項</h2>
 	<p>FitbitはFitbit, Inc.の登録商標およびサービスマークです。
 	   \'Fit Notifications\'はFitbitプラットフォームで使用するように設計されています。
