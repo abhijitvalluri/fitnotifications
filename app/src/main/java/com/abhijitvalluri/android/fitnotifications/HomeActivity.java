@@ -109,17 +109,9 @@ public class HomeActivity extends AppCompatActivity {
             // App has been updated
 
             new AlertDialog.Builder(HomeActivity.this)
-                    .setTitle("Notifications issue with latest Fitbit app fixed!")
-                    .setMessage(Html.fromHtml("<p>We fixed the issue caused due to the latest update to " +
-                            "the Fitbit app, by editing the settings on your phone for our " +
-                            "app. This changes the behavior of the notifications. Please note that you will " +
-                            "receive notifications on your Fitbit tracker <b>ONLY</b> if the notification " +
-                            "makes a sound now, due to new restrictions of the Fitbit app. So, edit the " +
-                            "settings of third party apps accordingly.</p>" +
-                            "<p>Also, this update reset any changes made for the \"Do Not Disturb\" mode. " +
-                            "Please click on \"Verify Settings\" button below to enable \"Override Do Not " +
-                            "Disturb\", if you wish to do so."))
-                    .setPositiveButton("Verify Settings", new DialogInterface.OnClickListener() {
+                    .setTitle(getString(R.string.fitbit_2_70_issues_dialog_title))
+                    .setMessage(Html.fromHtml(getString(R.string.fitbit_2_70_issues_dialog_message)))
+                    .setPositiveButton(getString(R.string.verify_settings_button), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             Intent intent = new Intent();
@@ -129,7 +121,7 @@ public class HomeActivity extends AppCompatActivity {
                             startActivity(intent);
                         }
                     })
-                    .setNegativeButton("Never show again", new DialogInterface.OnClickListener() {
+                    .setNegativeButton(getString(R.string.never_show_again_button), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             mPreferences.edit().putInt(getString(R.string.version_key), Constants.VERSION_CODE).apply();

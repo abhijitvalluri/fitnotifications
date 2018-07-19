@@ -105,6 +105,11 @@
     <string name="setup_incomplete">セットアップが完了していません。以前のバージョンのアプリで正常に設定した場合でも、初期セットアップをもう一度実行してください。</string>
     <string name="setup_incomplete_title">セットアップが未完了</string>
 
+    <!-- Home activity -->
+    <string name="fitbit_2_70_issues_dialog_title">通知に関する問題を修正しました！</string>
+    <string name="verify_settings_button">設定を確認</string>
+    <string name="never_show_again_button">以降表示しない</string>
+
     <!-- Widget strings -->
 
     <!-- Notification Channel strings -->
@@ -161,7 +166,7 @@
     <!-- DND Settings - - - - - - - - - - - - - - - - -  -->
     <string name="forward_priority_only_notifications_title">優先する通知のみ通知する</string>
     <string name="forward_priority_only_notifications_summary">有効にした場合、マナーモード時に「優先する通知」の対象となっているアプリにのみ通知します。
-    （このアプリと通知を行うアプリの両方で「マナーモードをオーバライドする」を有効にする必要があります）</string>
+    （このアプリと通知を行うアプリの両方で「マナーモードをオーバーライドする」を有効にする必要があります）</string>
 
     <!-- Notification Service Settings - - - - - - - - - -->
     <string name="disable_forward_screen_on_title">画面がオンの時に通知を無効にする</string>
@@ -225,5 +230,14 @@
     <string name="schedule_friday">金</string>
     <string name="schedule_saturday">土</string>
 
+    <!-- HTML Information - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <string name="fitbit_2_70_issues_dialog_message"><![CDATA[
+       <p>最新のFitbitアプリにアップデートすることで発生していた問題を修正しました。
+       この修正で通知の動作が変更されています。Fitbitアプリの制限により、
+       音声あり通知<b>のみ</b>Fitbitトラッカーが通知を受け取ることに注意してください。
+       そのため、通知を受け取るアプリの設定を編集してください。</p>
+       <p>また「マナーモード」の変更がリセットされました。必要であれば、「設定の確認」ボタンをクリックして
+       「マナーモードをオーバーライドする」を有効にしてください。
+    ]]></string>
 
 </resources>
