@@ -1,5 +1,6 @@
 <resources>
     <!-- General App strings -->
+    <string name="other_app_icon">インストールしたアプリのアイコン</string>
     <string name="about_app">アプリについて</string>
     <string name="instructions">初期セットアップを開始</string>
     <string name="manual_setup_instructions">セットアップ手順</string>
