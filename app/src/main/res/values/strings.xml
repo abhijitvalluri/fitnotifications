@@ -137,6 +137,7 @@
     <string name="version_key">AppVersion</string>
     <string name="setup_incomplete">Setup is incomplete! Please review the interactive setup once, even if you successfully configured a previous version of the app. </string>
     <string name="setup_incomplete_title">Incomplete Setup</string>
+    <string name="setup_incomplete_cancel">Okay, you can check out the new setup process at any time!</string>
 
     <!-- Home activity -->
     <string name="fitbit_2_70_issues">fitbitIssueFirstNotification</string>

@@ -415,7 +415,7 @@ public class HomeActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     mPreferences.edit().putBoolean(getString(R.string.done_first_launch_key), true).apply();
-                                    Toast.makeText(HomeActivity.this, "Okay, you can check out the new setup process at any time!", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(HomeActivity.this, R.string.setup_incomplete_cancel, Toast.LENGTH_LONG).show();
                                 }
                             })
                             .create()
