@@ -1,6 +1,5 @@
 <resources>
     <!-- General App strings -->
-    <string name="app_name">Fit Notifications</string>
     <string name="app_icon">Fit Notifications App Icon</string>
     <string name="other_app_icon">App icon of an installed app</string>
     <string name="about_app">アプリについて</string>
