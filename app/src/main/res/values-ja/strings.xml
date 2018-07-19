@@ -1,6 +1,5 @@
 <resources>
     <!-- General App strings -->
-    <string name="other_app_icon">App icon of an installed app</string>
     <string name="about_app">アプリについて</string>
     <string name="instructions">初期セットアップを開始</string>
     <string name="manual_setup_instructions">セットアップ手順</string>
@@ -14,7 +13,6 @@
     <string name="app_choices_activity_title">アプリの選択</string>
     <string name="enabled_apps_filter_menu">有効化したアプリ</string>
     <string name="rate_app">Like our app? Then rate it!</string>
-    <string name="email_subject">Feedback for Fit Notifications app</string>
     <string name="placeholder_notification_text">[プレースホルダ通知] クリックすると自動非表示を有効にできます</string>
     <string name="notification_text">[プレースホルダ通知]クリックすると自動非表示を有効にできます。中継した通知を自動非表示にすることもできます</string>
     <string name="test_notification">テスト通知</string>
@@ -100,8 +98,6 @@
     <string name="intro_done_desc">下のボタンをクリックしてテスト通知を送信してください。セットアップが完了している場合は、端末に通知が表示されます！ここでは基本設定を行いました。その他の機能については設定ページをご覧ください。</string>
 
     <!-- Side bar -->
-    <string name="drawer_open">Open navigation drawer</string>
-    <string name="drawer_close">Close navigation drawer</string>
     <string name="feedback">フィードバック</string>
     <string name="send_feedback">フィードバックを送る</string>
 
@@ -110,9 +106,6 @@
     <string name="setup_incomplete_title">セットアップが未完了</string>
 
     <!-- Widget strings -->
-    <string name="widget_button">Fit Notification Service Toggle</string>
-    <string name="widget_on_text">ON</string>
-    <string name="widget_off_text">OFF</string>
 
     <!-- Notification Channel strings -->
     <string name="notification_channel_name">プレースホルダ通知</string>
