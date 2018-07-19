@@ -12,7 +12,7 @@
     <string name="app_choices">アプリのセットアップ</string>
     <string name="app_choices_activity_title">アプリの選択</string>
     <string name="enabled_apps_filter_menu">有効化したアプリ</string>
-    <string name="rate_app">Like our app? Then rate it!</string>
+    <string name="rate_app">ぜひ評価してください！</string>
     <string name="placeholder_notification_text">[プレースホルダ通知] クリックすると自動非表示を有効にできます</string>
     <string name="notification_text">[プレースホルダ通知]クリックすると自動非表示を有効にできます。中継した通知を自動非表示にすることもできます</string>
     <string name="test_notification">テスト通知</string>
