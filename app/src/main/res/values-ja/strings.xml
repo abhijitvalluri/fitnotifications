@@ -78,23 +78,24 @@
 
     <string name="intro_dnd_mode_title">Android 6.0以降のマナーモード</string>
     <string name="intro_dnd_mode_desc">マナーモードを有効にすると、通常はFitbitデバイスに通知が送られません。この動作を変更するには、「追加の設定」をクリックすると表示されるガイドに従ってください。</string>
+    <string name="intro_dnd_mode_button_configure">設定</string>
     <string name="intro_dnd_mode_button">追加の設定</string>
     <string name="intro_dnd_mode_button_oreo">Android 8での追加の設定</string>
     <string name="intro_dnd_mode_button_nougat">Android 7での追加の設定</string>
     <string name="intro_dnd_mode_button_marshmallow">Android 6での追加の設定</string>
 
     <string name="intro_dnd_mode_marshmallow_message">
-    下部の「CONFIGURE」をクリックしてください。次の画面で「通知」を選択し、「優先通知」を有効にします。\n
+    「設定」をクリックしてください。次の画面で「通知」を選択し、「優先通知」を有効にします。\n
     \nサイレントモードを使用する場合は、「優先する通知のみ」を有効にしてください。そのようにすれば、Fitbitデバイスが通知を受け取れますが、
     通知音やバイブレーションが動作することはありません。
     </string>
     <string name="intro_dnd_mode_nougat_message">
-    下部の「CONFIGURE」をクリックしてください。次の画面で「通知」を選択します。「マナーモードで表示」を無効にし、「[通知を非表示]をオーバーライドする」を有効にします。\n
+    「設定」をクリックしてください。次の画面で「通知」を選択します。「マナーモードで表示」を無効にし、「[通知を非表示]をオーバーライドする」を有効にします。\n
     \nサイレントモードを使用する場合は、「優先する通知のみ」を有効にしてください。そのようにすれば、Fitbitデバイスが通知を受け取れますが、
     通知音やバイブレーションが動作することはありません。
     </string>
     <string name="intro_dnd_mode_oreo_message">
-    下部の「CONFIGURE」をクリックしてください。次の画面で「アプリの通知」を選択します。「プレースホルダ通知」チャンネルを選択し、「[通知を非表示]をオーバーライドする」を有効にします。\n
+    「設定」をクリックしてください。次の画面で「アプリの通知」を選択します。「プレースホルダ通知」チャンネルを選択し、「[通知を非表示]をオーバーライドする」を有効にします。\n
     \nサイレントモードを使用する場合は、「優先する通知のみ」を有効にしてください。そのようにすれば、Fitbitデバイスが通知を受け取れます。\n
     \n注意：Android Oreoでは通知の設定を変更できますが、Fitbitデバイスに通知が送られなくなるので、通知の重要度を「低」にしないでください
     </string>
@@ -257,6 +258,47 @@
 	<p>FitbitはFitbit, Inc.の登録商標およびサービスマークです。
 	   \'Fit Notifications\'はFitbitプラットフォームで使用するように設計されています。
 	   このアプリはFitbitによって出されたものではなく、Fitbitはこのアプリの機能を保証しません。</p>
+    ]]></string>
+    <string name="instructions_text"><![CDATA[
+    <p>To properly set up this application, please follow the instructions below:</p>
+    <ol>
+        <li>Enable notification access to this application by clicking the \'Enable Notification Access\' button on the main screen.</li><br/>
+        <li>In the Fitbit app, go into your device settings by clicking the device icon*.</li><br/>
+        <li>Select \'Text Notifications\' or \'Call and Text Notifications\' under \'General\'.</li><br/>
+        <li>Select \'Text Notifications\' under \'Settings\'.</li><br/>
+        <li>Choose \'Fit Notifications\'. Sync your Fitbit device within the Fitbit app.</li>
+        <p><b>NOTE:</b> Do not choose \'Fit Notifications\' for \'Call Notifications\' or \'Calendar Notifications\' in the Fitbit app! Doing so will cause this app to not work!</p>
+
+        <li>In the \'Fit Notifications\' app, press the \'Setup Apps\' button on the main screen. Then,
+            choose the apps whose notifications you would like to be sent to your compatible Fitbit device.</li><br/>
+        <li>Click the \'Turn on\' button at the bottom of the main screen when you want to start the notification
+            service provided by this app. Once the service is running, the button says \'Turn off\' to stop the service.
+            Click the \'Turn off\' button to stop the service. You must keep the Fitbit app from Fitbit, Inc.
+            installed at all times and pair your Fitbit device to the phone for this to work. Enjoy!</li><br />
+        <li><b>NOTE:</b> If you use a device running Android 6.0 or above and you enable \"Do Not Disturb\" mode, also
+            called silent mode, then please follow the additional instructions below.</li>
+    </ol>
+    <p style=\"font-size:70%;\">* You must have a compatible Fitbit device, such as Fitbit Alta, Alta HR, Charge 2, Blaze or Surge.</p>
+    <p>Future updates will further refine the feature set of this app! Please provide feedback on Google Play if
+       there are any issues and if you like this app, kindly provide or update your review!</p>
+
+    <h3>Enabling notifications when using \"Do Not Disturb\" mode</h3>
+    <p>Due to the new \"Do Not Disturb\" mode in Android 6.0, if you use this mode (also called silent mode) then you
+    will not receive notifications on your Fitbit device as Android disables notification forwarding. To avoid
+    this issue manually, you have to change the notifications priority for Fit Notifications app.</p>
+
+    <p>To do so, go to \"Settings>Apps>Fit Notifications\". Note that this menu may be at a slightly different location on
+    your phone. Then, choose \"Notifications\" and enable \"Treat as priority\". Note that if your phone is running Android
+    7.0 (Nougat) or newer version, then the option is renamed to  \"Override Do Not Disturb\". Enable this option.
+    Then, when you use silent mode, enable \"Priority Only\". Doing so will allow you to get notifications via the app on
+    your Fitbit device, but it will not make any notification sound on the phone as this app doesn\'t cause notification
+    sounds or vibrations anyway.</p>
+
+    <h3>Demo</h3>
+    <p>Once you finish the setup process, press the \'Test Notification\' button on the main screen to send a test
+    notification to your Fibit. You should then see a notification in the status bar from this app,
+    while at the same time you should have received a sample notification on your Fitbit. Then, you have confirmed
+    that the application is working correctly! Issues? Please contact us!</p>
     ]]></string>
     <string name="faqs_text"><![CDATA[
     <p><b>Q.どのFitbitをサポートしていますか？</b></p>

@@ -96,6 +96,7 @@
 
     <string name="intro_dnd_mode_title">Do not disturb mode on Android 6.0+</string>
     <string name="intro_dnd_mode_desc">If you enable do not disturb mode, then no notifications will be forwarded to your Fitbit device, by default. To change that, you need to follow specific instructions by clicking below.</string>
+    <string name="intro_dnd_mode_button_configure">Configure</string>
     <string name="intro_dnd_mode_button">Extra Instructions</string>
     <string name="intro_dnd_mode_button_oreo">Extra Instructions for Android 8</string>
     <string name="intro_dnd_mode_button_nougat">Extra Instructions for Android 7</string>
