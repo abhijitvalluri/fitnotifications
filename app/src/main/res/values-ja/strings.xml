@@ -112,7 +112,7 @@
 
     <!-- First launch -->
     <string name="setup_incomplete">セットアップが完了していません。以前のバージョンのアプリで正常に設定した場合でも、初期セットアップをもう一度実行してください。</string>
-    <string name="setup_incomplete_title">セットアップが未完了</string>
+    <string name="setup_incomplete_title">セットアップ未完了</string>
 
     <!-- Home activity -->
     <string name="fitbit_2_70_issues_dialog_title">通知に関する問題を修正しました！</string>
