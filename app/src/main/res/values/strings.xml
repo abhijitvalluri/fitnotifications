@@ -21,6 +21,10 @@
     <string name="enabled_apps_filter_menu">Filter Enabled Apps</string>
     <string name="notification_service_started">Fit Notifications Service started</string>
     <string name="rate_app">Like our app? Then rate it!</string>
+    <string name="feedback_step1_title">Send Feedback: Step 1</string>
+    <string name="feedback_step1_message">Enter your feedback below:</string>
+    <string name="no_feedback_message">You must type some feedback to proceed!</string>
+    <string name="select_send_feedback_app">Step 2: Select app to send feedback</string>
     <string name="send_email">Send Email</string>
     <string name="email_subject">Feedback for Fit Notifications app</string>
     <string name="email_body">Please provide your feedback or suggestions here: </string>
@@ -92,6 +96,7 @@
 
     <string name="intro_dnd_mode_title">Do not disturb mode on Android 6.0+</string>
     <string name="intro_dnd_mode_desc">If you enable do not disturb mode, then no notifications will be forwarded to your Fitbit device, by default. To change that, you need to follow specific instructions by clicking below.</string>
+    <string name="intro_dnd_mode_button_configure">Configure</string>
     <string name="intro_dnd_mode_button">Extra Instructions</string>
     <string name="intro_dnd_mode_button_oreo">Extra Instructions for Android 8</string>
     <string name="intro_dnd_mode_button_nougat">Extra Instructions for Android 7</string>
@@ -121,6 +126,9 @@
     <!-- Side bar -->
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
+    <string name="drawer_title">Options</string>
+    <string name="app_information">App Information</string>
+    <string name="troubleshooting">Troubleshooting</string>
     <string name="feedback">Feedback</string>
     <string name="send_feedback">Send feedback</string>
 
@@ -129,10 +137,14 @@
     <string name="version_key">AppVersion</string>
     <string name="setup_incomplete">Setup is incomplete! Please review the interactive setup once, even if you successfully configured a previous version of the app. </string>
     <string name="setup_incomplete_title">Incomplete Setup</string>
+    <string name="setup_incomplete_cancel">Okay, you can check out the new setup process at any time!</string>
 
     <!-- Home activity -->
     <string name="fitbit_2_70_issues">fitbitIssueFirstNotification</string>
     <string name="fitbit_2_70_issues_never_show_again">fitbitIssueNeverShowAgain</string>
+    <string name="fitbit_2_70_issues_dialog_title">Notifications issue with latest Fitbit app fixed!</string>
+    <string name="verify_settings_button">Verify Settings</string>
+    <string name="never_show_again_button">Never show again</string>
 
     <!-- Preference keys -->
     <string name="show_enabled_apps_key">ShowEnabledApps</string>
@@ -264,6 +276,19 @@
     <!-- App Settings Activity - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
     <string name="filter_heading">Filter Text</string>
     <string name="filter_desc">Separate multiple patterns with a semicolon (;). Filters can either be exclusive or inclusive. Only notifications that satisfy the filters will be allowed. Click the info button for more details.</string>
+    <string name="filter_text_instructions_title">Filter Text Instructions</string>
+    <string name="filter_text_instructions_message">
+    You can set both positive and negative filters. To create a positive
+    filter, start the text with a plus (+) sign. So, if you want to only
+    forward notifications containing the word \'John\', then your filter text
+    should be \'+John\' (without the quotes \'  \').\n\n
+    To create a negative filter, start the text with a minus (-) sign. So, if you
+    don\'t want to forward notifications containing the word \'Smith\', then
+    create a filter with the text \'-Smith\'.\n\n
+    For backwards compatibility, any filter that does not contain a \'+\' or \'-\' sign
+    at the start is treated as a negative filter.\n\n
+    NOTE: To filter a plus sign at the start of your positive filter do the following: \'++John\'.
+    This will forward only those notifications that contain the phrase \'+John\'.</string>
     <string name="discard_empty_notifications">Discard empty notifications</string>
     <string name="discard_ongoing_notifications">Discard ongoing notifications</string>
     <string name="schedule_heading">Notification Schedule</string>
@@ -275,6 +300,13 @@
     <string name="all_day">All day schedule</string>
     <string name="next_day">(Next day)</string>
     <string name="schedule_disabled">All day</string>
+    <string name="schedule_sunday">S</string>
+    <string name="schedule_monday">M</string>
+    <string name="schedule_tuesday">T</string>
+    <string name="schedule_wednesday">W</string>
+    <string name="schedule_thursday">T</string>
+    <string name="schedule_friday">F</string>
+    <string name="schedule_saturday">S</string>
 
     <!-- Notification summary patterns  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <string name="new_messages_summary_pattern">\\d+ new messages</string>
@@ -387,6 +419,17 @@
     </ul>
     <p><b>Support the developer!</b> You can <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer by visiting the donation web page! More details on the website.</p>
 
+    ]]></string>
+    <string name="fitbit_2_70_issues_dialog_message"><![CDATA[
+       <p>We fixed the issue caused due to the latest update to
+       the Fitbit app, by editing the settings on your phone for our
+       app. This changes the behavior of the notifications. Please note that you will
+       receive notifications on your Fitbit tracker <b>ONLY</b> if the notification
+       makes a sound now, due to new restrictions of the Fitbit app. So, edit the
+       settings of third party apps accordingly.</p>
+       <p>Also, this update reset any changes made for the \"Do Not Disturb\" mode.
+       Please click on \"Verify Settings\" button below to enable \"Override Do Not
+       Disturb\", if you wish to do so.
     ]]></string>
     <string name="opensource_text"><![CDATA[
     <p>This software contains portions of the following libraries, subject to the below licenses.</p>

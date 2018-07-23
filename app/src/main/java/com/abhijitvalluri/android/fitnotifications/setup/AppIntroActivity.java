@@ -280,7 +280,7 @@ public class AppIntroActivity extends IntroActivity {
                         @Override
                         public void onClick(View v) {
                             AlertDialog dialog = new AlertDialog.Builder(AppIntroActivity.this)
-                                    .setPositiveButton("Configure", new DialogInterface.OnClickListener() {
+                                    .setPositiveButton(R.string.intro_dnd_mode_button_configure, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             Intent intent = new Intent();
@@ -290,7 +290,7 @@ public class AppIntroActivity extends IntroActivity {
                                             startActivity(intent);
                                         }
                                     })
-                                    .setNegativeButton("CANCEL", null).create();
+                                    .setNegativeButton(android.R.string.cancel, null).create();
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 dialog.setTitle(getString(R.string.intro_dnd_mode_button_oreo));
                                 dialog.setMessage(getString(R.string.intro_dnd_mode_oreo_message));

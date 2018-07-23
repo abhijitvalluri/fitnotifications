@@ -8,7 +8,7 @@
             android:title="Home"
             android:checked="true"/>
 
-        <item android:title="App Information">
+        <item android:title="@string/app_information">
             <menu>
                 <group android:checkableBehavior="single">
                     <item
@@ -31,7 +31,7 @@
                     android:title="@string/support_dev" />
             </menu>
         </item>
-        <item android:title="Troubleshooting">
+        <item android:title="@string/troubleshooting">
             <menu>
                 <group android:checkableBehavior="single">
                     <item

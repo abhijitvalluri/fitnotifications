@@ -109,17 +109,9 @@ public class HomeActivity extends AppCompatActivity {
             // App has been updated
 
             new AlertDialog.Builder(HomeActivity.this)
-                    .setTitle("Notifications issue with latest Fitbit app fixed!")
-                    .setMessage(Html.fromHtml("<p>We fixed the issue caused due to the latest update to " +
-                            "the Fitbit app, by editing the settings on your phone for our " +
-                            "app. This changes the behavior of the notifications. Please note that you will " +
-                            "receive notifications on your Fitbit tracker <b>ONLY</b> if the notification " +
-                            "makes a sound now, due to new restrictions of the Fitbit app. So, edit the " +
-                            "settings of third party apps accordingly.</p>" +
-                            "<p>Also, this update reset any changes made for the \"Do Not Disturb\" mode. " +
-                            "Please click on \"Verify Settings\" button below to enable \"Override Do Not " +
-                            "Disturb\", if you wish to do so."))
-                    .setPositiveButton("Verify Settings", new DialogInterface.OnClickListener() {
+                    .setTitle(getString(R.string.fitbit_2_70_issues_dialog_title))
+                    .setMessage(Html.fromHtml(getString(R.string.fitbit_2_70_issues_dialog_message)))
+                    .setPositiveButton(getString(R.string.verify_settings_button), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             Intent intent = new Intent();
@@ -129,7 +121,7 @@ public class HomeActivity extends AppCompatActivity {
                             startActivity(intent);
                         }
                     })
-                    .setNegativeButton("Never show again", new DialogInterface.OnClickListener() {
+                    .setNegativeButton(getString(R.string.never_show_again_button), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             mPreferences.edit().putInt(getString(R.string.version_key), Constants.VERSION_CODE).apply();
@@ -199,14 +191,14 @@ public class HomeActivity extends AppCompatActivity {
         layout.setPadding(32,16,32,16);
 
         final TextView title = new TextView(HomeActivity.this);
-        title.setText("Enter your feedback below:");
+        title.setText(R.string.feedback_step1_message);
         title.setTextSize(18);
         final EditText input = new EditText(HomeActivity.this);
         layout.addView(title);
         layout.addView(input);
 
         final AlertDialog dialog = new AlertDialog.Builder(HomeActivity.this)
-            .setTitle("Send Feedback: Step 1")
+            .setTitle(R.string.feedback_step1_title)
             .setView(layout)
             .setPositiveButton(android.R.string.ok, null)
             .setNegativeButton(android.R.string.cancel, null)
@@ -225,7 +217,7 @@ public class HomeActivity extends AppCompatActivity {
                         String feedback = input.getText().toString();
                         feedback = feedback.trim();
                         if (feedback.isEmpty()) {
-                            Toast.makeText(HomeActivity.this, "You must type some feedback to proceed!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(HomeActivity.this, R.string.no_feedback_message, Toast.LENGTH_SHORT).show();
                         } else {
                             feedback += "\n\n";
                             String uriText =
@@ -237,7 +229,7 @@ public class HomeActivity extends AppCompatActivity {
 
                             Intent sendIntent = new Intent(Intent.ACTION_SENDTO);
                             sendIntent.setData(uri);
-                            startActivity(Intent.createChooser(sendIntent, "Step 2: Select app to send feedback"));
+                            startActivity(Intent.createChooser(sendIntent, getString(R.string.select_send_feedback_app)));
 
                             dialog.dismiss();
                         }
@@ -423,7 +415,7 @@ public class HomeActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     mPreferences.edit().putBoolean(getString(R.string.done_first_launch_key), true).apply();
-                                    Toast.makeText(HomeActivity.this, "Okay, you can check out the new setup process at any time!", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(HomeActivity.this, R.string.setup_incomplete_cancel, Toast.LENGTH_LONG).show();
                                 }
                             })
                             .create()

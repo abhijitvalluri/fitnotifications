@@ -1,0 +1,343 @@
+<resources>
+    <!-- General App strings -->
+    <string name="other_app_icon">インストールしたアプリのアイコン</string>
+    <string name="about_app">アプリについて</string>
+    <string name="instructions">初期セットアップを開始</string>
+    <string name="manual_setup_instructions">セットアップ手順</string>
+    <string name="faqs">よくある質問</string>
+    <string name="donate">寄付</string>
+    <string name="support_dev">開発者を支援する!</string>
+    <string name="whats_new">新機能・変更点</string>
+    <string name="opensource">オープンソースライセンス</string>
+    <string name="credits">クレジット</string>
+    <string name="app_choices">アプリのセットアップ</string>
+    <string name="app_choices_activity_title">アプリの選択</string>
+    <string name="enabled_apps_filter_menu">有効化したアプリ</string>
+    <string name="rate_app">ぜひ評価してください！</string>
+    <string name="feedback_step1_title">ステップ1：フィードバック内容</string>
+    <string name="feedback_step1_message">以下に内容を記述してください</string>
+    <string name="no_feedback_message">内容を記述してください</string>
+    <string name="select_send_feedback_app">ステップ2：送信するアプリの選択</string>
+    <string name="placeholder_notification_text">[プレースホルダ通知] クリックすると自動非表示を有効にできます</string>
+    <string name="notification_text">[プレースホルダ通知]クリックすると自動非表示を有効にできます。中継した通知を自動非表示にすることもできます</string>
+    <string name="test_notification">テスト通知</string>
+    <string name="test_notification_sent">テスト通知を送信しました</string>
+    <string name="notification_access_enable_textView">通知アクセスの有効化</string>
+    <string name="notification_access_disable_textView">通知アクセスの無効化</string>
+    <string name="enable_notification_access">通知アクセスの有効化</string>
+    <string name="disable_notification_access">通知アクセスの無効化</string>
+    <string name="start_service">サービスの開始</string>
+    <string name="turn_on_service">ONにする</string>
+    <string name="turn_off_service">OFFにする</string>
+    <string name="service_on">ON</string>
+    <string name="service_off">OFF</string>
+    <string name="search_menu">アプリの検索</string>
+
+    <!-- Home screen -->
+    <string name="service_state">通知サービスの状態: </string>
+    <string name="enable_logging">ログの有効化: </string>
+
+    <!-- Intro Strings Activity -->
+    <string name="intro_get_started_button">開始する</string>
+    <string name="intro_welcome_title">Fitbit デバイスですべての通知を受け取ります</string>
+    <string name="intro_welcome_desc">このアプリはFitbitプラットフォームで使用するように設計されています。Fitbitの公式アプリを必要とし、多くのFitbitデバイスと互換性があります。我々はFitbit, Inc.との関係はありません。</string>
+
+    <string name="intro_enable_access_title">最初に、通知アクセスを有効にしましょう</string>
+    <string name="intro_enable_access_desc">このアプリとFitbitの公式アプリの通知アクセスを有効にする必要があります。下のボタンをクリックし、表示された画面で両方のアプリを有効にします</string>
+
+    <string name="intro_enable_access_update_title">通知アクセスが有効になりました</string>
+    <string name="intro_enable_access_update_desc">通知アクセスが有効になりました！次のステップに進みましょう。</string>
+
+    <string name="intro_enable_access_success_title">通知アクセスは有効です！</string>
+    <string name="intro_enable_access_success_desc">このアプリが動作するには通知アクセスが必要です。既に有効にしているので、次のステップに進みましょう！</string>
+
+    <string name="intro_get_fitbit_title">Fitbit 公式アプリをインストールしてください！</string>
+    <string name="intro_get_fitbit_desc">Fitbit 公式アプリをインストールしていません。下のボタンをクリックしてインストールしてください。</string>
+    <string name="intro_get_fitbit_button">Fitbitアプリをインストール</string>
+
+    <string name="intro_setup_fitbit_title1">Fitbitアプリの通知設定: ステップ1</string>
+    <string name="intro_setup_fitbit_title2">Fitbitアプリの通知設定: ステップ2</string>
+    <string name="intro_setup_fitbit_title3">Fitbitアプリの通知設定: ステップ3</string>
+    <string name="intro_setup_fitbit_desc1">Fitbitアプリでデバイスアイコンをクリックし、デバイス設定に入ります
+                                            \n\n<b>サポートしているデバイス:</b>\nFitbit Alta, Alta HR, Charge 2, Blaze, Surge.
+                                            Fitbit Flex 2 は一部のみサポートしています(LEDの点灯)。</string>
+    <string name="intro_setup_issues_title">セットアップに問題がありましたか？</string>
+    <string name="intro_setup_issues_message">セットアップは、一度完了しています。
+                                              \n\n通知に問題がある場合は、スマホを再起動してセットアップを再度実行してください。
+                                              それでも解決しない場合は、アプリを再インストールしてください</string>
+    <string name="intro_setup_issues_ok">OK</string>
+    <string name="intro_setup_fitbit_desc2">「一般」の下にある「通知」を選択しましょう。そして「テキストメッセージ」を選択してください。</string>
+    <string name="intro_setup_fitbit_desc3">「Fit Notifications」を選択してください。そしてFitbitデバイスを同期させます。通知が届かなくなるので、「カレンダーのイベント」でFit Notificationsを選択してはいけません。</string>
+    <string name="intro_setup_fitbit_button3">Fitbitアプリを開く</string>
+    <string name="intro_get_fitbit_toast_text3">Fitbitアプリが見つかりません。1回戻って、Fitbitの公式アプリをインストールしてください。</string>
+
+    <string name="intro_select_apps_desc">通知を受け取るアプリを選択できます。端末に表示される通知テキストとアプリ名が表示されます。\n\n各アプリの歯車アイコンから追加の設定を行うことができます。</string>
+
+    <string name="intro_start_service_title">通知待受サービスの開始</string>
+    <string name="intro_start_service_desc">このサービスはバックグラウンドで常駐します。通知の受信を停止する場合は、このアプリからサービスを再起動してください。サービスの実行を無効化してしまうので、タスクキラーアプリは使用しないでください。</string>
+
+    <string name="intro_dnd_mode_title">Android 6.0以降のマナーモード</string>
+    <string name="intro_dnd_mode_desc">マナーモードを有効にすると、通常はFitbitデバイスに通知が送られません。この動作を変更するには、「追加の設定」をクリックすると表示されるガイドに従ってください。</string>
+    <string name="intro_dnd_mode_button_configure">設定</string>
+    <string name="intro_dnd_mode_button">追加の設定</string>
+    <string name="intro_dnd_mode_button_oreo">Android 8での追加の設定</string>
+    <string name="intro_dnd_mode_button_nougat">Android 7での追加の設定</string>
+    <string name="intro_dnd_mode_button_marshmallow">Android 6での追加の設定</string>
+
+    <string name="intro_dnd_mode_marshmallow_message">
+    「設定」をクリックしてください。次の画面で「通知」を選択し、「優先通知」を有効にします。\n
+    \nサイレントモードを使用する場合は、「優先する通知のみ」を有効にしてください。そのようにすれば、Fitbitデバイスは通知を受け取れますが、
+    通知音やバイブレーションが動作することはありません。
+    </string>
+    <string name="intro_dnd_mode_nougat_message">
+    「設定」をクリックしてください。次の画面で「通知」を選択します。「マナーモードで表示」を無効にし、「[通知を非表示]をオーバーライドする」を有効にします。\n
+    \nサイレントモードを使用する場合は、「優先する通知のみ」を有効にしてください。そのようにすれば、Fitbitデバイスは通知を受け取れますが、
+    通知音やバイブレーションが動作することはありません。
+    </string>
+    <string name="intro_dnd_mode_oreo_message">
+    「設定」をクリックしてください。次の画面で「アプリの通知」を選択します。「プレースホルダ通知」チャンネルを選択し、「[通知を非表示]をオーバーライドする」を有効にします。\n
+    \nサイレントモードを使用する場合は、「優先する通知のみ」を有効にしてください。そのようにすれば、Fitbitデバイスは通知を受け取れます。\n
+    \n注意：Android Oreoでは通知の設定を変更できますが、Fitbitデバイスに通知が送られなくなるので、通知の重要度を「低」にしないでください
+    </string>
+
+    <string name="intro_done_title">準備完了！設定を確認してください！</string>
+    <string name="intro_done_desc">下のボタンをクリックしてテスト通知を送信してください。セットアップが完了している場合は、端末に通知が表示されます！ここでは基本設定を行いました。その他の機能については設定ページをご覧ください。</string>
+
+    <!-- Side bar -->
+    <string name="drawer_title">オプション</string>
+    <string name="app_information">アプリの情報</string>
+    <string name="feedback">フィードバック</string>
+    <string name="send_feedback">フィードバックを送る</string>
+    <string name="troubleshooting">トラブルシューティング</string>
+
+    <!-- First launch -->
+    <string name="setup_incomplete">セットアップが完了していません。以前のバージョンのアプリで正常に設定した場合でも、初期セットアップをもう一度実行してください。</string>
+    <string name="setup_incomplete_title">セットアップ未完了</string>
+    <string name="setup_incomplete_cancel">セットアップは後からいつでも実行できます</string>
+
+    <!-- Home activity -->
+    <string name="fitbit_2_70_issues_dialog_title">通知に関する問題を修正しました！</string>
+    <string name="verify_settings_button">設定を確認</string>
+    <string name="never_show_again_button">以降表示しない</string>
+
+    <!-- Notification Channel strings -->
+    <string name="notification_channel_name">プレースホルダ通知</string>
+    <string name="notification_channel_desc">これは、Fit Notificationsアプリのプレースホルダ通知のチャンネルです。
+    この通知はアプリが適切に動作するために必要です。</string>
+
+    <!-- Settings Menu - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
+    <!-- Misc. -->
+    <string name="dismiss_after"> </string>
+    <string name="one_notification">1つの通知は</string>
+    <string name="second">秒</string>
+    <string name="seconds">秒</string>
+
+    <!-- Settings Menu headings -->
+    <string name="settings_menu">設定</string>
+    <string name="placeholder_notif_settings">プレースホルダ通知の設定</string>
+    <string name="relayed_notif_settings">中継した通知の設定</string>
+    <string name="limit_notif_settings">通知制限の設定</string>
+    <string name="debug_settings">トラブルシューティングの設定</string>
+    <string name="dnd_settings">マナーモードの設定</string>
+    <string name="notification_service_settings">通知サービスの設定</string>
+
+    <!-- Placeholder Notification Settings -->
+    <string name="dismiss_placeholder_notif">プレースホルダ通知の消去</string>
+    <string name="dismiss_placeholder_notif_summary">プレースホルダ通知を自動的に消去する</string>
+
+    <string name="placeholder_dismiss_delay">消去する時間</string>
+    <string name="placeholder_dismiss_delay_summary0">消去しない</string>
+    <plurals name="placeholder_dismiss_delay_summary">
+        <item quantity="other">%1$d秒後</item>
+    </plurals>
+
+    <!-- Relayed Notification Settings -->
+    <string name="dismiss_relayed_notif">中継した通知の消去</string>
+    <string name="dismiss_relayed_notif_summary">他のアプリから中継した通知を自動的に消去する</string>
+
+    <string name="relayed_dismiss_delay">消去する時間</string>
+    <string name="relayed_dismiss_delay_summary0">消去しない</string>
+    <plurals name="relayed_dismiss_delay_summary">
+        <item quantity="other">%1$d秒後</item>
+    </plurals>
+
+    <!-- Limit Notification Settings -->
+    <string name="limit_notif">中継した通知の制限</string>
+    <string name="limit_notif_summary">各アプリがFitbitデバイスに送信できる通知数を設定します。短時間に多くの通知がデバイスに送られる場合に使用します。</string>
+
+    <string name="notif_limit_duration">期間の制限</string>
+    <string name="notif_limit_duration_summary0">制限なくすべての通知を送信します</string>
+    <plurals name="notif_limit_duration_summary">
+        <item quantity="other">%1$d秒に1つの通知を中継します（1アプリごとにカウント）。それ以上の通知は破棄されます。</item>
+    </plurals>
+
+    <!-- DND Settings - - - - - - - - - - - - - - - - -  -->
+    <string name="forward_priority_only_notifications_title">優先する通知のみ通知する</string>
+    <string name="forward_priority_only_notifications_summary">有効にした場合、マナーモード時に「優先する通知」の対象となっているアプリにのみ通知します。
+    （このアプリと通知を行うアプリの両方で「マナーモードをオーバーライドする」を有効にする必要があります）</string>
+
+    <!-- Notification Service Settings - - - - - - - - - -->
+    <string name="disable_forward_screen_on_title">画面がオンの時に通知を無効にする</string>
+    <string name="enable_forward_screen_on_summary">画面がオンの時にもFitbitデバイスに通知を送信します</string>
+    <string name="disable_forward_screen_on_summary">画面がオンの時にはFitbitデバイスに通知を送信しません</string>
+
+    <!-- Display app name setting -->
+    <string name="display_app_name_title">アプリ名の表示</string>
+    <string name="display_app_name_summary_enabled">Fitbitトラッカーに通知したアプリ名を表示します</string>
+    <string name="display_app_name_summary_disabled">Fitbitトラッカーに通知したアプリ名を表示しません</string>
+
+    <!-- Transliteration settings -->
+    <string name="transliterate_notification_title">ラテン文字への変換</string>
+    <string name="transliterate_notification_summary_enabled">非ラテン文字をラテン文字に変換します</string>
+    <string name="transliterate_notification_summary_disabled">非ラテン文字をラテン文字に変換しません</string>
+
+    <!-- Split notification setting -->
+    <string name="split_notification_title">長い通知の分割</string>
+    <string name="split_notification_summary">長い通知を細かく分割して省略せずに表示します</string>
+
+    <string name="notification_text_limit_title">Fitbitデバイスの文字制限</string>
+    <string name="notification_text_limit_summary_disabled">制限しない</string>
+    <plurals name="notification_text_limit_summary_enabled">
+        <item quantity="other">最大%1$d文字</item>
+    </plurals>
+    <string name="notification_text_limit_before">最大</string>
+    <string name="notification_text_limit_after">文字を表示</string>
+
+    <string name="num_split_notifications_title">通知を分割する個数</string>
+    <string name="num_split_notifications_summary_disabled">なし</string>
+    <plurals name="num_split_notifications_summary_enabled">
+        <item quantity="other">通知を%1$d個に分割</item>
+    </plurals>
+    <string name="num_split_notifications_before">通知を</string>
+    <string name="num_split_notifications_after">個に分割</string>
+
+    <!-- App Choice Activity - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
+    <string name="app_list_loading_text">アプリの読み込み中&#8230;</string>
+    <string name="app_list_empty_search">条件に一致するアプリはありません</string>
+    <string name="search_query_hint">アプリ名の入力&#8230;</string>
+
+    <!-- App Settings Activity - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
+    <string name="filter_heading">テキストのフィルタリング</string>
+    <string name="filter_desc">複数のパターンを区切るにはセミコロン(;)を使用します。排他的、包含的なフィルタリングが可能です。フィルタリングを満たす通知のみが許可されます。詳細については情報ボタンを押してください</string>
+    <string name="filter_text_instructions_title">フィルタリングの説明</string>
+    <string name="filter_text_instructions_message">
+        一致と除外、両方のフィルタを設定できます。
+        一致フィルタを作成するには、プラス記号（+）でテキストを開始します。
+        したがって\'John\'という単語を含む通知のみを転送する場合は、フィルタリングのテキストを\'+John\'（引用符なし：\' \'）にする必要があります。\n\n
+        除外フィルタを作成するには、マイナス記号（-）でテキストを開始します。
+        したがって\'Smith\'という単語を含む通知を転送したくない場合は、フィルタリングのテキストを\'-Smith\'（引用符なし：\' \'）というフィルタを作成してください。\n\n
+        互換性のため、開始時に\'+\'または\'-\'記号を含まないフィルタは、除外フィルタとして扱います。\n\n
+        注意：一致フィルタの先頭にあるプラス記号をフィルタとして使いたい場合は、次のようにします。\'++John\'。
+        これにより、\'+John\'という単語を含む通知のみが転送されます。
+    </string>
+    <string name="discard_empty_notifications">内容のない通知の破棄</string>
+    <string name="discard_ongoing_notifications">進行中の通知の破棄</string>
+    <string name="schedule_heading">通知のスケジュール設定</string>
+    <string name="schedule_desc">指定した開始時刻から終了時刻の間のみ、Fitbitデバイスに通知を行います</string>
+    <string name="start_time_heading">開始時刻:</string>
+    <string name="stop_time_heading">終了時刻:</string>
+    <string name="start_time_error">開始時刻を終了時刻と同じ時刻には設定できません</string>
+    <string name="stop_time_error">終了時刻を開始時刻と同じ時刻には設定できません</string>
+    <string name="all_day">常に通知する</string>
+    <string name="next_day">(翌日)</string>
+    <string name="schedule_disabled">全時刻</string>
+    <string name="schedule_sunday">日</string>
+    <string name="schedule_monday">月</string>
+    <string name="schedule_tuesday">火</string>
+    <string name="schedule_wednesday">水</string>
+    <string name="schedule_thursday">木</string>
+    <string name="schedule_friday">金</string>
+    <string name="schedule_saturday">土</string>
+
+    <!-- HTML Information - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <string name="about_app_text"><![CDATA[
+    <p>Fit Notificationsはインストールされているアプリから、サポートされているFitbitデバイスに通知を送信できるサードパーティのアプリです。
+       アプリを正しく設定するには、セットアップの内容に従ってください。</p>
+    <p>このアプリのソースコードは<a href=\"https://github.com/abhijitvalluri/fitnotifications\">Github (abhijitvalluri/fitnotifications)</a>から利用できます。Smart Dinosaurs Entertainment以外の開発者からも貢献していただいています。</p>
+	<p>\'Fit Notifications\'および\'Smart Dinosaurs Entertainment\'のどちらもFitbit, Inc.との提携関係がないことにご注意ください。</p>
+	<h2>免責事項</h2>
+	<p>FitbitはFitbit, Inc.の登録商標およびサービスマークです。
+	   \'Fit Notifications\'はFitbitプラットフォームで使用するように設計されています。
+	   このアプリはFitbitによって出されたものではなく、Fitbitはこのアプリの機能を保証しません。</p>
+    ]]></string>
+    <string name="instructions_text"><![CDATA[
+    <p>アプリを正しく設定するために以下の手順に従ってください</p>
+    <ol>
+        <li>ホーム画面の「通知アクセスの有効化」をクリックして、アプリの通知アクセスを有効にします。</li><br/>
+        <li>Fitbitアプリでデバイスアイコン*をクリックして、デバイス設定に移動します。</li><br/>
+        <li>「一般」の「通知」を選択します</li><br/>
+        <li>「通知」の中の「テキストメッセージ」を選択します</li><br/>
+        <li>「Fit Notifications」を選択し、Fitbitアプリ内でデバイスを同期します。</li>
+        <p><b>注意:</b> 「Fit Notifications」を「カレンダーのイベント」で選択してはいけません。アプリが動作しなくなります。</p>
+
+        <li>「Fit Notifications」アプリのホーム画面で「アプリのセットアップ」をクリックします。
+            Fitbitデバイスに通知を送信するアプリを選択します。</li><br/>
+        <li>ホーム画面の「ONにする」ボタンをクリックして、このアプリの通知サービスを起動します。
+            サービスを実行すると、「OFFにする」ボタンが表示されます。このボタンをクリックするとサービスが停止します。
+            Fitbit, Inc.のFitbitアプリはインストールしたままで、Fitbitデバイスがスマホと接続していることで動作します。
+            あとは楽しんでください！</li><br />
+        <li><b>注意:</b> Android 6.0以降を使用し、マナーモードもしくはサイレントモードが有効な場合は、
+            以下の追加の設定に従ってください</li>
+    </ol>
+    <p style=\"font-size:70%;\">* サポートしているデバイス（Fitbit Alta、Alta HR、Charge 2、Blaze、Surge）が必要です</p>
+    <p>今後のアップデートで、アプリの機能を更に改善していきます！
+    問題がある場合やこのアプリを気に入った場合はレビューをいただけますと幸いです。</p>
+
+    <h3>マナーモード時に通知を有効にする</h3>
+    <p>Android 6.0での新機能である「マナーモード」（もしくはサイレントモード）は、通知の転送を無効にするため、
+    Fitbitデバイスが通知を受信できません。この問題は、Fit Notificationsアプリの優先通知を変更することで回避します。</p>
+
+    <p>「設定>アプリ>Fit Notifications」に移動します。このメニューはお使いのスマホにより異なる場合があります。
+    次に「通知」を選択し「優先通知」をオンにします。Android 7.0以降のバージョンを使用している場合は、
+    「[通知を非表示]をオーバーライドする」に名称が変わっています。このオプションをオンにします。
+    サイレントモードを使用している場合は、「優先する通知のみ」を有効にします。そのようにすれば、Fitbitデバイスは通知を受け取れますが、
+    通知音やバイブレーションが動作することはありません。</p>
+
+    <h3>デモ</h3>
+    <p>設定が完了したらホーム画面の「テスト通知」ボタンを押してFitbitに通知を送信できます。
+    このアプリの通知がステータスバーに表示され、Fitbitデバイスが通知を受け取ります。
+    アプリが正しく動作することを確認できましたか？問題があればお問い合わせください！</p>
+    ]]></string>
+    <string name="faqs_text"><![CDATA[
+    <p><b>Q.どのFitbitをサポートしていますか？</b></p>
+    <p>このアプリは、Fitbit Alta、Alta HR、Blaze、Surge、Charge 2をサポートしています（これらはテキストメッセージを通知できるデバイスです）。
+       残念ではありますが、Fitbit, Inc.はCharge、Charge HRのサードパーティによる着信通知に関する動作を変更しました。
+       そのためこのアプリは、これらのデバイスをサポートしていません。Fitbit, Inc.はいつでもテキストメッセージ通知の動作を変更することができます。
+       これは私たちが制御できるものではありません。</p>
+    <p><b>Q. アプリが正しく動作しません</b></p>
+    <p>Fitbit, Inc.がサードパーティによるテキスト通知の動作を変更した場合、「Fit Notifications」が動作しなくなることがあります。
+    このような問題が発生した場合は、アプリのアップデートを行いますので私たちに報告してください。</p>
+    <p><b>Q. Fitbitデバイスに通知が表示されません。なぜですか？</b></p>
+    <p>お持ちのFitbitデバイスが、このアプリでサポートされていることを確認してください。またFitbit Inc.のFitbit公式アプリがインストールされているか確認してください。
+       「Fit Notifications」へ通知アクセスが有効になっているかなど、セットアップのすべての指示に従っていることを確認してください。
+        またBluetoothを有効にして、Fitbitデバイスと同期できることを確認してください（Android端末によっては位置情報を有効にする必要もあります）。</p>
+    <p><b>Q. まだ通知を受け取れません。なぜですか？</b></p>
+    <p>Fitbitデバイスで通知をONにしていることを確認してください。さらに「サービスの開始」ボタンを押して「Fit Notifications」のサービスが実行されていることを確認してください。
+       このサービスが、Androidによって停止されてしまっている可能性があります。このアプリが必要とするサービスが停止されてしまうので、
+       タスクキラーアプリは使用しないでください。最後にテスト通知をクリックして通知のテストを行うことができます。</p>
+    <p>アプリが動作しないその他の理由は以下の通りです</p>
+    <ul>
+        <li>Fitbitデバイスのバッテリーが少ない場合、Fitbitアプリは通知を無効にすることがあります</li>
+        <li>エラーが発生した場合、通知を有効にするためにFitbitデバイスを再起動する必要があります。デバイスを再起動する方法については、FitbitのWebサイトを参照してください</li>
+        <li>Fitbit公式アプリのテキストメッセージの項目で「Fit Notifications」を再度選択してください</li>
+    </ul>
+    <p><b>通知の転送に問題が発生するFit Notificationsアプリの設定</b></p>
+    <p>このアプリの「プレースホルダ通知の消去」を有効にすると、通知に問題が発生する事象がありました。
+       通知に関する問題が発生している場合は、「通知の消去」の時間を増やす、もしくは消去しないように設定してください。</p>
+    <p><b>Q. タスクキラーアプリを使用できますか？</b></p>
+    <p>タスクキラーアプリは、このアプリの動作に影響を与えることに注意してください。タスクキラーを無効にするか「Fit Notifications」がサービスを実行することを許可してください</p>
+    <p><b>Q. 特定のアプリから通知を受け取れません</b></p>
+    <p>サポート対象のFitbitデバイスで、通知を表示するアプリを選択したことを確認してください（アプリのセットアップ項目）。
+       セットアップを正しく行っても引き続き問題が発生している場合は、アプリ名、Google Playのリンク、通知が届かない旨を記載し、Eメールでご連絡ください。
+       発生した問題はアップデートにて解決します。</p>
+    ]]></string>
+    <string name="fitbit_2_70_issues_dialog_message"><![CDATA[
+       <p>最新のFitbitアプリにアップデートすることで発生していた問題を修正しました。
+       この修正で通知の動作が変更されています。Fitbitアプリの制限により、
+       音声ありの通知<b>のみ</b>Fitbitトラッカーが通知を受け取ることに注意してください。
+       そのため、通知を受け取るアプリの設定を編集してください。</p>
+       <p>また「マナーモード」の変更がリセットされました。必要であれば、「設定の確認」ボタンをクリックして
+       「マナーモードをオーバーライドする」を有効にしてください。
+    ]]></string>
+
+</resources>
