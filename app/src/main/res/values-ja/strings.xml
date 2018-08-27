@@ -59,7 +59,8 @@
     <string name="intro_setup_fitbit_title2">Fitbitアプリの通知設定: ステップ2</string>
     <string name="intro_setup_fitbit_title3">Fitbitアプリの通知設定: ステップ3</string>
     <string name="intro_setup_fitbit_desc1">Fitbitアプリでデバイスアイコンをクリックし、デバイス設定に入ります
-                                            \n\n<b>サポートしているデバイス:</b>\nFitbit Alta, Alta HR, Charge 2, Blaze, Surge.
+                                            \n\n<b>サポートしているデバイス:</b>\nFitbit Alta, Alta HR, Charge 2, Charge 3,
+                                            Blaze, Surge, Ionic, Versa, および将来発売されるデバイスのうち「テキストメッセージ」をサポートする全てのデバイス。
                                             Fitbit Flex 2 は一部のみサポートしています(LEDの点灯)。</string>
     <string name="intro_setup_issues_title">セットアップに問題がありましたか？</string>
     <string name="intro_setup_issues_message">セットアップは、一度完了しています。
