@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- General App strings -->
     <string name="other_app_icon">インストールしたアプリのアイコン</string>
     <string name="about_app">アプリについて</string>
@@ -59,8 +59,8 @@
     <string name="intro_setup_fitbit_title2">Fitbitアプリの通知設定: ステップ2</string>
     <string name="intro_setup_fitbit_title3">Fitbitアプリの通知設定: ステップ3</string>
     <string name="intro_setup_fitbit_desc1">Fitbitアプリでデバイスアイコンをクリックし、デバイス設定に入ります
-                                            \n\n<b>サポートしているデバイス:</b>\nFitbit Alta, Alta HR, Charge 2, Charge 3,
-                                            Blaze, Surge, Ionic, Versa, および将来発売されるデバイスのうち「テキストメッセージ」をサポートする全てのデバイス。
+                                            \n\n<b>サポートしているデバイス:</b>\nFitbit Alta, Alta HR、Charge 2、Charge 3、
+                                            Blaze、Surge、Ionic、Versa および将来発売されるデバイスのうち「テキストメッセージ」をサポートする全てのデバイス。
                                             Fitbit Flex 2 は一部のみサポートしています(LEDの点灯)。</string>
     <string name="intro_setup_issues_title">セットアップに問題がありましたか？</string>
     <string name="intro_setup_issues_message">セットアップは、一度完了しています。
@@ -68,20 +68,24 @@
                                               それでも解決しない場合は、アプリを再インストールしてください</string>
     <string name="intro_setup_issues_ok">OK</string>
     <string name="intro_setup_fitbit_desc2">「一般」の下にある「通知」を選択しましょう。そして「テキストメッセージ」を選択してください。</string>
-    <string name="intro_setup_fitbit_desc3">「Fit Notifications」を選択してください。そしてFitbitデバイスを同期させます。通知が届かなくなるので、「カレンダーのイベント」でFit Notificationsを選択してはいけません。</string>
+    <string name="intro_setup_fitbit_desc3">「Fit Notifications」を選択してください。そしてFitbitアプリでFitbitデバイスを同期させます。通知が届かなくなるので、「着信」「カレンダーのイベント」にFit Notificationsを選択してはいけません。
+        \n\n「マナーモード」「サイレントモード」を使用する場合は、Fitbitアプリの通知設定ページで「常にバイブレーションをオン」を有効にしてください。</string>
     <string name="intro_setup_fitbit_button3">Fitbitアプリを開く</string>
     <string name="intro_get_fitbit_toast_text3">Fitbitアプリが見つかりません。1回戻って、Fitbitの公式アプリをインストールしてください。</string>
 
-    <string name="intro_select_apps_desc">通知を受け取るアプリを選択できます。端末に表示される通知テキストとアプリ名が表示されます。\n\n各アプリの歯車アイコンから追加の設定を行うことができます。</string>
+    <string name="intro_select_apps_desc">通知を受け取るアプリを選択できます。
+        端末に表示される通知テキストとアプリ名が表示されます。
+        \n\n各アプリの歯車アイコン（設定アイコン）から追加の設定を行うことができます。</string>
 
     <string name="intro_start_service_title">通知待受サービスの開始</string>
     <string name="intro_start_service_desc">このサービスはバックグラウンドで常駐します。通知の受信を停止する場合は、このアプリからサービスを再起動してください。サービスの実行を無効化してしまうので、タスクキラーアプリは使用しないでください。</string>
 
     <string name="intro_dnd_mode_title">Android 6.0以降のマナーモード</string>
-    <string name="intro_dnd_mode_desc">マナーモードを有効にすると、通常はFitbitデバイスに通知が送られません。この動作を変更するには、「追加の設定」をクリックすると表示されるガイドに従ってください。</string>
+    <string name="intro_dnd_mode_desc">マナーモードを有効にすると、通常はFitbitデバイスに通知が送られません。この動作を変更するには、「追加の設定」をクリックすると表示されるガイドに従ってください。
+                                        \n\nまた、Fitbitアプリの通知設定ページで「常にバイブレーションをオン」を有効にしてください。</string>
     <string name="intro_dnd_mode_button_configure">設定</string>
     <string name="intro_dnd_mode_button">追加の設定</string>
-    <string name="intro_dnd_mode_button_oreo">Android 8での追加の設定</string>
+    <string name="intro_dnd_mode_button_oreo">Android 8以降での追加の設定</string>
     <string name="intro_dnd_mode_button_nougat">Android 7での追加の設定</string>
     <string name="intro_dnd_mode_button_marshmallow">Android 6での追加の設定</string>
 
@@ -252,13 +256,13 @@
     <!-- HTML Information - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <string name="about_app_text"><![CDATA[
     <p>Fit Notificationsはインストールされているアプリから、サポートされているFitbitデバイスに通知を送信できるサードパーティのアプリです。
-       アプリを正しく設定するには、セットアップの内容に従ってください。</p>
+       アプリを正しく設定するには、セットアップの内容に従ってください。Fitbitアプリの通知機能がお使いのスマホをサポートしていない場合、このアプリは動作しませんのでご注意ください</p>
     <p>このアプリのソースコードは<a href=\"https://github.com/abhijitvalluri/fitnotifications\">Github (abhijitvalluri/fitnotifications)</a>から利用できます。Smart Dinosaurs Entertainment以外の開発者からも貢献していただいています。</p>
 	<p>\'Fit Notifications\'および\'Smart Dinosaurs Entertainment\'のどちらもFitbit, Inc.との提携関係がないことにご注意ください。</p>
 	<h2>免責事項</h2>
 	<p>FitbitはFitbit, Inc.の登録商標およびサービスマークです。
 	   \'Fit Notifications\'はFitbitプラットフォームで使用するように設計されています。
-	   このアプリはFitbitによって出されたものではなく、Fitbitはこのアプリの機能を保証しません。</p>
+	   このアプリはFitbitによって開発されたものではないため、Fitbitはこのアプリの機能を保証しません。</p>
     ]]></string>
     <string name="instructions_text"><![CDATA[
     <p>アプリを正しく設定するために以下の手順に従ってください</p>
@@ -298,38 +302,91 @@
     このアプリの通知がステータスバーに表示され、Fitbitデバイスが通知を受け取ります。
     アプリが正しく動作することを確認できましたか？問題があればお問い合わせください！</p>
     ]]></string>
-    <string name="faqs_text"><![CDATA[
-    <p><b>Q.どのFitbitをサポートしていますか？</b></p>
-    <p>このアプリは、Fitbit Alta、Alta HR、Blaze、Surge、Charge 2をサポートしています（これらはテキストメッセージを通知できるデバイスです）。
-       残念ではありますが、Fitbit, Inc.はCharge、Charge HRのサードパーティによる着信通知に関する動作を変更しました。
-       そのためこのアプリは、これらのデバイスをサポートしていません。Fitbit, Inc.はいつでもテキストメッセージ通知の動作を変更することができます。
+    <string name="faqs_text" tools:ignore="TypographyDashes"><![CDATA[
+    <!-- FAQ #1 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <p><b>Q. どのFitbitデバイスで動作しますか？</b></p>
+    <p>このアプリはテキストメッセージを通知できるデバイスで動作します。Fitbit Alta、Alta HR、Blaze、
+       Surge、Charge 2、Charge3、Versa、Ionic および将来発売されるモデルのうち「テキストメッセージ」をサポートする全てのデバイスを含みます。</p>
+
+    <p>Fitbit, Inc.はいつでもテキストメッセージ通知の動作を変更することができることをご了承ください。
        これは私たちが制御できるものではありません。</p>
-    <p><b>Q. アプリが正しく動作しません</b></p>
-    <p>Fitbit, Inc.がサードパーティによるテキスト通知の動作を変更した場合、「Fit Notifications」が動作しなくなることがあります。
-    このような問題が発生した場合は、アプリのアップデートを行いますので私たちに報告してください。</p>
-    <p><b>Q. Fitbitデバイスに通知が表示されません。なぜですか？</b></p>
-    <p>お持ちのFitbitデバイスが、このアプリでサポートされていることを確認してください。またFitbit Inc.のFitbit公式アプリがインストールされているか確認してください。
-       「Fit Notifications」へ通知アクセスが有効になっているかなど、セットアップのすべての指示に従っていることを確認してください。
-        またBluetoothを有効にして、Fitbitデバイスと同期できることを確認してください（Android端末によっては位置情報を有効にする必要もあります）。</p>
-    <p><b>Q. まだ通知を受け取れません。なぜですか？</b></p>
-    <p>Fitbitデバイスで通知をONにしていることを確認してください。さらに「サービスの開始」ボタンを押して「Fit Notifications」のサービスが実行されていることを確認してください。
-       このサービスが、Androidによって停止されてしまっている可能性があります。このアプリが必要とするサービスが停止されてしまうので、
-       タスクキラーアプリは使用しないでください。最後にテスト通知をクリックして通知のテストを行うことができます。</p>
-    <p>アプリが動作しないその他の理由は以下の通りです</p>
+
+
+    <!-- FAQ #2 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <p><b>Q. 通知の問題についてのトラブルシューティングや解決策はどこで入手できますか？</b></p>
+    <p>下記Fitbitのヘルプページは、通知の問題の解決の手助けになります。</p>
     <ul>
-        <li>Fitbitデバイスのバッテリーが少ない場合、Fitbitアプリは通知を無効にすることがあります</li>
-        <li>エラーが発生した場合、通知を有効にするためにFitbitデバイスを再起動する必要があります。デバイスを再起動する方法については、FitbitのWebサイトを参照してください</li>
-        <li>Fitbit公式アプリのテキストメッセージの項目で「Fit Notifications」を再度選択してください</li>
+        <li><a href=\"https://help.fitbit.com/articles/ja/Help_article/1979/\">Fitbit デバイスで、スマートフォンから通知を受け取るには、どうすればいいですか？</a></li>
+        <li><a href=\"https://help.fitbit.com/articles/ja/Help_article/1610\">Fitbit デバイスが、スマートフォンからの通知を受信しません</a></li>
+        <li><a href=\"https://help.fitbit.com/articles/ja/Help_article/1186\">Fitbit デバイスを再起動したいのですが、どうすればよいですか？</a></li>
     </ul>
-    <p><b>通知の転送に問題が発生するFit Notificationsアプリの設定</b></p>
-    <p>このアプリの「プレースホルダ通知の消去」を有効にすると、通知に問題が発生する事象がありました。
+
+
+    <!-- FAQ #3 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <p><b>Q. Fitbitデバイスに通知が全く表示されません。どのようにすればよいですか？</b></p>
+    <p>これまでの質問を読み、お持ちのFitbitデバイスがサポートされているものに含まれているか確認してください。
+       また、<a href=\"https://www.fitbit.com/jp/devices\">Fitbitのウェブサイト</a>から、ご利用のスマホがFitbitアプリの「着信とテキスト通知」機能と互換性があるか確認してください。
+       ご利用のスマホがFitbitのウェブサイトから見つからない場合や、「着信とテキスト通知」機能が一覧にない場合はこのアプリは動作しない可能性があります。</p>
+
+    <p>ご利用のスマホに互換性がある場合は、「Fit Notifications」へ通知アクセスが有効になっているかなど、セットアップのすべての指示に従っていることを確認してください。
+       またBluetoothを有効にして、Fitbitデバイスと同期できることを確認してください（Android端末によっては位置情報を有効にする必要もあります）。</p>
+
+
+    <!-- FAQ #4 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <p><b>Q. まだ通知を受け取れません。なぜですか？</b></p>
+    <p>Fitbitデバイスの通知設定がオンになっているか確認してください。この問題に対する解決策やヘルプについては
+       <a href=\"https://help.fitbit.com/articles/ja/Help_article/1610\">Fitbitのヘルプページ</a>を参考にしてください。</p>
+
+    <p>問題を解決するためのその他の方法:</p>
+    <ul>
+        <li>ホーム画面の「ONにする」ボタンをタップして「Fit Notifications」サービスを起動してください。
+            このサービスは場合によってはAndroidにより停止させられてしまう可能性があります。
+            タスクキラーアプリは誤ってこのサービスを停止させてしまい、問題を引き起こす場合があるため使用しないでください</li>
+        <li>ホーム画面の「テスト通知」ボタンをタップしてテスト通知を送信することで、通知機能に問題が発生しているか確認することができます。</li>
+        <li><b>Fitbitデバイスのバッテリーが少ない場合:</b> Fitbitアプリが通知を無効にすることがありますので、Fitbitデバイスを充電してください。</li>
+        <li>エラーを解決するためにFitbitデバイスの再起動が必要な場合があります。
+            再起動の方法は<a href=\"https://help.fitbit.com/articles/ja/Help_article/1186\">ヘルプページ</a>から確認できます。</li>
+        <li>初期セットアップをもう一度行い、Fitbitアプリのテキスト通知で「Fit Notifications」を選択、その後デバイスをもう一度同期してください。</li>
+    </ul>
+
+
+    <!-- FAQ #5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <p><b>Q. このアプリに既知の問題はありますか？</b></p>
+    <p>一部のユーザはこのアプリの「プレースホルダ通知の消去」を有効にすると、通知に問題が発生する事象がありました。
        通知に関する問題が発生している場合は、「通知の消去」の時間を増やす、もしくは消去しないように設定してください。</p>
-    <p><b>Q. タスクキラーアプリを使用できますか？</b></p>
-    <p>タスクキラーアプリは、このアプリの動作に影響を与えることに注意してください。タスクキラーを無効にするか「Fit Notifications」がサービスを実行することを許可してください</p>
+
+
+    <!-- FAQ #6 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <p><b>Q. 特定のアプリから通知を受け取れません</b></p>
-    <p>サポート対象のFitbitデバイスで、通知を表示するアプリを選択したことを確認してください（アプリのセットアップ項目）。
-       セットアップを正しく行っても引き続き問題が発生している場合は、アプリ名、Google Playのリンク、通知が届かない旨を記載し、Eメールでご連絡ください。
-       発生した問題はアップデートにて解決します。</p>
+    <p>ホーム画面から「アプリのセットアップ」をタップして、通知を表示するアプリにチェックが入っていることを確認してください。
+       チェックボックスの隣にある設定アイコンをタップして、アプリの個別設定の画面を表示します。アプリの個別設定画面でスケジュールを含む全ての設定が正しく行われていることを確認してください。
+       アプリの個別設定により、一部の通知が表示されない場合があるため、必ず内容を確認してください。</p>
+
+    <p>セットアップを正しく行っても引き続き問題が発生している場合は、アプリ名、Google Playのリンク、通知が届かない旨を記載してEメールでご連絡ください。
+       我々は発生した問題の解決方法をフォローします。</p>
+
+
+    <!-- FAQ #7 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <p><b>Q. アプリが将来的に動作しなくなることはありますか？</b></p>
+    <p>Fitbit, Inc.がサードパーティによるテキスト通知の動作を変更した場合、「Fit Notifications」が動作しなくなることがあります。
+       このような問題が発生した場合はアプリのアップデートを試みますが、永久に動作を保証するものではありません。まずは発生した問題を私たちに報告してください。</p>
+    <p><b>Q. タスクキラーアプリを使用できますか？</b></p>
+    <p>タスクキラーアプリは、このアプリの動作に影響を与えることに注意してください。
+       タスクキラーを無効にするか「Fit Notifications」がサービスを実行することを許可してください。</p>
+    ]]></string>
+    <string name="whats_new_text"><![CDATA[
+    <br />
+    <p><b>version 2.9.17</b>での変更点</p>
+    <ul>
+        <li><b>日本語をサポートしました！</b> このアップデートはGithub上で<a href=\"https://github.com/YoshihideSogawa\">Yoshihide Sogawa</a>の貢献があったため実現しました。
+            Androidプログラミングの知識があり、自らの言語に翻訳したい場合は
+            <a href=\"https://github.com/abhijitvalluri/fitnotifications\">このアプリのGithubプロジェクト</a>にぜひご協力ください。</li>
+        <br />
+        <li><b>セットアップ手順とよくある質問の更新:</b> 最新のFitbitアプリに従って内容を反映させました。
+            通知の問題を素早く解決するためのリンクや解決策を「よくある質問」内に追加しました。</li>
+    </ul>
+    <p><b>開発者を支援してください！</b> <a href="https://abhijitvalluri.com/android/donate/">寄付ページ</a>から開発者を支援できます！詳細はウェブサイトをご覧ください。</p>
+
     ]]></string>
 
 </resources>
