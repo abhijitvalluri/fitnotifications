@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- General App strings -->
     <string name="app_name">Fit Notifications</string>
     <string name="app_icon">Fit Notifications App Icon</string>
@@ -76,29 +76,35 @@
     <string name="intro_setup_fitbit_title2">Setup notifications in Fitbit app: Step 2</string>
     <string name="intro_setup_fitbit_title3">Setup notifications in Fitbit app: Step 3</string>
     <string name="intro_setup_fitbit_desc1">First, go into device settings by clicking the device icon in the Fitbit app.
-                                            \n\n<b>Compatible Fitbit devices:</b>\nFitbit Alta, Alta HR, Charge 2, Blaze, Surge.
+                                            \n\n<b>Compatible Fitbit devices:</b>\nFitbit Alta, Alta HR, Charge 2, Charge 3,
+                                            Blaze, Surge, Ionic, Versa, and any future device that supports \"Text Notifications\".
                                             Limited compatibility with Fitbit Flex 2 (lights up the LEDs).</string>
     <string name="intro_setup_issues_title">Setup issues?</string>
     <string name="intro_setup_issues_message">Looks like you already finished setup once.
                                               \n\nIf you are still having issues with notifications, try rebooting the phone and setup again.
-                                              If that does not work, try reinstalling the app.</string>
-    <string name="intro_setup_issues_ok">Got it!</string>
-    <string name="intro_setup_fitbit_desc2">Select \'Call and Text Notifications\' under \'General\'. Then, Select \'Text Notifications\' under \'Settings\'.</string>
-    <string name="intro_setup_fitbit_desc3">Choose \'Fit Notifications\'. Then, sync your Fitbit device within the Fitbit app. Do not choose this app for Call/Calendar Notifications, otherwise you will NOT get any notifications.</string>
+                                              You can also go through the troubleshooting section of this app for help and useful resources.</string>
+    <string name="intro_setup_issues_ok">OK</string>
+    <string name="intro_setup_fitbit_desc2">Select \'Notifications\' option under \'General\'. Then, Select \'Text Messages\' option.</string>
+    <string name="intro_setup_fitbit_desc3">Choose \'Fit Notifications\' app as your default messaging app. Then, sync your Fitbit device
+        within the Fitbit app. Do not choose this app for the \'Call\' and \'Calendar Events\' options, otherwise you MAY NOT get any notifications.
+        \n\nYou can also enable the \'Always Vibrate\' option in this setting page in the Fitbit app, if you plan to use \'Do Not Disturb\' or \'Silent\' mode.</string>
     <string name="intro_setup_fitbit_button3">Open Fitbit app</string>
     <string name="intro_get_fitbit_toast_text3">Fitbit app not found! Go back and install the official Fitbit app!</string>
 
     <string name="intro_select_apps_title">Choose the apps you want notifications for</string>
-    <string name="intro_select_apps_desc">You can now choose the apps whose notifications you want to receive on your Fitbit device. They will appear like Text Notifications on the device and will have the app name for clarity.\n\nYou can also configure additional settings using the gear icon for each app individually.</string>
+    <string name="intro_select_apps_desc">You can now choose the apps whose notifications you want to receive on your Fitbit device.
+        They will appear like Text Notifications on the device and will have the app name for clarity.
+        \n\nYou can also configure additional settings using the gear icon (settings icon) for each app individually.</string>
 
     <string name="intro_start_service_title">Start the notification listening service</string>
     <string name="intro_start_service_desc">This service will try to stay in the background. If you stop receiving notifications, restart the service from this app. Don\'t use task killer apps, as they can disable the service.</string>
 
     <string name="intro_dnd_mode_title">Do not disturb mode on Android 6.0+</string>
-    <string name="intro_dnd_mode_desc">If you enable do not disturb mode, then no notifications will be forwarded to your Fitbit device, by default. To change that, you need to follow specific instructions by clicking below.</string>
+    <string name="intro_dnd_mode_desc">If you enable do not disturb mode, then no notifications will be forwarded to your Fitbit device, by default. To change that, you need to follow specific instructions by clicking below.
+                                       \n\nYou should also enable the \'Always Vibrate\' option in the Fitbit app\'s notifications settings page.</string>
     <string name="intro_dnd_mode_button_configure">Configure</string>
     <string name="intro_dnd_mode_button">Extra Instructions</string>
-    <string name="intro_dnd_mode_button_oreo">Extra Instructions for Android 8</string>
+    <string name="intro_dnd_mode_button_oreo">Extra Instructions for Android 8 and above</string>
     <string name="intro_dnd_mode_button_nougat">Extra Instructions for Android 7</string>
     <string name="intro_dnd_mode_button_marshmallow">Extra Instructions for Android 6</string>
 
@@ -140,9 +146,6 @@
     <string name="setup_incomplete_cancel">Okay, you can check out the new setup process at any time!</string>
 
     <!-- Home activity -->
-    <string name="fitbit_2_70_issues">fitbitIssueFirstNotification</string>
-    <string name="fitbit_2_70_issues_never_show_again">fitbitIssueNeverShowAgain</string>
-    <string name="fitbit_2_70_issues_dialog_title">Notifications issue with latest Fitbit app fixed!</string>
     <string name="verify_settings_button">Verify Settings</string>
     <string name="never_show_again_button">Never show again</string>
 
@@ -316,13 +319,14 @@
     <!-- HTML Information - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <string name="about_app_text"><![CDATA[
     <p>Fit Notifications is a third party application that allows you to send notifications from any of the apps installed on your phone to your compatible Fitbit device.
-       In order to properly setup this application, please follow the provided instructions.</p>
+       In order to properly setup this application, please follow the provided instructions. Please note that this app will not work if the Fitbit app\'s notifications feature
+       is not compatible with your phone.</p>
     <p>The source code for this app is available at <a href=\"https://github.com/abhijitvalluri/fitnotifications\">Github (abhijitvalluri/fitnotifications)</a>, with contributions from other developers apart from Smart Dinosaurs Entertainment.</p>
 	<p>Please note that neither \'Fit Notifications\' nor \'Smart Dinosaurs Entertainment\' is affiliated with Fitbit, Inc. in anyway.</p>
 	<h2>Disclaimer</h2>
 	<p>Fitbit is a registered trademark and service mark of Fitbit, Inc.
        \'Fit Notifications\' is designed for use with the Fitbit platform. This application
-       is not put out by Fitbit, and Fitbit does not service or warrant the functionality of this application.</p>
+       is not developed by Fitbit, and Fitbit does not service or warrant the functionality of this application.</p>
     ]]></string>
     <string name="instructions_text"><![CDATA[
     <p>To properly set up this application, please follow the instructions below:</p>
@@ -365,71 +369,98 @@
     while at the same time you should have received a sample notification on your Fitbit. Then, you have confirmed
     that the application is working correctly! Issues? Please contact us!</p>
     ]]></string>
-    <string name="faqs_text"><![CDATA[
+    <string name="faqs_text" tools:ignore="TypographyDashes"><![CDATA[
+    <!-- FAQ #1 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <p><b>Q. Is my Fitbit device supported?</b></p>
-    <p>This app can only work with Fitbit Alta, Alta HR, Blaze, Surge, and Charge 2, i.e. those devices where you can set a text notification.
-       Unfortunately, Fitbit, Inc. has recently changed the behavior for 3rd party call notifications on Charge and Charge HR.
-       Hence those devices are not compatible with this app. Fitbit, Inc. may modify the behavior of text notifications at any
+    <p>This app will work with any Fitbit device that <b>supports text notifications</b>. This includes Fitbit Alta, Alta HR, Blaze,
+       Surge, Charge 2, Charge 3, Versa, Ionic and any future Fitbit models that support text notifications.</p>
+
+    <p>Please note that Fitbit, Inc. may modify the behavior of text notifications at any
        time for the compatible devices. This is not in our control.</p>
-    <p><b>Q. Will this app ever stop working as advertised?</b></p>
-    <p>If Fitbit, Inc. decides to change the behavior of text notifications from 3rd party apps such as this, then unfortunately
-       \'Fit Notifications\' may stop working. We will try to update the app in case of such issues. Please report such issues to us.</p>
-    <p><b>Q. I am not getting any notifications on my Fitbit device. Why?</b></p>
-    <p>Please ensure that your Fitbit device is one of the supported devices. Also, ensure that you have the official Fitbit app from
-       Fitbit, Inc. Make sure that you followed all the instructions, including enabling notification access to \'Fitbit Notifications\'.
-       Also, ensure that you can sync to your Fitbit device by enabling Bluetooth (location services should also be enabled on newer Android devices).</p>
-    <p><b>Q. I still cannot get notifications! Why?</b></p>
-    <p>Make sure you have enabled the notification feature on your Fitbit device. Additionally, ensure that the \'Fit Notifications\'
-       service is running by pressing \'Start Service\' button below. This service MAY be stopped by Android on occasion. Do not use task
-       killers as they can stop the service needed by this app to function. Finally, you can press the demo notification button below to
-       test the functionality while you troubleshoot the problem.</p>
-    <p>Other reasons as to why the app is not working include:</p>
+
+
+    <!-- FAQ #2 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <p><b>Q. Where can I find useful information to troubleshoot issues with notifications?</b></p>
+    <p>You may find these help pages on the Fitbit website very useful in troubleshooting a variety
+       of issues:</p>
     <ul>
-        <li>Low battery on your Fitbit device: the Fitbit app may disable Notifications if your Fitbit device has low battery.</li>
-        <li>Your Fitbit device may require a reboot to enable notifications, due to errors. Refer to the Fitbit website to find out how to reboot your device.</li>
-        <li>You may need to reselect \'Fit Notifications\' as described in Step 5 in the instructions.</li>
+        <li><a href=\"https://help.fitbit.com/articles/en_US/Help_article/1979\">How do I get notifications from my phone on my Fitbit device?</a></li>
+        <li><a href=\"https://help.fitbit.com/articles/en_US/Help_article/1610\">My Fitbit device isn\'t receiving notifications from my phone</a></li>
+        <li><a href=\"https://help.fitbit.com/articles/en_US/Help_article/1186\">How do I restart my Fitbit device?</a></li>
     </ul>
-    <p><b>Fit Notifications app settings that can cause issues with notification forwarding:</b></p>
+
+
+    <!-- FAQ #3 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <p><b>Q. I am not getting any notifications on my Fitbit device! How can I fix it?</b></p>
+    <p>Please ensure that your Fitbit device is one of the supported devices, as described above. Also, make sure that your phone is compatible
+       with the \"Call & Text Notifications\" feature of the Fitbit app by <a href=\"https://www.fitbit.com/devices\">checking on the Fitbit website.</a>
+       If your phone is not listed on the Fitbit website, or does not have the \"Call & Text Notifications\" feature listed as compatible, then this
+       app may not work.</p>
+
+    <p>If your phone is compatible, then verify that you followed all the instructions in the setup, including enabling notification access to \"Fitbit Notifications\".
+       Also, ensure that you can sync to your Fitbit device by enabling Bluetooth (location services should also be enabled on newer Android devices).</p>
+
+
+    <!-- FAQ #4 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <p><b>Q. I still cannot get notifications!! Why?</b></p>
+    <p>Make sure you have turned on your Fitbit device\'s notification setting. You can learn how to do this and many other helpful tips to troubleshoot
+       issues by visiting <a href=\"https://help.fitbit.com/articles/en_US/Help_article/1610\">this help page on the Fitbit website.</a></p>
+
+    <p>Some other suggestions for troubleshooting:</p>
+    <ul>
+        <li>Ensure that the \"Fit Notifications\" service is running by pressing \"Turn on\" button on the home page. This service MAY get stopped
+            by Android on occasion. Do not use task killers as they may accidentally stop this service and cause issues.</li>
+        <li>You can click on the \"Test Notification\" button on the home page to send a test notification and troubleshoot the functionality of this app.</li>
+        <li><b>Low battery on your Fitbit device:</b> Please charge your device as the Fitbit app may disable Notifications if your Fitbit device has low battery.</li>
+        <li>Your Fitbit device may require a restart to enable notifications, due to errors. Please read this
+            <a href=\"https://help.fitbit.com/articles/en_US/Help_article/1186\">help page</a> to learn how to restart your device.</li>
+        <li>You may need to go through the interactive setup process again and select \"Fit Notifications\" as your text notification app in Fitbit, and sync your device again.</li>
+    </ul>
+
+
+    <!-- FAQ #5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <p><b>Q. Are there any known issues with this app?</b></p>
     <p>Some users have experienced issues receiving notifications when they enable the \"Dismiss placeholder notification\"
        setting within this app. If you are experiencing issues with notifications, please try increasing the \"Dismiss\" delay,
        or try disabling this setting completely.</p>
+
+
+    <!-- FAQ #6 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <p><b>Q. Why am I not getting notifications from a particular app on my phone?</b></p>
+    <p>Go to the \"Setup Apps\" screen from the home page, and make sure that you have selected the app for which you want to
+       see notifications. Click on the settings icon next to the checkbox to access the app specific settings, and check that
+       all settings are correct, including the schedule. These app specific settings can cause some notifications to not appear,
+       so it is important to verify them.</p>
+
+    <p>If you still have issues, and followed the instructions correctly, then please contact us via
+       email to inform us the name of the application (including Google Play Store link) for which you are missing notifications.
+       We will follow up to troubleshoot the issue with you.</p>
+
+
+    <!-- FAQ #7 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <p><b>Q. Will this app ever stop working as advertised?</b></p>
+    <p>If Fitbit, Inc. decides to change the behavior of text notifications from 3rd party apps such as this, then unfortunately
+       \"Fit Notifications\" may stop working. We will try to update the app in case of such issues, but we cannot guarantee that this
+       app will work forever. Please report such issues to us.</p>
     <p><b>Q. Can this app function if I use task killers on my phone?</b></p>
     <p>Please note that task killers may interfere with the proper functioning of this app. It is recommended that you disable task
-       killers or at least allow them to keep the \'Fit Notifications\' service running.</p>
-    <p><b>Q. Why am I not getting notifications from a particular app on my phone?</b></p>
-    <p>Make sure that you have selected the app for which you want to see notifications on your compatible Fitbit device - refer to
-        step 6 of the instructions. If you still have issues, and followed the instructions correctly, then please contact us via
-       email to inform us the name of the application (including Google Play Store link) for which you are missing notifications.
-       We will attempt to resolve this issue in an update.</p>
+       killers or at least allow them to keep the \"Fit Notifications\" service running.</p>
     ]]></string>
     <string name="whats_new_text"><![CDATA[
     <br />
-    <p>Changes in <b>version 2.9.16:</b></p>
+    <p>Changes in <b>version 2.9.17:</b></p>
     <ul>
-        <li><b>Fixed the notifications issue due to latest Fitbit update (April 18, 2018)!</b>
-        We fixed the issue caused due to the latest update to the Fitbit app (on April 18, 2018),
-        by editing the settings on your phone for our app. This changes the behavior of the notifications a little.
-        Please note that you will receive notifications on your Fitbit tracker <b>ONLY</b> if the notification
-        makes a sound now, due to new restrictions of the Fitbit app. So, edit the settings of third party apps accordingly.</p>
-
-        <p>Also, this update reset any changes made for the \"Do Not Disturb\" mode. Please go to
-        the App settings for the \"Fit Notifications\" app in your phone\'s settings, then click
-        on \"App Notifications\" and enable \"Override Do Not Disturb\" setting under the
-        \"Placeholder notification\" choice, if you wish to do so.</li>
+        <li><b>Added Japanese translations!</b> This update includes Japanese translations thanks
+            contributions from <a href=\"https://github.com/YoshihideSogawa\">Yoshihide Sogawa</a>
+            on Github. If you know some Android programming and want to translate this app to your language,
+            please contribute to the <a href=\"https://github.com/abhijitvalluri/fitnotifications\">Github project for this app.</a></li>
+        <br />
+        <li><b>Updated setup instructions and troubleshooting information:</b> Updated the instructions to
+            reflect the latest changes in the Fitbit app. Added useful links and more information in the
+            \"Frequently Asked Questions\" (FAQs) section to help users fix issues with notifications more quickly.</li>
     </ul>
     <p><b>Support the developer!</b> You can <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer by visiting the donation web page! More details on the website.</p>
 
-    ]]></string>
-    <string name="fitbit_2_70_issues_dialog_message"><![CDATA[
-       <p>We fixed the issue caused due to the latest update to
-       the Fitbit app, by editing the settings on your phone for our
-       app. This changes the behavior of the notifications. Please note that you will
-       receive notifications on your Fitbit tracker <b>ONLY</b> if the notification
-       makes a sound now, due to new restrictions of the Fitbit app. So, edit the
-       settings of third party apps accordingly.</p>
-       <p>Also, this update reset any changes made for the \"Do Not Disturb\" mode.
-       Please click on \"Verify Settings\" button below to enable \"Override Do Not
-       Disturb\", if you wish to do so.
     ]]></string>
     <string name="opensource_text"><![CDATA[
     <p>This software contains portions of the following libraries, subject to the below licenses.</p>

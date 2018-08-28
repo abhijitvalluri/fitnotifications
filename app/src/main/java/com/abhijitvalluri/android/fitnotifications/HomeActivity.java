@@ -107,34 +107,16 @@ public class HomeActivity extends AppCompatActivity {
         if (mPreferences.getInt(getString(R.string.version_key), 0) < Constants.VERSION_CODE
                 && mPreferences.getBoolean(getString(R.string.done_first_launch_key), false)) {
             // App has been updated
+            // TODO: For version 2.9.18 - Update Android SDK to latest version & work on improved schedule feature
 
-            new AlertDialog.Builder(HomeActivity.this)
-                    .setTitle(getString(R.string.fitbit_2_70_issues_dialog_title))
-                    .setMessage(Html.fromHtml(getString(R.string.fitbit_2_70_issues_dialog_message)))
-                    .setPositiveButton(getString(R.string.verify_settings_button), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Intent intent = new Intent();
-                            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                            Uri uri = Uri.fromParts("package", Constants.PACKAGE_NAME, null);
-                            intent.setData(uri);
-                            startActivity(intent);
-                        }
-                    })
-                    .setNegativeButton(getString(R.string.never_show_again_button), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            mPreferences.edit().putInt(getString(R.string.version_key), Constants.VERSION_CODE).apply();
-                        }
-                    })
-                    .create()
-                    .show();
+            mPreferences.edit().putInt(getString(R.string.version_key), Constants.VERSION_CODE).apply();
 
-            if (mPreferences.getInt(getString(R.string.placeholder_dismiss_delay_key), 0) < 5) {
+            if (mPreferences.getInt(getString(R.string.placeholder_dismiss_delay_key), 0) < Constants.DEFAULT_DELAY_SECONDS) {
                 // Set default Dismiss Placeholder notification delay to 7. Low delays can cause
                 // problems with relaying notifications.
                 mPreferences.edit()
-                            .putInt(getString(R.string.placeholder_dismiss_delay_key), 7).apply();
+                            .putInt(getString(R.string.placeholder_dismiss_delay_key),
+                                    Constants.DEFAULT_DELAY_SECONDS).apply();
             }
 
             navDrawer.setCheckedItem(R.id.nav_whats_new);

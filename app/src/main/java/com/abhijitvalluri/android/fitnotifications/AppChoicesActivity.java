@@ -299,6 +299,10 @@ public class AppChoicesActivity extends AppCompatActivity {
 
                 if (!mAppSelectionsStore.contains(appPackageName) && !appPackageName.equals(Constants.PACKAGE_NAME)) {
                     mAppSelectionsStore.addAppSelection(new AppSelection(appPackageName, appName));
+                } else if (mAppSelectionsStore.contains(appPackageName) && !appName.equals(mAppSelectionsStore.getAppName(appPackageName))) {
+                    AppSelection appSelection = mAppSelectionsStore.getAppSelection(appPackageName);
+                    appSelection.setAppName(appName);
+                    mAppSelectionsStore.updateAppSelection(appSelection);
                 }
             }
         } catch (Exception e) {

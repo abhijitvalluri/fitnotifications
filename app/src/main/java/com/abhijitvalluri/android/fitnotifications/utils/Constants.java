@@ -30,7 +30,7 @@ public class Constants {
     public static final int DEFAULT_NOTIF_CHAR_LIMIT = 100;
     public static final Integer NOTIFICATION_ID = (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
     public static final int DEFAULT_NUM_NOTIF = 100;
-    public static final int DEFAULT_DELAY_SECONDS = 5;
+    public static final int DEFAULT_DELAY_SECONDS = 7;
     public static final String NOTIFICATION_CHANNEL_ID_OLD = "fitNotifications_channel_003";
     public static final String NOTIFICATION_CHANNEL_ID_FIX = "fitNotifications_channel_005";
     public static final String NOTIFICATION_CHANNEL_ID = "fitNotifications_channel_007";
