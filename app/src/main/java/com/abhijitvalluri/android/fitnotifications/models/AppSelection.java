@@ -92,6 +92,8 @@ public class AppSelection implements Parcelable {
         return mAppName;
     }
 
+    public void setAppName(String appName) { mAppName = appName; }
+
     public String getFilterText() {
         return mFilterText;
     }

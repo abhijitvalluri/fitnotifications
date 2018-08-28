@@ -86,7 +86,7 @@
     <string name="intro_setup_issues_ok">OK</string>
     <string name="intro_setup_fitbit_desc2">Select \'Notifications\' option under \'General\'. Then, Select \'Text Messages\' option.</string>
     <string name="intro_setup_fitbit_desc3">Choose \'Fit Notifications\' app as your default messaging app. Then, sync your Fitbit device
-        within the Fitbit app. Do not choose this app for the \'Call\' and \'Calendar Events\' options, otherwise you will MAY NOT get any notifications.
+        within the Fitbit app. Do not choose this app for the \'Call\' and \'Calendar Events\' options, otherwise you MAY NOT get any notifications.
         \n\nYou can also enable the \'Always Vibrate\' option in this setting page in the Fitbit app, if you plan to use \'Do Not Disturb\' or \'Silent\' mode.</string>
     <string name="intro_setup_fitbit_button3">Open Fitbit app</string>
     <string name="intro_get_fitbit_toast_text3">Fitbit app not found! Go back and install the official Fitbit app!</string>
@@ -451,7 +451,7 @@
     <p>Changes in <b>version 2.9.17:</b></p>
     <ul>
         <li><b>Added Japanese translations!</b> This update includes Japanese translations thanks
-            the contribution from <a href=\"https://github.com/YoshihideSogawa\">Yoshihide Sogawa</a>
+            contributions from <a href=\"https://github.com/YoshihideSogawa\">Yoshihide Sogawa</a>
             on Github. If you know some Android programming and want to translate this app to your language,
             please contribute to the <a href=\"https://github.com/abhijitvalluri/fitnotifications\">Github project for this app.</a></li>
         <br />
