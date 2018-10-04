@@ -33,7 +33,7 @@ import android.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.NonNull;
-import android.support.v7.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat;
 import android.widget.RemoteViews;
 
 import com.abhijitvalluri.android.fitnotifications.R;
@@ -147,6 +147,8 @@ public class NLService extends NotificationListenerService {
         mMessageExtractors.put("org.telegram.messenger", new GroupSummaryMessageExtractor(res, true));
         // WhatsApp
         mMessageExtractors.put("com.whatsapp", new GroupSummaryMessageExtractor(res, false));
+        // WhatsApp+ unofficial app
+        mMessageExtractors.put("com.WhatsApp4Plus", new GroupSummaryMessageExtractor(res, false));
         // Google Calendar
         mMessageExtractors.put("com.google.android.calendar", new BasicMessageExtractor());
         // GMail

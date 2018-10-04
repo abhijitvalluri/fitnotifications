@@ -374,19 +374,5 @@
     <p>タスクキラーアプリは、このアプリの動作に影響を与えることに注意してください。
        タスクキラーを無効にするか「Fit Notifications」がサービスを実行することを許可してください。</p>
     ]]></string>
-    <string name="whats_new_text"><![CDATA[
-    <br />
-    <p><b>version 2.9.17</b>での変更点</p>
-    <ul>
-        <li><b>日本語をサポートしました！</b> このアップデートはGithub上で<a href=\"https://github.com/YoshihideSogawa\">Yoshihide Sogawa</a>の貢献があったため実現しました。
-            Androidプログラミングの知識があり、自らの言語に翻訳したい場合は
-            <a href=\"https://github.com/abhijitvalluri/fitnotifications\">このアプリのGithubプロジェクト</a>にぜひご協力ください。</li>
-        <br />
-        <li><b>セットアップ手順とよくある質問の更新:</b> 最新のFitbitアプリに従って内容を反映させました。
-            通知の問題を素早く解決するためのリンクや解決策を「よくある質問」内に追加しました。</li>
-    </ul>
-    <p><b>開発者を支援してください！</b> <a href="https://abhijitvalluri.com/android/donate/">寄付ページ</a>から開発者を支援できます！詳細はウェブサイトをご覧ください。</p>
-
-    ]]></string>
 
 </resources>

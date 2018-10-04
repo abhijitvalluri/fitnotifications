@@ -448,6 +448,10 @@
     ]]></string>
     <string name="whats_new_text"><![CDATA[
     <br />
+    <p>Changes in <b>version 2.9.18:</b></p>
+    <ul>
+        <li>Updated app to latest Android platform, improved notification support for some apps.</li>
+    </ul>
     <p>Changes in <b>version 2.9.17:</b></p>
     <ul>
         <li><b>Added Japanese translations!</b> This update includes Japanese translations thanks
