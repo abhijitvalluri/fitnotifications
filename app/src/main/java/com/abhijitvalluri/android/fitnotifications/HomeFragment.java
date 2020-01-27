@@ -33,11 +33,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v4.app.NotificationCompat;
+import androidx.fragment.app.Fragment;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.NotificationCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -399,7 +399,7 @@ public class HomeFragment extends Fragment {
                         .setContent(contentView);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    builder.setChannelId(Constants.NOTIFICATION_CHANNEL_ID);
+                    builder.setChannelId(Constants.NOTIFICATION_CHANNEL_ID_CURRENT);
                 }
 
                 // Creates an explicit intent for the SettingsActivity in the app

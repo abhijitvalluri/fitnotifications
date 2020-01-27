@@ -6,7 +6,7 @@
           android:title="@string/search_menu"
           android:icon="@drawable/ic_search_white_24dp"
           app:showAsAction="collapseActionView|ifRoom"
-          app:actionViewClass="android.support.v7.widget.SearchView" />
+          app:actionViewClass="androidx.appcompat.widget.SearchView" />
 
     <item android:id="@+id/menu_filter_enabled"
           android:title="@string/enabled_apps_filter_menu"

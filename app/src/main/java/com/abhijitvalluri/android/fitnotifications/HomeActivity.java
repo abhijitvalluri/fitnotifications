@@ -24,22 +24,21 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.text.Html;
+
+import androidx.annotation.NonNull;
+import com.google.android.material.navigation.NavigationView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -141,24 +140,40 @@ public class HomeActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-            try {
-                manager.deleteNotificationChannel(Constants.NOTIFICATION_CHANNEL_ID_OLD);
-                manager.deleteNotificationChannel(Constants.NOTIFICATION_CHANNEL_ID_FIX);
-
-            } catch (NullPointerException e) {
-                Log.e("FitNotificationErrors", "Error deleting notification channel. Error = " + e.getMessage());
+            if (manager == null) {
+                Log.e("FitNotificationErrors", "Error: Notification manager is null!");
+                return;
             }
 
-            String id = Constants.NOTIFICATION_CHANNEL_ID;
+            manager.deleteNotificationChannel(Constants.NOTIFICATION_CHANNEL_ID_003);
+            manager.deleteNotificationChannel(Constants.NOTIFICATION_CHANNEL_ID_005);
+            manager.deleteNotificationChannel(Constants.NOTIFICATION_CHANNEL_ID_007);
+
+            String id = Constants.NOTIFICATION_CHANNEL_ID_CURRENT;
             CharSequence name = getString(R.string.notification_channel_name);
             String desc = getString(R.string.notification_channel_desc);
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
             NotificationChannel channel = new NotificationChannel(id, name, importance);
+            /* Setting the notification sound to a silent sound file (silent.ogg) causes the
+               sound of the relayed notifications to also be suppressed...
+
+               Need to figure out a way to make my placeholder notif not make a sound, and not
+               suppress sound of relayed notif. and to make fitbit actually relay notif and vibrate
+
+               fitbit does not relay notif if importance is less than default (low or min).
+               SO fitbit only relays notifs with default or higher importance. But such notifs make sound. SO placeholder will make sound
+               If importance is low, placeholder wont make sound but won't get relayed.
+
+               If I set importance to default but set sound to null, placeholder makes no sound and notif is relayed but fitbit won't vibrate, I think?
+               Must verify if Fitbit does not vibrate or if it is just my Fitbit Ionic being very flaky/inconsistent. This may be THE SOLUTION.
+               Note: I will implement this! Check if users report issues.
+
+               If I enable the always vibrate feature on Fitbit app then it will vibrate. But then it will also relay notifs in DND mode.
+               I can then also enable setting in my app to not relay notifs in DND mode...
+            */
+
+            channel.setSound(null, null);
             channel.setShowBadge(false);
-            channel.setSound(Uri.parse("android.resource://" + getPackageName() + "/" + "raw/silent.ogg"),
-                    new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                                                 .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
-                                                 .build());
             channel.setDescription(desc);
             channel.enableLights(false);
             channel.enableVibration(false);
@@ -406,6 +421,8 @@ public class HomeActivity extends AppCompatActivity {
                 return;
             default:
         }
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     private class SmoothDrawerToggle extends ActionBarDrawerToggle {

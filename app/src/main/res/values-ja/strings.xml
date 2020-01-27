@@ -322,6 +322,17 @@
     </ul>
 
 
+    <!-- FAQ #2.1 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <p><b>Q. Why is my Fitbit device not vibrating when it receives a notification?</b></p>
+    <p>Please be aware that your Fitbit device may actually be receiving notifications, but may not be
+       alerting you because it is not vibrating. This can happen in silent mode or do not disturb mode,
+       or may occur on Android 10 devices, because of the way Fit Notifications app creates a new,
+       silent notification (placeholder notification).</p>
+
+    <p>To fix this problem, you can go to the \"Notifications\" settings for your Fitbit device in the
+       official Fitbit app. In the Notifications settings, please enable the \"Always Vibrate\" option.</p>
+
+
     <!-- FAQ #3 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <p><b>Q. Fitbitデバイスに通知が全く表示されません。どのようにすればよいですか？</b></p>
     <p>これまでの質問を読み、お持ちのFitbitデバイスがサポートされているものに含まれているか確認してください。

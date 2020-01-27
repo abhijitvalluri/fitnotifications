@@ -32,9 +32,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v4.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.NotificationCompat;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -200,7 +200,7 @@ public class AppIntroActivity extends IntroActivity {
                                 .setContent(contentView);
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            builder.setChannelId(Constants.NOTIFICATION_CHANNEL_ID);
+                            builder.setChannelId(Constants.NOTIFICATION_CHANNEL_ID_CURRENT);
                         }
 
                         // Creates an explicit intent for the SettingsActivity in the app

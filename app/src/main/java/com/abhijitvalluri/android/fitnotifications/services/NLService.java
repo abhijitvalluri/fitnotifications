@@ -32,8 +32,8 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationCompat;
+import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
 import android.widget.RemoteViews;
 
 import com.abhijitvalluri.android.fitnotifications.R;
@@ -339,7 +339,7 @@ public class NLService extends NotificationListenerService {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder.setChannelId(Constants.NOTIFICATION_CHANNEL_ID);
+            builder.setChannelId(Constants.NOTIFICATION_CHANNEL_ID_CURRENT);
         }
 
         if (mSplitNotification && notificationText.length() > mFitbitNotifCharLimit) {

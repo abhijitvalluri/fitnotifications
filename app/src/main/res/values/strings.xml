@@ -390,6 +390,17 @@
     </ul>
 
 
+    <!-- FAQ #2.1 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <p><b>Q. Why is my Fitbit device not vibrating when it receives a notification?</b></p>
+    <p>Please be aware that your Fitbit device may actually be receiving notifications, but may not be
+       alerting you because it is not vibrating. This can happen in silent mode or do not disturb mode,
+       or may occur on Android 10 devices, because of the way Fit Notifications app creates a new,
+       silent notification (placeholder notification).</p>
+
+    <p>To fix this problem, you can go to the \"Notifications\" settings for your Fitbit device in the
+       official Fitbit app. In the Notifications settings, please enable the \"Always Vibrate\" option.</p>
+
+
     <!-- FAQ #3 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <p><b>Q. I am not getting any notifications on my Fitbit device! How can I fix it?</b></p>
     <p>Please ensure that your Fitbit device is one of the supported devices, as described above. Also, make sure that your phone is compatible
@@ -448,21 +459,15 @@
     ]]></string>
     <string name="whats_new_text"><![CDATA[
     <br />
-    <p>Changes in <b>version 2.9.18:</b></p>
-    <ul>
-        <li>Updated app to latest Android platform, improved notification support for some apps.</li>
-    </ul>
-    <p>Changes in <b>version 2.9.17:</b></p>
-    <ul>
-        <li><b>Added Japanese translations!</b> This update includes Japanese translations thanks
-            contributions from <a href=\"https://github.com/YoshihideSogawa\">Yoshihide Sogawa</a>
-            on Github. If you know some Android programming and want to translate this app to your language,
-            please contribute to the <a href=\"https://github.com/abhijitvalluri/fitnotifications\">Github project for this app.</a></li>
-        <br />
-        <li><b>Updated setup instructions and troubleshooting information:</b> Updated the instructions to
-            reflect the latest changes in the Fitbit app. Added useful links and more information in the
-            \"Frequently Asked Questions\" (FAQs) section to help users fix issues with notifications more quickly.</li>
-    </ul>
+    <p>Changes in <b>version 2.10.0:</b></p>
+    <ol>
+        <li>Updated app with Android 10 platform, and general stability improvements.<br /><br /></li>
+        <li>Fixed issue on Android 10 where the placeholder notification is suppressing the
+            notification sound of the actual notification. <br /><br />
+            If your Fitbit device does not vibrate but still receives notifications, then
+            please try enabling the \"Always Vibrate\" setting in the Fitbit app, under
+            the \"Notifications\" settings for your Fitbit device.</li>
+    </ol>
     <p><b>Support the developer!</b> You can <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer by visiting the donation web page! More details on the website.</p>
 
     ]]></string>
