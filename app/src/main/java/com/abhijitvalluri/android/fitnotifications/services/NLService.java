@@ -34,6 +34,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 import android.widget.RemoteViews;
 
 import com.abhijitvalluri.android.fitnotifications.R;
@@ -237,6 +238,7 @@ public class NLService extends NotificationListenerService {
         String filterText = null;
         boolean discardEmptyNotifications = false;
         boolean discardOngoingNotifications = true;
+        String customPrefix = null;
 
         {
             AppSelection appSelection = AppSelectionsStore.get(this).getAppSelection(appPackageName);
@@ -244,6 +246,7 @@ public class NLService extends NotificationListenerService {
                 filterText = appSelection.getFilterText().trim();
                 discardEmptyNotifications = appSelection.isDiscardEmptyNotifications();
                 discardOngoingNotifications = appSelection.isDiscardOngoingNotifications();
+                customPrefix = appSelection.getCustomPrefix().trim();
             }
         }
 
@@ -309,7 +312,11 @@ public class NLService extends NotificationListenerService {
         String notificationText = titleAndText[1].toString();
 
         if (mDisplayAppName) {
-            notificationText = "[" + mAppSelectionsStore.getAppName(appPackageName) + "] " + notificationText;
+            String appPrefix = customPrefix;
+            if (TextUtils.isEmpty(appPrefix)) {
+                appPrefix = mAppSelectionsStore.getAppName(appPackageName);
+            }
+            notificationText = "[" + appPrefix + "] " + notificationText;
         }
 
         if (mTransliterateNotif) {

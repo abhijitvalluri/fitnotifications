@@ -33,7 +33,7 @@ import java.util.HashMap;
  * Helper class for the Database
  */
 public class AppSelectionDbHelper extends SQLiteOpenHelper {
-    private static final int VERSION = 7;
+    private static final int VERSION = 8;
     private static final String DATABASE_NAME = "fitNotificationAppSelection.db";
     private HashMap<String, String> mDbAlterCommands;
     private Context mContext;
@@ -91,6 +91,10 @@ public class AppSelectionDbHelper extends SQLiteOpenHelper {
                 AppChoiceTable.Cols.DAYS_OF_WEEK,
                 "alter table " + AppChoiceTable.NAME + " add column " +
                 AppChoiceTable.Cols.DAYS_OF_WEEK + " INTEGER NOT NULL DEFAULT 127;");
+        mDbAlterCommands.put(
+                AppChoiceTable.Cols.CUSTOM_PREFIX,
+                "alter table " + AppChoiceTable.NAME + " add column " +
+                AppChoiceTable.Cols.CUSTOM_PREFIX + " TEXT DEFAULT '';");
     }
 
     @Override
@@ -109,7 +113,8 @@ public class AppSelectionDbHelper extends SQLiteOpenHelper {
                 AppChoiceTable.Cols.DISCARD_EMPTY_NOTIFICATIONS + ", " +
                 AppChoiceTable.Cols.DISCARD_ONGOING_NOTIFICATIONS + ", " +
                 AppChoiceTable.Cols.ALL_DAY_SCHEDULE + ", " +
-                AppChoiceTable.Cols.DAYS_OF_WEEK +
+                AppChoiceTable.Cols.DAYS_OF_WEEK + ", " +
+                AppChoiceTable.Cols.CUSTOM_PREFIX +
                 ")"
                 // ALERT!!! Make sure you have a comma to separate all names! Had a bug because I forgot it of ALL_DAY_SCHEDULE
         );

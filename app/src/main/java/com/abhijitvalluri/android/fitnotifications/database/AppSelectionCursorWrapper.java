@@ -51,6 +51,7 @@ public class AppSelectionCursorWrapper extends CursorWrapper {
         } else {
             daysOfWeek = getInt(getColumnIndex(AppChoiceTable.Cols.DAYS_OF_WEEK));
         }
+        String customPrefix = getString(getColumnIndex(AppChoiceTable.Cols.CUSTOM_PREFIX));
 
         return new AppSelection(appPackageName,
                                 appName,
@@ -63,6 +64,7 @@ public class AppSelectionCursorWrapper extends CursorWrapper {
                                 discardEmptyNotif != 0,
                                 discardOngoingNotif != 0,
                                 allDaySchedule != 0,
-                                daysOfWeek);
+                                daysOfWeek,
+                                customPrefix);
     }
 }

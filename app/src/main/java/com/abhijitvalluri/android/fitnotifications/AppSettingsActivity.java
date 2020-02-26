@@ -66,6 +66,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
 
     private AppSelection mAppSelection;
     private EditText mFilterText;
+    private EditText mCustomPrefix;
     private TextView mNextDay;
     private Button mStartTimeButton;
     private Button mStopTimeButton;
@@ -99,6 +100,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         TextView filterTextDescription;
 
         mFilterText = (EditText) findViewById(R.id.filter_text);
+        mCustomPrefix = (EditText) findViewById(R.id.custom_prefix);
         mStartTimeButton = (Button) findViewById(R.id.start_time);
         mStopTimeButton = (Button) findViewById(R.id.stop_time);
         mNextDay = (TextView) findViewById(R.id.next_day);
@@ -159,6 +161,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         discardOngoingSwitch.setChecked(mDiscardOngoingNotifications);
         setTitle(mAppSelection.getAppName());
         mFilterText.setText(mAppSelection.getFilterText());
+        mCustomPrefix.setText(mAppSelection.getCustomPrefix());
 
         allDaySwitch.setChecked(mAllDaySchedule);
         setupScheduleSettings();
@@ -426,6 +429,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
     @Override
     public void onBackPressed() {
         mAppSelection.setFilterText(mFilterText.getText().toString());
+        mAppSelection.setCustomPrefix(mCustomPrefix.getText().toString());
         mAppSelection.setStartTimeHour(mStartTimeHour);
         mAppSelection.setStartTimeMinute(mStartTimeMinute);
         mAppSelection.setStopTimeHour(mStopTimeHour);

@@ -279,6 +279,33 @@
                 android:textSize="16sp"/>
 
         </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@color/lightGrey_translucent" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:labelFor="@+id/custom_prefix"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="19sp"
+            android:text="@string/custom_prefix"
+            android:paddingTop="16dp"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:inputType="text"
+            android:id="@+id/custom_prefix"/>
+
     </LinearLayout>
 </ScrollView>
 

@@ -310,6 +310,7 @@
     <string name="schedule_thursday">T</string>
     <string name="schedule_friday">F</string>
     <string name="schedule_saturday">S</string>
+    <string name="custom_prefix">Custom prefix</string>
 
     <!-- Notification summary patterns  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <string name="new_messages_summary_pattern">\\d+ new messages</string>
