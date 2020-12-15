@@ -71,7 +71,7 @@
             android:layout_marginBottom="16dp"
             android:background="@color/lightGrey_translucent" />
 
-        <Switch
+        <androidx.appcompat.widget.SwitchCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
@@ -87,7 +87,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
             android:background="@color/lightGrey_translucent" />
-        <Switch
+        <androidx.appcompat.widget.SwitchCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
@@ -123,7 +123,7 @@
             android:textSize="16sp"
             android:text="@string/schedule_desc"/>
 
-        <Switch
+        <androidx.appcompat.widget.SwitchCompat
             android:text="@string/all_day"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -145,6 +145,7 @@
             android:textSize="16sp"
             android:paddingRight="18dp"
             android:paddingLeft="18dp"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -185,6 +186,7 @@
         </LinearLayout>
 
         <LinearLayout
+            style="?android:attr/buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="32dp"
             android:orientation="horizontal"
@@ -194,6 +196,7 @@
             android:layout_marginRight="16dp">
 
             <Button
+                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/button_sunday"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
@@ -206,6 +209,7 @@
                 android:textSize="16sp"/>
 
             <Button
+                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/button_monday"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
@@ -218,6 +222,7 @@
                 android:textSize="16sp"/>
 
             <Button
+                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/button_tuesday"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
@@ -230,6 +235,7 @@
                 android:textSize="16sp"/>
 
             <Button
+                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/button_wednesday"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
@@ -242,6 +248,7 @@
                 android:textSize="16sp"/>
 
             <Button
+                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/button_thursday"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
@@ -254,6 +261,7 @@
                 android:textSize="16sp"/>
 
             <Button
+                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/button_friday"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
@@ -266,6 +274,7 @@
                 android:textSize="16sp"/>
 
             <Button
+                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/button_saturday"
                 android:layout_width="32dp"
                 android:layout_height="32dp"

@@ -24,7 +24,7 @@ import android.os.Parcelable;
  */
 public class AppSelection implements Parcelable {
 
-    private String mAppPackageName;
+    private final String mAppPackageName;
     private String mAppName;
     private boolean mIsSelected;
     private String mFilterText;

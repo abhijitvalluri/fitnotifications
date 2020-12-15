@@ -55,9 +55,9 @@ class BasicMessageExtractor extends MessageExtractor {
     }
 
 
-    protected static boolean endsWith(CharSequence big, CharSequence small) {
-        return big != null && small != null && big.length() >= small.length()
-                && big.subSequence(big.length() - small.length(), big.length()).toString().contentEquals(small);
+    protected static boolean notEndsWith(CharSequence big, CharSequence small) {
+        return big == null || small == null || big.length() < small.length()
+                || !big.subSequence(big.length() - small.length(), big.length()).toString().contentEquals(small);
     }
 
 

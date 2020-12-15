@@ -18,6 +18,8 @@ package com.abhijitvalluri.android.fitnotifications;
 
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
@@ -29,7 +31,6 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
@@ -92,9 +93,9 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_settings);
 
-        Switch discardEmptySwitch;
-        Switch discardOngoingSwitch;
-        Switch allDaySwitch;
+        SwitchCompat discardEmptySwitch;
+        SwitchCompat discardOngoingSwitch;
+        SwitchCompat allDaySwitch;
         ImageButton filterTextInfo;
         TextView filterTextDescription;
 
@@ -102,9 +103,9 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         mStartTimeButton = (Button) findViewById(R.id.start_time);
         mStopTimeButton = (Button) findViewById(R.id.stop_time);
         mNextDay = (TextView) findViewById(R.id.next_day);
-        discardEmptySwitch = (Switch) findViewById(R.id.discard_empty);
-        discardOngoingSwitch = (Switch) findViewById(R.id.discard_ongoing);
-        allDaySwitch = (Switch) findViewById(R.id.all_day);
+        discardEmptySwitch = (SwitchCompat) findViewById(R.id.discard_empty);
+        discardOngoingSwitch = (SwitchCompat) findViewById(R.id.discard_ongoing);
+        allDaySwitch = (SwitchCompat) findViewById(R.id.all_day);
         filterTextInfo = findViewById(R.id.filter_text_info);
         filterTextDescription = findViewById(R.id.filter_text_desc);
 
@@ -135,6 +136,7 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
 
         if (savedInstanceState == null) {
             mAppSelection = getIntent().getParcelableExtra(APP_SELECTION_EXTRA);
+            assert mAppSelection != null; // Should always be true.
             mStartTimeHour = mAppSelection.getStartTimeHour();
             mStartTimeMinute = mAppSelection.getStartTimeMinute();
             mStopTimeHour = mAppSelection.getStopTimeHour();
@@ -414,13 +416,11 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

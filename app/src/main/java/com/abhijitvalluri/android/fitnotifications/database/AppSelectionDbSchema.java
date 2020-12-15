@@ -18,7 +18,6 @@ package com.abhijitvalluri.android.fitnotifications.database;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Database Schema to store the Fit Notification app's app selection choices.

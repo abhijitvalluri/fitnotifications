@@ -28,6 +28,7 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
@@ -63,7 +64,7 @@ public class NLService extends NotificationListenerService {
     private static final MessageExtractor sDefaultExtractor = new GenericMessageExtractor();
     private final Map<String, MessageExtractor> mMessageExtractors = new TreeMap<>();
 
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     private static List<String> mSelectedAppsPackageNames;
     private static boolean mIsServiceEnabled;
@@ -289,11 +290,11 @@ public class NLService extends NotificationListenerService {
         }
 
         if (mDebugLog.isEnabled()) {
-            mDebugLog.writeLog("Unfiltered and undiscarded");
+            mDebugLog.writeLog("Unfiltered and retained (not discarded)");
         }
 
         if (mLimitNotifications) {
-            Long currentTimeMillis = System.currentTimeMillis();
+            long currentTimeMillis = System.currentTimeMillis();
             Long lastNotificationTime = mLastNotificationTimeMap.get(appPackageName);
             if (lastNotificationTime != null && currentTimeMillis < lastNotificationTime + mNotifLimitDurationMillis) {
                 return;
@@ -325,7 +326,7 @@ public class NLService extends NotificationListenerService {
             mDebugLog.writeLog("Constructing notification");
         }
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL_ID_CURRENT);
         builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
                 .setContent(contentView)
                 .setContentTitle(notificationTitle)
@@ -335,11 +336,7 @@ public class NLService extends NotificationListenerService {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // prevent notification from appearing on the lock screen
-            builder.setVisibility(Notification.VISIBILITY_SECRET);
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder.setChannelId(Constants.NOTIFICATION_CHANNEL_ID_CURRENT);
+            builder.setVisibility(NotificationCompat.VISIBILITY_SECRET);
         }
 
         if (mSplitNotification && notificationText.length() > mFitbitNotifCharLimit) {
@@ -381,7 +378,6 @@ public class NLService extends NotificationListenerService {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         cancelNotification(sbn.getKey());
                     } else {
-                        //noinspection deprecation
                         cancelNotification(appPackageName, sbn.getTag(), sbn.getId());
                     }
                 }

@@ -67,11 +67,9 @@ public class AppSelectionsStore {
         mPackageToAppName = new HashMap<>();
         mSelectedAppsPackageNames = new ArrayList<>();
 
-        AppSelectionCursorWrapper cursor = queryAppSelections(null, null);
-
-        try {
+        try (AppSelectionCursorWrapper cursor = queryAppSelections(null, null)) {
             cursor.moveToFirst();
-            while(!cursor.isAfterLast()) {
+            while (!cursor.isAfterLast()) {
                 AppSelection appSelection = cursor.getAppSelection();
                 appSelections.add(appSelection);
                 mPackageToAppName.put(appSelection.getAppPackageName(), appSelection.getAppName());
@@ -80,8 +78,6 @@ public class AppSelectionsStore {
                 }
                 cursor.moveToNext();
             }
-        } finally {
-            cursor.close();
         }
 
         Collections.sort(appSelections, new Comparator<AppSelection>() {
@@ -125,19 +121,16 @@ public class AppSelectionsStore {
     }
 
     public AppSelection getAppSelection(String appPackageName) {
-        AppSelectionCursorWrapper cursor = queryAppSelections(
-                AppChoiceTable.Cols.APP_PACKAGE_NAME + " = ?",
-                new String[]{appPackageName});
 
-        try {
+        try (AppSelectionCursorWrapper cursor = queryAppSelections(
+                AppChoiceTable.Cols.APP_PACKAGE_NAME + " = ?",
+                new String[]{appPackageName})) {
             if (cursor.getCount() == 0) {
                 return null;
             }
 
             cursor.moveToFirst();
             return cursor.getAppSelection();
-        } finally {
-            cursor.close();
         }
     }
 

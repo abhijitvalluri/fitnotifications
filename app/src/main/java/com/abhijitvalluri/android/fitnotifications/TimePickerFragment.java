@@ -18,6 +18,7 @@ package com.abhijitvalluri.android.fitnotifications;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
@@ -31,8 +32,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TimePicker;
 import android.widget.Toast;
-
-import com.abhijitvalluri.android.fitnotifications.utils.Func;
 
 /**
  * TimePickerFragment hosts the time picker dialog.
@@ -52,38 +51,48 @@ public class TimePickerFragment extends DialogFragment {
     private TimePicker mTimePicker;
     private int mOtherHour;
     private int mOtherMinute;
-    private String mOtherTimeFormatted;
     private int mRequestCode;
+
+    private Context mContext;
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        mContext = context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mContext = null;
+    }
 
     @Override
     @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        assert getArguments() != null; // Should never be null if created via newInstance
         int hour = getArguments().getInt(ARG_HOUR);
         int minute = getArguments().getInt(ARG_MINUTE);
         mOtherHour = getArguments().getInt(ARG_OTHER_HOUR);
         mOtherMinute = getArguments().getInt(ARG_OTHER_MINUTE);
-        mOtherTimeFormatted = DateFormat.getTimeFormat(getActivity()).format(
-                Func.convertHourMinute2Date(mOtherHour, mOtherMinute));
         mRequestCode = getArguments().getInt(ARG_REQUEST_CODE);
 
-        View v = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_time, null);
+        View v = LayoutInflater.from(mContext).inflate(R.layout.dialog_time, null);
 
         mTimePicker = (TimePicker) v.findViewById(R.id.dialog_time_time_picker);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             mTimePicker.setHour(hour);
             mTimePicker.setMinute(minute);
         } else {
-            //noinspection deprecation
             mTimePicker.setCurrentHour(hour);
-            //noinspection deprecation
             mTimePicker.setCurrentMinute(minute);
         }
-        mTimePicker.setIs24HourView(DateFormat.is24HourFormat(getActivity()));
+        mTimePicker.setIs24HourView(DateFormat.is24HourFormat(mContext));
 
         @StringRes int titleStringId = mRequestCode == AppSettingsActivity.START_TIME_REQUEST ?
                 R.string.start_time_heading : R.string.stop_time_heading;
 
-        final AlertDialog dialog = new AlertDialog.Builder(getActivity())
+        final AlertDialog dialog = new AlertDialog.Builder(mContext)
                 .setView(v)
                 .setTitle(titleStringId)
                 .setNegativeButton(android.R.string.cancel, null)
@@ -95,9 +104,7 @@ public class TimePickerFragment extends DialogFragment {
                             hour = mTimePicker.getHour();
                             minute = mTimePicker.getMinute();
                         } else {
-                            //noinspection deprecation
                             hour = mTimePicker.getCurrentHour();
-                            //noinspection deprecation
                             minute = mTimePicker.getCurrentMinute();
                         }
                         sendResult(mRequestCode, hour, minute);
@@ -113,9 +120,7 @@ public class TimePickerFragment extends DialogFragment {
                     hour = mTimePicker.getHour();
                     minute = mTimePicker.getMinute();
                 } else {
-                    //noinspection deprecation
                     hour = mTimePicker.getCurrentHour();
-                    //noinspection deprecation
                     minute = mTimePicker.getCurrentMinute();
                 }
                 Button positiveButton = ((AlertDialog)dialog).getButton(DialogInterface.BUTTON_POSITIVE);
@@ -147,7 +152,7 @@ public class TimePickerFragment extends DialogFragment {
             } else {
                 errToast = getString(R.string.stop_time_error);
             }
-            Toast.makeText(getContext(), errToast, Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, errToast, Toast.LENGTH_SHORT).show();
         } else {
             positiveButton.setEnabled(true);
         }
@@ -158,7 +163,7 @@ public class TimePickerFragment extends DialogFragment {
         intent.putExtra(EXTRA_HOUR, hour);
         intent.putExtra(EXTRA_MINUTE, minute);
 
-        TimePickerListener listener = (TimePickerListener) getContext();
+        TimePickerListener listener = (TimePickerListener) mContext;
         listener.onActivityResult2(requestCode, intent);
     }
 

@@ -35,8 +35,8 @@ import java.util.HashMap;
 public class AppSelectionDbHelper extends SQLiteOpenHelper {
     private static final int VERSION = 7;
     private static final String DATABASE_NAME = "fitNotificationAppSelection.db";
-    private HashMap<String, String> mDbAlterCommands;
-    private Context mContext;
+    private final HashMap<String, String> mDbAlterCommands;
+    private final Context mContext;
 
     public AppSelectionDbHelper(Context context) {
         super(context, DATABASE_NAME, null, VERSION);

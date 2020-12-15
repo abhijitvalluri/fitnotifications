@@ -25,7 +25,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackground"
-                android:clickable="true"
                 android:textColor="@color/material_grey900"/>
         </LinearLayout>
 
@@ -45,7 +44,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackground"
-                android:clickable="true"
                 android:textColor="@color/material_grey900"/>
         </LinearLayout>
 
@@ -128,7 +126,7 @@
 
 
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/enableLogSwitch"
         android:text="@string/enable_logging"
         android:textSize="18sp"

@@ -30,6 +30,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import androidx.core.app.NotificationManagerCompat;
@@ -110,9 +111,9 @@ public class AppIntroActivity extends IntroActivity {
     private void addEnableNotificationAccessSlide() {
         Set<String> EnabledListenerPackagesSet = NotificationManagerCompat.
                 getEnabledListenerPackages(this);
+        CustomSlideFragment fragment = new CustomSlideFragment();
         if (EnabledListenerPackagesSet.contains(Constants.PACKAGE_NAME)
                 && EnabledListenerPackagesSet.contains(Constants.FITBIT_PACKAGE_NAME)) {
-            CustomSlideFragment fragment = new CustomSlideFragment();
             fragment.setCanGoForward(true)
                     .setCanGoBackward(true)
                     .setTitleText(R.string.intro_enable_access_success_title)
@@ -125,7 +126,6 @@ public class AppIntroActivity extends IntroActivity {
                     .backgroundDark(R.color.purpleDark_intro)
                     .build();
         } else {
-            CustomSlideFragment fragment = new CustomSlideFragment();
             fragment.setCanGoForward(false)
                     .setCanGoBackward(true)
                     .setTitleText(R.string.intro_enable_access_title)
@@ -163,7 +163,7 @@ public class AppIntroActivity extends IntroActivity {
         final int placeholderNotifDismissDelayMillis = preferences.getInt(
                 getString(R.string.placeholder_dismiss_delay_key), Constants.DEFAULT_DELAY_SECONDS)
                 *1000;
-        final Handler handler = new Handler();
+        final Handler handler = new Handler(Looper.getMainLooper());
 
         // Demo
         addSlide(new SimpleSlide.Builder()
@@ -179,29 +179,21 @@ public class AppIntroActivity extends IntroActivity {
                     public void onClick(View v) {
                         Bundle newExtra = new Bundle();
 
-                        NotificationCompat.Builder builder = new NotificationCompat.Builder(AppIntroActivity.this);
+                        NotificationCompat.Builder builder = new NotificationCompat.Builder(AppIntroActivity.this, Constants.NOTIFICATION_CHANNEL_ID_CURRENT);
                         String notificationText = "Sample notification subject";
                         String notificationBigText = "Sample notification body. This is where the details of the notification will be shown.";
 
 
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("[").append("example").append("] ");
-                        sb.append(notificationText);
-                        if (notificationBigText.length() > 0) {
-                            sb.append(" -- ").append(notificationBigText);
-                        }
-
                         RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.custom_notification);
                         contentView.setTextViewText(R.id.customNotificationText, getString(R.string.placeholder_notification_text));
+                        String content = "[" + "example" + "] " +
+                                notificationText +
+                                " -- " + notificationBigText;
                         builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
-                                .setContentText(sb.toString())
+                                .setContentText(content)
                                 .setExtras(newExtra)
                                 .setContentTitle("Sample Notification Title")
                                 .setContent(contentView);
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            builder.setChannelId(Constants.NOTIFICATION_CHANNEL_ID_CURRENT);
-                        }
 
                         // Creates an explicit intent for the SettingsActivity in the app
                         Intent settingsIntent = new Intent(AppIntroActivity.this, SettingsActivity.class);
@@ -389,7 +381,8 @@ public class AppIntroActivity extends IntroActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch(requestCode) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
             case ENABLE_NOTIFICATION_ACCESS_INTENT: {
                 Set<String> EnabledListenerPackagesSet = NotificationManagerCompat.
                         getEnabledListenerPackages(this);

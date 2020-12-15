@@ -238,7 +238,7 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
         StringBuilder sb = new StringBuilder();
         for (; 0 <= pos && pos < lines.length; pos += step) {
             CharSequence message = senderPrefixPresent ? stripSender(lines[pos]) : lines[pos];
-            if (!matchesAnyPattern(message, mPhotoMessagePatterns) || !endsWith(sb, message)) {
+            if (!matchesAnyPattern(message, mPhotoMessagePatterns) || notEndsWith(sb, message)) {
                 if (sb.length() > 0) {
                     sb.append(' ');
                 }
@@ -274,7 +274,7 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
             }
 
             CharSequence message = stripSender(lines[pos]);
-            if (!matchesAnyPattern(message, mPhotoMessagePatterns) || !endsWith(senderMessages, message)) {
+            if (!matchesAnyPattern(message, mPhotoMessagePatterns) || notEndsWith(senderMessages, message)) {
                 senderMessages.append(' ').append(message);
             }
         }

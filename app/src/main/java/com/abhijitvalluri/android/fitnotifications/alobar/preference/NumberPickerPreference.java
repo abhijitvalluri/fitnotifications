@@ -52,8 +52,8 @@ public class NumberPickerPreference extends DialogPreference {
     private final boolean wrapSelectorWheel;
 
     private NumberPicker picker;
-    private TextView beforeTV, afterTV;
-    private String beforeText, afterText;
+    private final String beforeText;
+    private final String afterText;
     private int value;
 
     public NumberPickerPreference(Context context, AttributeSet attrs) {
@@ -81,14 +81,14 @@ public class NumberPickerPreference extends DialogPreference {
         picker = new NumberPicker(getContext());
         picker.setLayoutParams(layoutParams);
 
-        beforeTV = new TextView(getContext());
+        TextView beforeTV = new TextView(getContext());
         beforeTV.setText(beforeText);
         beforeTV.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18.0f);
         beforeTV.setPadding(0,20,0,0);
         beforeTV.setGravity(Gravity.END);
         beforeTV.setTypeface(Typeface.DEFAULT_BOLD);
 
-        afterTV = new TextView(getContext());
+        TextView afterTV = new TextView(getContext());
         afterTV.setText(afterText);
         afterTV.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18.0f);
         afterTV.setPadding(0,0,0,20);

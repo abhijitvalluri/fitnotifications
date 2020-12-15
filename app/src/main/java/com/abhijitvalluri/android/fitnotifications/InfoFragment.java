@@ -17,6 +17,8 @@
 package com.abhijitvalluri.android.fitnotifications;
 
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,19 +40,23 @@ public class InfoFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_info, container, false);
 
-        String webViewHtml = getArguments().getString(WEBVIEW_HTML);
         mWebView = (WebView) v.findViewById(R.id.infoActivityWV);
 
-        mWebView.loadDataWithBaseURL(null, webViewHtml, "text/html", "utf-8", null);
+        if (getArguments() != null) {
+            String webViewHtml = getArguments().getString(WEBVIEW_HTML);
+            if (webViewHtml != null) {
+                mWebView.loadDataWithBaseURL(null, webViewHtml, "text/html", "utf-8", null);
+            }
+        }
 
         return v;
     }
 
-    public void updateWebViewContent(String webViewHtml) {
+    public void updateWebViewContent(@NonNull String webViewHtml) {
         mWebView.loadDataWithBaseURL(null, webViewHtml, "text/html", "utf-8", null);
     }
 
-    public static Fragment newInstance(String webViewHtml) {
+    public static Fragment newInstance(@NonNull String webViewHtml) {
         Fragment frag = new InfoFragment();
         Bundle b = new Bundle();
         b.putString(WEBVIEW_HTML, webViewHtml);

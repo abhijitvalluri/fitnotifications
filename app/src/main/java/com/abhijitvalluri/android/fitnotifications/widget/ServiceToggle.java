@@ -59,7 +59,7 @@ public class ServiceToggle extends AppWidgetProvider {
 
             views.setOnClickPendingIntent(
                                     R.id.widgetToggleButton,
-                                    getPendingSelfIntent(context, appWidgetId, TOGGLE_CLICKED));
+                                    getPendingSelfIntent(context, appWidgetId));
 
             // Tell the AppWidgetManager to perform an update on the current app widget
             appWidgetManager.updateAppWidget(appWidgetId, views);
@@ -92,16 +92,16 @@ public class ServiceToggle extends AppWidgetProvider {
 
             views.setOnClickPendingIntent(
                     R.id.widgetToggleButton,
-                    getPendingSelfIntent(context, 0, TOGGLE_CLICKED));
+                    getPendingSelfIntent(context, 0));
 
             ComponentName componentName = new ComponentName(context, ServiceToggle.class);
             appWidgetManager.updateAppWidget(componentName, views);
         }
     }
 
-    private PendingIntent getPendingSelfIntent(Context context, int appWidgetId, String action) {
+    private PendingIntent getPendingSelfIntent(Context context, int appWidgetId) {
         Intent intent = new Intent(context, getClass());
-        intent.setAction(action);
+        intent.setAction(ServiceToggle.TOGGLE_CLICKED);
         return PendingIntent.getBroadcast(context, appWidgetId, intent, 0);
     }
 }

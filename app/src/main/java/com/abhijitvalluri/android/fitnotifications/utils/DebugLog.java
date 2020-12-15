@@ -14,6 +14,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by Abhijit Valluri on 6/14/2017.
@@ -30,11 +31,12 @@ public class DebugLog {
     public static final int STATUS_IO_EXCEPTION = -2;
 
 
-    private File mLogFile;
+    private final File mLogFile;
+    private final DateFormat mDateFormat;
+
     private FileOutputStream mLog;
     private int mFileStatus;
     private int mWriteStatus;
-    private DateFormat mDateFormat;
     private boolean mEnabled;
 
 
@@ -49,7 +51,7 @@ public class DebugLog {
         mLogFile = new File(context.getExternalFilesDir(null), LOG_FILENAME);
         mFileStatus = STATUS_UNINITIALIZED;
         mWriteStatus = STATUS_UNINITIALIZED;
-        mDateFormat  = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        mDateFormat  = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
     }
 
     public int getFileStatus() {
@@ -106,7 +108,7 @@ public class DebugLog {
         return mWriteStatus;
     }
 
-    public int writeLog(String string) {
+    public void writeLog(String string) {
         if (mFileStatus == STATUS_LOG_OPENED) {
             try {
                 if (mLogFile.length() >= Math.pow(10, 7)) {
@@ -117,7 +119,7 @@ public class DebugLog {
             } catch (SecurityException e) {
                 Log.e(LOG_FILENAME, "Unable to reset Fit Notifications Log: " + e.getMessage());
                 mWriteStatus = STATUS_IO_EXCEPTION;
-                return mWriteStatus;
+                return;
             }
 
             try {
@@ -130,11 +132,7 @@ public class DebugLog {
                 Log.e(LOG_FILENAME, "Unable to write to Fit Notifications Log: " + e.getMessage());
                 mWriteStatus = STATUS_IO_EXCEPTION;
             }
-
-            return mWriteStatus;
         }
-
-        return mFileStatus;
     }
 
     private int deInit() {

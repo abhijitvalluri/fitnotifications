@@ -14,7 +14,7 @@ import java.util.Map;
  */
 class GenericMessageExtractor extends BasicMessageExtractor {
 
-    private Map<String, String> mNotificationStringMap = new HashMap<>();
+    private final Map<String, String> mNotificationStringMap = new HashMap<>();
 
 
     @Override

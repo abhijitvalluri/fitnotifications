@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -59,7 +60,7 @@ public class TranslitUtil {
         SortedSet<SymbolReplacement> replacements = new TreeSet<>();
 
         // load the symbols and their replacements
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.length() == 0 || line.charAt(0) == '#' || line.trim().length() == 0) {
@@ -84,15 +85,15 @@ public class TranslitUtil {
             Log.e(TAG, "Error loading transliteration replacements", e);
         }
 
-        try { is.close(); } catch (IOException e) { }
+        try { is.close(); } catch (IOException ignored) { }
 
         return replacements;
     }
 
 
     private static class SymbolReplacement implements Comparable<SymbolReplacement> {
-        private int symbol;
-        private String replacement;
+        private final int symbol;
+        private final String replacement;
 
 
         public SymbolReplacement(int symbol, String replacement) {

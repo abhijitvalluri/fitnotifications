@@ -35,5 +35,4 @@ public class Constants {
     public static final String NOTIFICATION_CHANNEL_ID_005 = "fitNotifications_channel_005";
     public static final String NOTIFICATION_CHANNEL_ID_007 = "fitNotifications_channel_007";
     public static final String NOTIFICATION_CHANNEL_ID_CURRENT = "fitNotifications_channel_009";
-    public static final Date TODAY = new Date();
 }

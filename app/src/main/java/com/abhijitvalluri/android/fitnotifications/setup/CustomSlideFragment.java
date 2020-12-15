@@ -16,8 +16,10 @@
 
 package com.abhijitvalluri.android.fitnotifications.setup;
 
+import android.content.Context;
 import android.os.Bundle;
 import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 import android.view.LayoutInflater;
@@ -44,6 +46,20 @@ public class CustomSlideFragment extends SlideFragment {
     private int mTitleResId;
     private int mDescResId;
     private int mImageResId;
+
+    private Context mContext;
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        mContext = context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mContext = null;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -80,13 +96,13 @@ public class CustomSlideFragment extends SlideFragment {
 
         if (mTitleResId != 0) {
             mTitleTV.setText(mTitleResId);
-            mTitleTV.setTextColor(ContextCompat.getColor(this.getContext(),
+            mTitleTV.setTextColor(ContextCompat.getColor(mContext,
                     com.heinrichreimersoftware.materialintro.R.color.mi_text_color_primary_dark));
         }
 
         if (mDescResId != 0) {
             mDescriptionTV.setText(mDescResId);
-            mDescriptionTV.setTextColor(ContextCompat.getColor(this.getContext(),
+            mDescriptionTV.setTextColor(ContextCompat.getColor(mContext,
                     com.heinrichreimersoftware.materialintro.R.color.mi_text_color_secondary_dark));
         }
     }

@@ -16,6 +16,7 @@
 
 package com.abhijitvalluri.android.fitnotifications;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -29,10 +30,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
@@ -46,7 +50,6 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,7 +68,7 @@ import java.util.Set;
  */
 public class HomeFragment extends Fragment {
 
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     public static final String STATE_IS_DONATE_BANNER = "donateBanner";
 
@@ -79,7 +82,7 @@ public class HomeFragment extends Fragment {
     private TextView mNotificationAccessTV;
     private TextView mServiceStateTV;
     private TextView mBannerTV;
-    private Switch mEnableLogs;
+    private SwitchCompat mEnableLogs;
     private Button mSendLogs;
     private TextView mLogStatus;
 
@@ -88,6 +91,18 @@ public class HomeFragment extends Fragment {
 
     private Bundle LAUNCH_ACTIVITY_ANIM_BUNDLE;
     private Context mContext;
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        mContext = context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mContext = null;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -106,11 +121,10 @@ public class HomeFragment extends Fragment {
         mNotificationAccessTV = (TextView) v.findViewById(R.id.notificationAccessTV);
         mServiceStateTV = (TextView) v.findViewById(R.id.serviceStateText);
         mBannerTV = (TextView) v.findViewById(R.id.rate_app);
-        mEnableLogs = (Switch) v.findViewById(R.id.enableLogSwitch);
+        mEnableLogs = (SwitchCompat) v.findViewById(R.id.enableLogSwitch);
         mSendLogs = (Button) v.findViewById(R.id.sendLogsButton);
         mLogStatus = (TextView) v.findViewById(R.id.logStatus);
 
-        mContext = getContext();
         mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         if (!mIsDonateBanner && Math.random() < 0.5) {
             mIsDonateBanner = true;
@@ -154,7 +168,7 @@ public class HomeFragment extends Fragment {
                 int status = isChecked ? log.enable() : log.disable();
                 updateLogStatus(status);
                 if (isChecked) {
-                    new AlertDialog.Builder(getActivity())
+                    new AlertDialog.Builder(mContext)
                             .setTitle("Warning: Storage Usage!")
                             .setMessage("Please note that enabling logging will use storage space on your phone. We will limit log file size to 10 MB.\n\n" +
                                     "If you enable logging for too long, then old log contents will be over-written to stay within the 10 MB file size limit. " +
@@ -168,7 +182,7 @@ public class HomeFragment extends Fragment {
         mSendLogs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new AlertDialog.Builder(getActivity())
+                new AlertDialog.Builder(mContext)
                         .setTitle("Send logs to developer?")
                         .setMessage("If you send logs to the developer now, the app will stop collecting logs immediately and send whatever logs are present. It will then delete the logs from your phone. Do you want to proceed?")
                         .setPositiveButton("SEND", new DialogInterface.OnClickListener() {
@@ -217,20 +231,21 @@ public class HomeFragment extends Fragment {
         return v;
     }
 
+    @SuppressLint("SetTextI18n")
     private void sendDebugLogEmail(final StringBuilder body) {
-        final LinearLayout layout = new LinearLayout(getContext());
+        final LinearLayout layout = new LinearLayout(mContext);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(32,16,32,16);
 
 
-        final TextView title = new TextView(getContext());
+        final TextView title = new TextView(mContext);
         title.setText("Explain the problem below:");
         title.setTextSize(18);
-        final EditText input = new EditText(getContext());
+        final EditText input = new EditText(mContext);
         layout.addView(title);
         layout.addView(input);
 
-        final AlertDialog dialog = new AlertDialog.Builder(getContext())
+        final AlertDialog dialog = new AlertDialog.Builder(mContext)
                 .setTitle("Send Logs: Step 1")
                 .setView(layout)
                 .setPositiveButton(android.R.string.ok, null)
@@ -250,13 +265,13 @@ public class HomeFragment extends Fragment {
                         String issue = input.getText().toString();
                         issue = issue.trim();
                         if (issue.isEmpty()) {
-                            Toast.makeText(getContext(), "You must describe the problem you are facing to proceed!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mContext, "You must describe the problem you are facing to proceed!", Toast.LENGTH_SHORT).show();
                         } else {
                             body.insert(0, "\n\n------\n\n");
                             body.insert(0, issue);
 
                             DebugLog log = DebugLog.get(getActivity());
-                            startActivity(log.emailLogIntent(getContext(), body.toString()));
+                            startActivity(log.emailLogIntent(mContext, body.toString()));
 
                             mEnableLogs.setChecked(false);
                             dialog.dismiss();
@@ -269,6 +284,7 @@ public class HomeFragment extends Fragment {
         dialog.show();
     }
 
+    @SuppressLint("SetTextI18n")
     private void updateLogStatus(int status) {
         switch (status) {
             case DebugLog.STATUS_LOG_OPENED:
@@ -379,28 +395,18 @@ public class HomeFragment extends Fragment {
             public void onClick(View v) {
                 Bundle newExtra = new Bundle();
 
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext, Constants.NOTIFICATION_CHANNEL_ID_CURRENT);
                 String notificationText = "Sample notification subject";
                 String notificationBigText = "Sample notification body. This is where the details of the notification will be shown.";
 
-                StringBuilder sb = new StringBuilder();
-                sb.append("[").append("example").append("] ");
-                sb.append(notificationText);
-                if (notificationBigText.length() > 0) {
-                    sb.append(" -- ").append(notificationBigText);
-                }
-
                 RemoteViews contentView = new RemoteViews(mContext.getPackageName(), R.layout.custom_notification);
                 contentView.setTextViewText(R.id.customNotificationText, getString(R.string.placeholder_notification_text));
+                String content = "[" + "example" + "] " + notificationText + " -- " + notificationBigText;
                 builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
-                        .setContentText(sb.toString())
+                        .setContentText(content)
                         .setExtras(newExtra)
                         .setContentTitle("Sample Notification Title")
                         .setContent(contentView);
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    builder.setChannelId(Constants.NOTIFICATION_CHANNEL_ID_CURRENT);
-                }
 
                 // Creates an explicit intent for the SettingsActivity in the app
                 Intent settingsIntent = new Intent(mContext, SettingsActivity.class);
@@ -442,7 +448,7 @@ public class HomeFragment extends Fragment {
 
     private void updateNotificationAccessText() {
         Set<String> EnabledListenerPackagesSet = NotificationManagerCompat.
-                getEnabledListenerPackages(getContext());
+                getEnabledListenerPackages(mContext);
         if (EnabledListenerPackagesSet.contains(Constants.PACKAGE_NAME)
                 && EnabledListenerPackagesSet.contains(Constants.FITBIT_PACKAGE_NAME)) {
             mNotificationAccessTV.setText(getString(R.string.notification_access_disable_textView));
@@ -452,11 +458,11 @@ public class HomeFragment extends Fragment {
     }
 
     private void updateWidget() {
-        Intent i = new Intent(getActivity(), ServiceToggle.class);
+        Intent i = new Intent(mContext, ServiceToggle.class);
         i.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-        int[] ids = AppWidgetManager.getInstance(getContext()).getAppWidgetIds(new ComponentName(getContext(), ServiceToggle.class));
+        int[] ids = AppWidgetManager.getInstance(mContext).getAppWidgetIds(new ComponentName(mContext, ServiceToggle.class));
         i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
-        getActivity().sendBroadcast(i);
+        mContext.sendBroadcast(i);
     }
 
     private void initializeServiceButtons() {
@@ -465,7 +471,7 @@ public class HomeFragment extends Fragment {
         if(serviceEnabled) {
             mServiceButton.setText(R.string.turn_off_service);
             mServiceStateTV.setText(R.string.service_on);
-            mServiceStateTV.setTextColor(ContextCompat.getColor(getContext(), R.color.brightGreen));
+            mServiceStateTV.setTextColor(ContextCompat.getColor(mContext, R.color.brightGreen));
             mServiceButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -479,7 +485,7 @@ public class HomeFragment extends Fragment {
         } else {
             mServiceButton.setText(R.string.turn_on_service);
             mServiceStateTV.setText(R.string.service_off);
-            mServiceStateTV.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+            mServiceStateTV.setTextColor(ContextCompat.getColor(mContext, R.color.red));
             mServiceButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

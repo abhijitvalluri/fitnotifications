@@ -16,6 +16,7 @@
 
 package com.abhijitvalluri.android.fitnotifications;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.NotificationChannel;
@@ -106,7 +107,7 @@ public class HomeActivity extends AppCompatActivity {
         if (mPreferences.getInt(getString(R.string.version_key), 0) < Constants.VERSION_CODE
                 && mPreferences.getBoolean(getString(R.string.done_first_launch_key), false)) {
             // App has been updated
-            // TODO: For version 2.9.18 - Update Android SDK to latest version & work on improved schedule feature
+            // TODO: May be work on improved schedule feature
 
             mPreferences.edit().putInt(getString(R.string.version_key), Constants.VERSION_CODE).apply();
 
@@ -125,6 +126,7 @@ public class HomeActivity extends AppCompatActivity {
 
             // Open the database to update it in case the version is incremented.
             AppSelectionsStore store = AppSelectionsStore.get(this);
+            Log.i("FitNotificationInfo", "Checking db in case version is incremented: " + store.toString());
         }
 
         if (!mPreferences.getBoolean(getString(R.string.done_first_launch_key), false)) { // This is the first launch
@@ -256,6 +258,7 @@ public class HomeActivity extends AppCompatActivity {
         return i;
     }
 
+    @SuppressLint("NonConstantResourceId")
     private void selectDrawerItem(MenuItem menuItem) {
         // Create a new fragment and specify the fragment to show based on nav item clicked
         final Fragment frag;
@@ -363,7 +366,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         // Pass any configuration change to the drawer toggles
         mDrawerToggle.onConfigurationChanged(newConfig);
@@ -377,52 +380,46 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
 
-        switch (item.getItemId()) {
-            case R.id.menu_main_settings:
-                startActivity(SettingsActivity.newIntent(this), LAUNCH_ACTIVITY_ANIM_BUNDLE);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.menu_main_settings) {
+            startActivity(SettingsActivity.newIntent(this), LAUNCH_ACTIVITY_ANIM_BUNDLE);
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case APP_INTRO_FIRST_LAUNCH_INTENT:
-                if (resultCode == Activity.RESULT_OK) {
-                    mPreferences.edit().putBoolean(getString(R.string.done_first_launch_key), true).apply();
-                } else {
-                    new AlertDialog.Builder(HomeActivity.this)
-                            .setMessage(getString(R.string.setup_incomplete))
-                            .setTitle(getString(R.string.setup_incomplete_title))
-                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    startActivityForResult(new Intent(HomeActivity.this, AppIntroActivity.class), APP_INTRO_FIRST_LAUNCH_INTENT, LAUNCH_ACTIVITY_ANIM_BUNDLE);
-                                }
-                            })
-                            .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    mPreferences.edit().putBoolean(getString(R.string.done_first_launch_key), true).apply();
-                                    Toast.makeText(HomeActivity.this, R.string.setup_incomplete_cancel, Toast.LENGTH_LONG).show();
-                                }
-                            })
-                            .create()
-                            .show();
-                }
-                return;
-            default:
-        }
-
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == APP_INTRO_FIRST_LAUNCH_INTENT) {
+            if (resultCode == Activity.RESULT_OK) {
+                mPreferences.edit().putBoolean(getString(R.string.done_first_launch_key), true).apply();
+            } else {
+                new AlertDialog.Builder(HomeActivity.this)
+                        .setMessage(getString(R.string.setup_incomplete))
+                        .setTitle(getString(R.string.setup_incomplete_title))
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                startActivityForResult(new Intent(HomeActivity.this, AppIntroActivity.class), APP_INTRO_FIRST_LAUNCH_INTENT, LAUNCH_ACTIVITY_ANIM_BUNDLE);
+                            }
+                        })
+                        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mPreferences.edit().putBoolean(getString(R.string.done_first_launch_key), true).apply();
+                                Toast.makeText(HomeActivity.this, R.string.setup_incomplete_cancel, Toast.LENGTH_LONG).show();
+                            }
+                        })
+                        .create()
+                        .show();
+            }
+        }
     }
 
     private class SmoothDrawerToggle extends ActionBarDrawerToggle {

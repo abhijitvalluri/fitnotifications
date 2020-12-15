@@ -27,7 +27,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
-import androidx.core.view.MenuItemCompat;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -116,7 +117,6 @@ public class AppChoicesActivity extends AppCompatActivity {
 
         if (savedInstanceState != null && getSetupStatus(savedInstanceState)) {
             mAppSelections = savedInstanceState.getParcelableArrayList(STATE_APP_SELECTIONS);
-            Parcelable listState = savedInstanceState.getParcelable(STATE_RECYCLER_VIEW);
 
             if (mShowOnlyEnabledApps) {
                 List<AppSelection> appSelectionsSubList = new ArrayList<>();
@@ -131,7 +131,11 @@ public class AppChoicesActivity extends AppCompatActivity {
                 mAdapter = new ActivityAdapter(mAppSelections);
             }
             mRecyclerView.setAdapter(mAdapter);
-            mRecyclerView.getLayoutManager().onRestoreInstanceState(listState);
+
+            Parcelable listState = savedInstanceState.getParcelable(STATE_RECYCLER_VIEW);
+            if (listState != null && mRecyclerView.getLayoutManager() != null) {
+                mRecyclerView.getLayoutManager().onRestoreInstanceState(listState);
+            }
             mSetupComplete = getSetupStatus(savedInstanceState);
 
             DebugLog log = DebugLog.get(getApplicationContext());
@@ -155,8 +159,10 @@ public class AppChoicesActivity extends AppCompatActivity {
     public void onSaveInstanceState(Bundle savedInstanceState) {
         savedInstanceState.putParcelableArrayList(STATE_APP_SELECTIONS, mAppSelections);
         savedInstanceState.putBoolean(STATE_SETUP_COMPLETE, mSetupComplete);
-        Parcelable listState = mRecyclerView.getLayoutManager().onSaveInstanceState();
-        savedInstanceState.putParcelable(STATE_RECYCLER_VIEW, listState);
+        if (mRecyclerView.getLayoutManager() != null) {
+            Parcelable listState = mRecyclerView.getLayoutManager().onSaveInstanceState();
+            savedInstanceState.putParcelable(STATE_RECYCLER_VIEW, listState);
+        }
 
         super.onSaveInstanceState(savedInstanceState);
     }
@@ -168,7 +174,7 @@ public class AppChoicesActivity extends AppCompatActivity {
         MenuItem searchItem = menu.findItem(R.id.menu_app_search);
         MenuItem filterEnabledAppsItem = menu.findItem(R.id.menu_filter_enabled);
 
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setQueryHint(getString(R.string.search_query_hint));
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -207,19 +213,19 @@ public class AppChoicesActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            case R.id.menu_filter_enabled:
-                mShowOnlyEnabledApps = !mShowOnlyEnabledApps; // toggles the state of the filter
-                mPreferences.edit().putBoolean(getString(R.string.show_enabled_apps_key), mShowOnlyEnabledApps).apply();
-                item.setChecked(mShowOnlyEnabledApps);
-                recyclerViewShowEnabled();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            onBackPressed();
+            return true;
+        } else if (id == R.id.menu_filter_enabled) {
+            mShowOnlyEnabledApps = !mShowOnlyEnabledApps; // toggles the state of the filter
+            mPreferences.edit().putBoolean(getString(R.string.show_enabled_apps_key), mShowOnlyEnabledApps).apply();
+            item.setChecked(mShowOnlyEnabledApps);
+            recyclerViewShowEnabled();
+            return true;
         }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -236,19 +242,15 @@ public class AppChoicesActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case APP_SELECTIONS_REQUEST:
-                if (resultCode == RESULT_OK) {
-                    AppSelection appSelection = data.getParcelableExtra(
-                            AppSettingsActivity.APP_SELECTION_EXTRA);
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == APP_SELECTIONS_REQUEST && resultCode == RESULT_OK) {
+            AppSelection appSelection = data.getParcelableExtra(
+                    AppSettingsActivity.APP_SELECTION_EXTRA);
 
-                    if (appSelection != null) {
-                        mAppSelectionsStore.updateAppSelection(appSelection);
-                        updateAppSelections(appSelection);
-                    }
-                }
-                break;
-            default:
+            if (appSelection != null) {
+                mAppSelectionsStore.updateAppSelection(appSelection);
+                updateAppSelections(appSelection);
+            }
         }
     }
 
@@ -432,11 +434,11 @@ public class AppChoicesActivity extends AppCompatActivity {
 
     private class ActivityHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
+        private final TextView mAppNameTB;
+        private final ImageView mImageView;
+        private final CheckBox mAppSelectCB;
+
         private AppSelection mAppSelection;
-        private TextView mAppNameTB;
-        private ImageView mImageView;
-        private ImageButton mSettingsIB;
-        private CheckBox mAppSelectCB;
 
         public ActivityHolder(View itemView) {
             super(itemView);
@@ -444,10 +446,10 @@ public class AppChoicesActivity extends AppCompatActivity {
             mAppNameTB = (TextView) itemView.findViewById(R.id.appNameTextBox);
             mAppSelectCB = (CheckBox) itemView.findViewById(R.id.appSelectCheckBox);
             mImageView = (ImageView) itemView.findViewById(R.id.appIconImageView);
-            mSettingsIB = (ImageButton) itemView.findViewById(R.id.appSettingsIcon);
+            ImageButton settingsIB = (ImageButton) itemView.findViewById(R.id.appSettingsIcon);
 
             mAppSelectCB.setOnClickListener(this);
-            mSettingsIB.setOnClickListener(new View.OnClickListener() {
+            settingsIB.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(getApplicationContext(), AppSettingsActivity.class);
@@ -493,8 +495,9 @@ public class AppChoicesActivity extends AppCompatActivity {
             mAppSelectionsSubList = appSelectionsSubList;
         }
 
+        @NonNull
         @Override
-        public ActivityHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public ActivityHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(AppChoicesActivity.this);
             View view = inflater.inflate(R.layout.app_select_list_item, parent, false);
             return new ActivityHolder(view);
