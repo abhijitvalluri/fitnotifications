@@ -400,7 +400,7 @@ public class HomeFragment extends Fragment {
                 String notificationBigText = "Sample notification body. This is where the details of the notification will be shown.";
 
                 RemoteViews contentView = new RemoteViews(mContext.getPackageName(), R.layout.custom_notification);
-                contentView.setTextViewText(R.id.customNotificationText, getString(R.string.placeholder_notification_text));
+                contentView.setTextViewText(R.id.customNotificationText, getString(R.string.notification_text));
                 String content = "[" + "example" + "] " + notificationText + " -- " + notificationBigText;
                 builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
                         .setContentText(content)

@@ -107,17 +107,13 @@ public class HomeActivity extends AppCompatActivity {
         if (mPreferences.getInt(getString(R.string.version_key), 0) < Constants.VERSION_CODE
                 && mPreferences.getBoolean(getString(R.string.done_first_launch_key), false)) {
             // App has been updated
-            // TODO: May be work on improved schedule feature
 
             mPreferences.edit().putInt(getString(R.string.version_key), Constants.VERSION_CODE).apply();
 
-            if (mPreferences.getInt(getString(R.string.placeholder_dismiss_delay_key), 0) < Constants.DEFAULT_DELAY_SECONDS) {
-                // Set default Dismiss Placeholder notification delay to 7. Low delays can cause
-                // problems with relaying notifications.
-                mPreferences.edit()
-                            .putInt(getString(R.string.placeholder_dismiss_delay_key),
-                                    Constants.DEFAULT_DELAY_SECONDS).apply();
-            }
+            // Disable dismiss placeholder notification setting because it makes the notification disappear
+            // on the Fitbit device when the notification is dismissed on the phone.
+            mPreferences.edit()
+                    .putBoolean(getString(R.string.dismiss_placeholder_notif_key), false).apply();
 
             navDrawer.setCheckedItem(R.id.nav_whats_new);
             setTitle(R.string.whats_new);

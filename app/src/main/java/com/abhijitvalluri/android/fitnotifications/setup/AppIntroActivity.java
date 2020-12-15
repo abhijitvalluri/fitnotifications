@@ -185,7 +185,7 @@ public class AppIntroActivity extends IntroActivity {
 
 
                         RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.custom_notification);
-                        contentView.setTextViewText(R.id.customNotificationText, getString(R.string.placeholder_notification_text));
+                        contentView.setTextViewText(R.id.customNotificationText, getString(R.string.notification_text));
                         String content = "[" + "example" + "] " +
                                 notificationText +
                                 " -- " + notificationBigText;

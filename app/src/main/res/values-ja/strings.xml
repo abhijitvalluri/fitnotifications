@@ -18,8 +18,7 @@
     <string name="feedback_step1_message">以下に内容を記述してください</string>
     <string name="no_feedback_message">内容を記述してください</string>
     <string name="select_send_feedback_app">ステップ2：送信するアプリの選択</string>
-    <string name="placeholder_notification_text">[プレースホルダ通知] クリックすると自動非表示を有効にできます</string>
-    <string name="notification_text">[プレースホルダ通知]クリックすると自動非表示を有効にできます。中継した通知を自動非表示にすることもできます</string>
+    <string name="notification_text">[プレースホルダ通知]このための自動非表示設定を有効にすると、Fitbitデバイスから通知が削除される場合もあります</string>
     <string name="test_notification">テスト通知</string>
     <string name="test_notification_sent">テスト通知を送信しました</string>
     <string name="notification_access_enable_textView">通知アクセスの有効化</string>

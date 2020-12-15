@@ -8,7 +8,7 @@
             android:title="@string/dismiss_placeholder_notif"
             android:summary="@string/dismiss_placeholder_notif_summary"
             android:key="@string/dismiss_placeholder_notif_key"
-            android:defaultValue="true" />
+            android:defaultValue="false" />
         <com.abhijitvalluri.android.fitnotifications.alobar.preference.NumberPickerPreference
             android:title="@string/placeholder_dismiss_delay"
             android:key="@string/placeholder_dismiss_delay_key"
