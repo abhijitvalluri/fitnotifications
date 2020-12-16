@@ -38,7 +38,7 @@ import androidx.core.app.NotificationCompat;
 import android.widget.RemoteViews;
 
 import com.abhijitvalluri.android.fitnotifications.R;
-import com.abhijitvalluri.android.fitnotifications.SettingsActivity;
+import com.abhijitvalluri.android.fitnotifications.settings.SettingsActivity;
 import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
 import com.abhijitvalluri.android.fitnotifications.utils.AppSelectionsStore;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;

@@ -1,26 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory
+    <androidx.preference.PreferenceCategory
         android:title="@string/placeholder_notif_settings">
         <SwitchPreference
             android:title="@string/dismiss_placeholder_notif"
             android:summary="@string/dismiss_placeholder_notif_summary"
             android:key="@string/dismiss_placeholder_notif_key"
             android:defaultValue="false" />
-        <com.abhijitvalluri.android.fitnotifications.alobar.preference.NumberPickerPreference
+        <com.abhijitvalluri.android.fitnotifications.settings.NumberPickerPreference
             android:title="@string/placeholder_dismiss_delay"
             android:key="@string/placeholder_dismiss_delay_key"
             android:defaultValue="7"
             app:minValue="5"
             app:maxValue="60"
             app:beforeText="@string/dismiss_after"
-            app:afterText="@string/seconds"
-            app:wrapSelectorWheel="false" />
-    </PreferenceCategory>
+            app:afterText="@string/seconds" />
+    </androidx.preference.PreferenceCategory>
 
-    <PreferenceCategory
+    <androidx.preference.PreferenceCategory
         android:title="@string/relayed_notif_settings">
         <SwitchPreference
             android:title="@string/dismiss_relayed_notif"
@@ -28,18 +27,17 @@
             android:key="@string/dismiss_relayed_notif_key"
             android:defaultValue="false" />
 
-        <com.abhijitvalluri.android.fitnotifications.alobar.preference.NumberPickerPreference
+        <com.abhijitvalluri.android.fitnotifications.settings.NumberPickerPreference
             android:title="@string/relayed_dismiss_delay"
             android:key="@string/relayed_dismiss_delay_key"
             android:defaultValue="1"
             app:minValue="1"
             app:maxValue="60"
             app:beforeText="@string/dismiss_after"
-            app:afterText="@string/seconds"
-            app:wrapSelectorWheel="false" />
-    </PreferenceCategory>
+            app:afterText="@string/seconds" />
+    </androidx.preference.PreferenceCategory>
 
-    <PreferenceCategory
+    <androidx.preference.PreferenceCategory
         android:title="@string/limit_notif_settings">
         <SwitchPreference
             android:title="@string/limit_notif"
@@ -47,27 +45,26 @@
             android:key="@string/limit_notif_key"
             android:defaultValue="false" />
 
-        <com.abhijitvalluri.android.fitnotifications.alobar.preference.NumberPickerPreference
+        <com.abhijitvalluri.android.fitnotifications.settings.NumberPickerPreference
             android:title="@string/notif_limit_duration"
             android:key="@string/notif_limit_duration_key"
             android:defaultValue="1"
             app:minValue="1"
             app:maxValue="60"
             app:beforeText="@string/one_notification"
-            app:afterText="@string/seconds"
-            app:wrapSelectorWheel="false" />
-    </PreferenceCategory>
+            app:afterText="@string/seconds" />
+    </androidx.preference.PreferenceCategory>
 
-    <PreferenceCategory
+    <androidx.preference.PreferenceCategory
         android:title="@string/dnd_settings">
         <SwitchPreference
             android:title="@string/forward_priority_only_notifications_title"
             android:summary="@string/forward_priority_only_notifications_summary"
             android:key="@string/forward_priority_only_notifications_key"
             android:defaultValue="false" />
-    </PreferenceCategory>
+    </androidx.preference.PreferenceCategory>
 
-    <PreferenceCategory
+    <androidx.preference.PreferenceCategory
         android:title="@string/notification_service_settings">
         <SwitchPreference
             android:title="@string/disable_forward_screen_on_title"
@@ -93,24 +90,22 @@
             android:key="@string/split_notification_key"
             android:defaultValue="false" />
 
-        <com.abhijitvalluri.android.fitnotifications.alobar.preference.NumberPickerPreference
+        <com.abhijitvalluri.android.fitnotifications.settings.NumberPickerPreference
             android:title="@string/notification_text_limit_title"
             android:key="@string/notification_text_limit_key"
             android:defaultValue="100"
             app:minValue="10"
             app:maxValue="500"
             app:beforeText="@string/notification_text_limit_before"
-            app:afterText="@string/notification_text_limit_after"
-            app:wrapSelectorWheel="false" />
+            app:afterText="@string/notification_text_limit_after" />
 
-        <com.abhijitvalluri.android.fitnotifications.alobar.preference.NumberPickerPreference
+        <com.abhijitvalluri.android.fitnotifications.settings.NumberPickerPreference
             android:title="@string/num_split_notifications_title"
             android:key="@string/num_split_notifications_key"
             android:defaultValue="3"
             app:minValue="1"
             app:maxValue="7"
             app:beforeText="@string/num_split_notifications_before"
-            app:afterText="@string/num_split_notifications_after"
-            app:wrapSelectorWheel="false" />
-    </PreferenceCategory>
-</PreferenceScreen>
+            app:afterText="@string/num_split_notifications_after" />
+    </androidx.preference.PreferenceCategory>
+</androidx.preference.PreferenceScreen>

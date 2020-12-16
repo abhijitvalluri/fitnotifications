@@ -45,8 +45,9 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:2.24.5'
 
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.preference:preference:1.1.1'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'com.heinrichreimersoftware:material-intro:2.0.0' // TODO: ABHI: Check if this should be updated
     implementation 'com.google.android.material:material:1.2.1'
 }

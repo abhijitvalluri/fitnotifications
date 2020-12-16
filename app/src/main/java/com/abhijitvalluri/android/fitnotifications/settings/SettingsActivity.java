@@ -14,21 +14,29 @@
    limitations under the License.
 */
 
-package com.abhijitvalluri.android.fitnotifications;
+package com.abhijitvalluri.android.fitnotifications.settings;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
 import android.preference.PreferenceManager;
 import androidx.annotation.PluralsRes;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.MenuItem;
 
+import com.abhijitvalluri.android.fitnotifications.HomeFragment;
+import com.abhijitvalluri.android.fitnotifications.R;
 import com.abhijitvalluri.android.fitnotifications.services.NLService;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
+
+import java.util.Objects;
 
 /**
  * This is the main settings activity to store the various settings in the SharedPreferences
@@ -43,26 +51,59 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getFragmentManager().beginTransaction()
+        getSupportFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new SettingsFragment())
                 .commit();
 
     }
 
-    //
-    public static class SettingsFragment extends PreferenceFragment
+    public static class SettingsFragment extends PreferenceFragmentCompat
     implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+        private static final String DIALOG_FRAGMENT_TAG = "NumberPickerPreferenceDialog";
         private SharedPreferences mPreferences;
+
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            setPreferencesFromResource(R.xml.main_settings, rootKey);
+        }
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            addPreferencesFromResource(R.xml.main_settings);
             mPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        }
 
-            // Initialize delay summaries
+        @Override
+        public void onResume() {
+            super.onResume();
+            mPreferences.registerOnSharedPreferenceChangeListener(this);
+            initializePreferenceSummaries();
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            mPreferences.unregisterOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onDisplayPreferenceDialog(Preference preference) {
+            if (getParentFragmentManager().findFragmentByTag(DIALOG_FRAGMENT_TAG) != null) {
+                return;
+            }
+
+            if (preference instanceof NumberPickerPreference) {
+                final DialogFragment dialog = ((NumberPickerPreference) preference).createDialog(preference.getKey());
+                dialog.setTargetFragment(this, 0);
+                dialog.show(getParentFragmentManager(), DIALOG_FRAGMENT_TAG);
+            } else {
+                super.onDisplayPreferenceDialog(preference);
+            }
+        }
+
+        private void initializePreferenceSummaries() {
             String key = getString(R.string.placeholder_dismiss_delay_key);
             boolean prefValue = mPreferences.getBoolean(getString(R.string.dismiss_placeholder_notif_key), false);
             updateSummaryWithPlurals(key,
@@ -86,30 +127,30 @@ public class SettingsActivity extends AppCompatActivity {
                     R.plurals.notif_limit_duration_summary,
                     R.string.notif_limit_duration_summary0,
                     prefValue);
-            findPreference(key).setEnabled(prefValue);
+            requirePreference(key).setEnabled(prefValue);
 
             key = getString(R.string.disable_forward_screen_on_key);
             updateDisableWhenScreenOnSummary(key,
-                                             mPreferences.getBoolean(key, false));
+                    mPreferences.getBoolean(key, false));
 
             key = getString(R.string.transliterate_notification_key);
             updateTransliterateNotificationSummary(key,
-                                                   mPreferences.getBoolean(key, true));
+                    mPreferences.getBoolean(key, true));
 
             prefValue = mPreferences.getBoolean(getString(R.string.split_notification_key), false);
             key = getString(R.string.notification_text_limit_key);
             updateSummaryWithPlurals(key,
-                                     mPreferences.getInt(key, Constants.DEFAULT_NOTIF_CHAR_LIMIT),
-                                     R.plurals.notification_text_limit_summary_enabled,
-                                     R.string.notification_text_limit_summary_disabled,
-                                     prefValue);
+                    mPreferences.getInt(key, Constants.DEFAULT_NOTIF_CHAR_LIMIT),
+                    R.plurals.notification_text_limit_summary_enabled,
+                    R.string.notification_text_limit_summary_disabled,
+                    prefValue);
 
             key = getString(R.string.num_split_notifications_key);
             updateSummaryWithPlurals(key,
-                                     mPreferences.getInt(key, Constants.DEFAULT_NUM_NOTIF),
-                                     R.plurals.num_split_notifications_summary_enabled,
-                                     R.string.num_split_notifications_summary_disabled,
-                                     prefValue);
+                    mPreferences.getInt(key, Constants.DEFAULT_NUM_NOTIF),
+                    R.plurals.num_split_notifications_summary_enabled,
+                    R.string.num_split_notifications_summary_disabled,
+                    prefValue);
 
             key = getString(R.string.display_app_name_key);
             updateDisplayAppNameSummary(key, mPreferences.getBoolean(key, true));
@@ -117,25 +158,25 @@ public class SettingsActivity extends AppCompatActivity {
 
         private void updateDisplayAppNameSummary(String summaryKey, boolean enable) {
             if (enable) {
-                findPreference(summaryKey).setSummary(getResources().getString(R.string.display_app_name_summary_enabled));
+                requirePreference(summaryKey).setSummary(getResources().getString(R.string.display_app_name_summary_enabled));
             } else {
-                findPreference(summaryKey).setSummary(getResources().getString(R.string.display_app_name_summary_disabled));
+                requirePreference(summaryKey).setSummary(getResources().getString(R.string.display_app_name_summary_disabled));
             }
         }
 
         private void updateTransliterateNotificationSummary(String summaryKey, boolean enable) {
             if (enable) {
-                findPreference(summaryKey).setSummary(getResources().getString(R.string.transliterate_notification_summary_enabled));
+                requirePreference(summaryKey).setSummary(getResources().getString(R.string.transliterate_notification_summary_enabled));
             } else {
-                findPreference(summaryKey).setSummary(getResources().getString(R.string.transliterate_notification_summary_disabled));
+                requirePreference(summaryKey).setSummary(getResources().getString(R.string.transliterate_notification_summary_disabled));
             }
         }
 
         private void updateDisableWhenScreenOnSummary(String summaryKey, boolean disable) {
             if (disable) {
-                findPreference(summaryKey).setSummary(getResources().getString(R.string.disable_forward_screen_on_summary));
+                requirePreference(summaryKey).setSummary(getResources().getString(R.string.disable_forward_screen_on_summary));
             } else {
-                findPreference(summaryKey).setSummary(getResources().getString(R.string.enable_forward_screen_on_summary));
+                requirePreference(summaryKey).setSummary(getResources().getString(R.string.enable_forward_screen_on_summary));
             }
         }
 
@@ -145,13 +186,17 @@ public class SettingsActivity extends AppCompatActivity {
                                               @StringRes int stringId,
                                               boolean enabled) {
             if (enabled) {
-                findPreference(summaryKey).setSummary(getResources()
+                requirePreference(summaryKey).setSummary(getResources()
                         .getQuantityString(pluralsId, value, value));
             } else {
-                findPreference(summaryKey).setSummary(getString(stringId));
+                requirePreference(summaryKey).setSummary(getString(stringId));
             }
 
-            findPreference(summaryKey).setEnabled(enabled);
+            requirePreference(summaryKey).setEnabled(enabled);
+        }
+
+        private <T extends Preference> T requirePreference(@NonNull CharSequence key) {
+            return Objects.requireNonNull(findPreference(key));
         }
 
         @Override
@@ -241,18 +286,6 @@ public class SettingsActivity extends AppCompatActivity {
                 boolean forwardOnlyPriorityNotifs = mPreferences.getBoolean(key, false);
                 NLService.onForwardOnlyPriorityNotifSettingUpdated(forwardOnlyPriorityNotifs);
             }
-        }
-
-        @Override
-        public void onResume() {
-            super.onResume();
-            mPreferences.registerOnSharedPreferenceChangeListener(this);
-        }
-
-        @Override
-        public void onPause() {
-            super.onPause();
-            mPreferences.unregisterOnSharedPreferenceChangeListener(this);
         }
     }
 

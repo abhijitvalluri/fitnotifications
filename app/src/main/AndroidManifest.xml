@@ -49,9 +49,10 @@
             android:screenOrientation="portrait"
             android:theme="@style/IntroTheme"/>
         <activity
-            android:name=".SettingsActivity"
+            android:name=".settings.SettingsActivity"
             android:label="@string/settings_menu"
-            android:parentActivityName=".HomeActivity"/>
+            android:parentActivityName=".HomeActivity"
+            android:theme="@style/AppTheme"/>
         <activity
             android:name=".AppSettingsActivity"
             android:parentActivityName=".AppChoicesActivity"/>

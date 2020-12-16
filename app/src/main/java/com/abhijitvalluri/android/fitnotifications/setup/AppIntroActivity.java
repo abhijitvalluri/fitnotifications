@@ -40,7 +40,7 @@ import android.widget.Toast;
 
 import com.abhijitvalluri.android.fitnotifications.AppChoicesActivity;
 import com.abhijitvalluri.android.fitnotifications.R;
-import com.abhijitvalluri.android.fitnotifications.SettingsActivity;
+import com.abhijitvalluri.android.fitnotifications.settings.SettingsActivity;
 import com.abhijitvalluri.android.fitnotifications.services.NLService;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
 import com.abhijitvalluri.android.fitnotifications.utils.Func;
