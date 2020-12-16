@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-package com.abhijitvalluri.android.fitnotifications;
+package com.abhijitvalluri.android.fitnotifications.home;
 
 import android.os.Bundle;
 
@@ -24,6 +24,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+
+import com.abhijitvalluri.android.fitnotifications.R;
 
 /**
  * Fragment that holds the information for the various pages navigated to from the side drawer

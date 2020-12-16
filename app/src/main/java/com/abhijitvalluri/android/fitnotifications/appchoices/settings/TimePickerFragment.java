@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-package com.abhijitvalluri.android.fitnotifications;
+package com.abhijitvalluri.android.fitnotifications.appchoices.settings;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -32,6 +32,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TimePicker;
 import android.widget.Toast;
+
+import com.abhijitvalluri.android.fitnotifications.R;
 
 /**
  * TimePickerFragment hosts the time picker dialog.

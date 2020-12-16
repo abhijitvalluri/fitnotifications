@@ -38,7 +38,7 @@ import androidx.core.app.NotificationCompat;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
-import com.abhijitvalluri.android.fitnotifications.AppChoicesActivity;
+import com.abhijitvalluri.android.fitnotifications.appchoices.AppChoicesActivity;
 import com.abhijitvalluri.android.fitnotifications.R;
 import com.abhijitvalluri.android.fitnotifications.settings.SettingsActivity;
 import com.abhijitvalluri.android.fitnotifications.services.NLService;

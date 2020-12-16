@@ -20,7 +20,7 @@ import android.database.Cursor;
 import android.database.CursorWrapper;
 
 import com.abhijitvalluri.android.fitnotifications.database.AppSelectionDbSchema.AppChoiceTable;
-import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
+import com.abhijitvalluri.android.fitnotifications.appchoices.models.AppSelection;
 
 /**
  * A wrapper for the cursor class to make accessing data from the database more convenient.

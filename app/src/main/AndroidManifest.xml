@@ -12,7 +12,8 @@
         android:label="@string/app_name"
         android:resizeableActivity="false"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:targetApi="n">
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -24,7 +25,7 @@
         </provider>
 
         <activity
-            android:name=".HomeActivity"
+            android:name=".home.HomeActivity"
             android:theme="@style/HomeTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -41,9 +42,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AppChoicesActivity"
+            android:name=".appchoices.AppChoicesActivity"
             android:label="@string/app_choices_activity_title"
-            android:parentActivityName=".HomeActivity"/>
+            android:parentActivityName=".home.HomeActivity"/>
         <activity
             android:name=".setup.AppIntroActivity"
             android:screenOrientation="portrait"
@@ -51,11 +52,11 @@
         <activity
             android:name=".settings.SettingsActivity"
             android:label="@string/settings_menu"
-            android:parentActivityName=".HomeActivity"
+            android:parentActivityName=".home.HomeActivity"
             android:theme="@style/AppTheme"/>
         <activity
-            android:name=".AppSettingsActivity"
-            android:parentActivityName=".AppChoicesActivity"/>
+            android:name=".appchoices.settings.AppSettingsActivity"
+            android:parentActivityName=".appchoices.AppChoicesActivity"/>
 
         <service
             android:name=".services.NLService"

@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-package com.abhijitvalluri.android.fitnotifications;
+package com.abhijitvalluri.android.fitnotifications.home;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -32,6 +32,7 @@ import android.preference.PreferenceManager;
 
 import androidx.annotation.NonNull;
 
+import com.abhijitvalluri.android.fitnotifications.R;
 import com.abhijitvalluri.android.fitnotifications.settings.SettingsActivity;
 import com.google.android.material.navigation.NavigationView;
 import androidx.fragment.app.Fragment;
@@ -53,7 +54,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.abhijitvalluri.android.fitnotifications.setup.AppIntroActivity;
-import com.abhijitvalluri.android.fitnotifications.utils.AppSelectionsStore;
+import com.abhijitvalluri.android.fitnotifications.appchoices.store.AppSelectionsStore;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
 
 

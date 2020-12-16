@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-package com.abhijitvalluri.android.fitnotifications;
+package com.abhijitvalluri.android.fitnotifications.appchoices.settings;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -32,7 +32,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
+import com.abhijitvalluri.android.fitnotifications.R;
+import com.abhijitvalluri.android.fitnotifications.appchoices.models.AppSelection;
 import com.abhijitvalluri.android.fitnotifications.utils.Func;
 
 /**

@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-package com.abhijitvalluri.android.fitnotifications.models;
+package com.abhijitvalluri.android.fitnotifications.appchoices.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;

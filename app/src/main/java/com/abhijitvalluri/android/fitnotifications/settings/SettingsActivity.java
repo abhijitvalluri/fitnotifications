@@ -31,7 +31,7 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.MenuItem;
 
-import com.abhijitvalluri.android.fitnotifications.HomeFragment;
+import com.abhijitvalluri.android.fitnotifications.home.HomeFragment;
 import com.abhijitvalluri.android.fitnotifications.R;
 import com.abhijitvalluri.android.fitnotifications.services.NLService;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;

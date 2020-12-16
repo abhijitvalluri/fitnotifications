@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-package com.abhijitvalluri.android.fitnotifications;
+package com.abhijitvalluri.android.fitnotifications.appchoices;
 
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -47,9 +47,11 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.abhijitvalluri.android.fitnotifications.models.AppSelection;
+import com.abhijitvalluri.android.fitnotifications.R;
+import com.abhijitvalluri.android.fitnotifications.appchoices.models.AppSelection;
+import com.abhijitvalluri.android.fitnotifications.appchoices.settings.AppSettingsActivity;
+import com.abhijitvalluri.android.fitnotifications.appchoices.store.AppSelectionsStore;
 import com.abhijitvalluri.android.fitnotifications.services.NLService;
-import com.abhijitvalluri.android.fitnotifications.utils.AppSelectionsStore;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
 import com.abhijitvalluri.android.fitnotifications.utils.DebugLog;
 import com.abhijitvalluri.android.fitnotifications.utils.Func;
