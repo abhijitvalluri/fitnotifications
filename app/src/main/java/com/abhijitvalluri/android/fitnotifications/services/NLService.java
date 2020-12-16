@@ -344,42 +344,24 @@ public class NLService extends NotificationListenerService {
             for (int i = 0; i < slices.size(); i++) {
                 builder.setContentText(slices.get(i));
                 final Notification notif = builder.build();
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mNotificationManager.notify(NOTIFICATION_ID, notif);
-                    }
-                }, 500 * (i + 1));
+                mHandler.postDelayed(() -> mNotificationManager.notify(NOTIFICATION_ID, notif), 500 * (i + 1));
             }
         } else { // Do not split the notification
             builder.setContentText(notificationText);
             final Notification notif = builder.build();
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mNotificationManager.notify(NOTIFICATION_ID, notif);
-                }
-            }, 500);
+            mHandler.postDelayed(() -> mNotificationManager.notify(NOTIFICATION_ID, notif), 500);
         }
 
         if (mDismissPlaceholderNotif) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mNotificationManager.cancel(NOTIFICATION_ID);
-                }
-            }, mPlaceholderNotifDismissDelayMillis);
+            mHandler.postDelayed(() -> mNotificationManager.cancel(NOTIFICATION_ID), mPlaceholderNotifDismissDelayMillis);
         }
 
         if (mDismissRelayedNotif) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        cancelNotification(sbn.getKey());
-                    } else {
-                        cancelNotification(appPackageName, sbn.getTag(), sbn.getId());
-                    }
+            mHandler.postDelayed(() -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    cancelNotification(sbn.getKey());
+                } else {
+                    cancelNotification(appPackageName, sbn.getTag(), sbn.getId());
                 }
             }, mRelayedNotifDismissDelayMillis);
         }

@@ -28,7 +28,6 @@ import android.text.format.DateFormat;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -109,19 +108,9 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         filterTextInfo = findViewById(R.id.filter_text_info);
         filterTextDescription = findViewById(R.id.filter_text_desc);
 
-        filterTextInfo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showFilterTextInstructions();
-            }
-        });
+        filterTextInfo.setOnClickListener(v -> showFilterTextInstructions());
 
-        filterTextDescription.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showFilterTextInstructions();
-            }
-        });
+        filterTextDescription.setOnClickListener(v -> showFilterTextInstructions());
 
         mFilterText.setHorizontallyScrolling(false);
         mFilterText.setMaxLines(5);
@@ -167,52 +156,33 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
         setupWeekdayButtons();
         setupWeekdayButtonsOnClickListeners();
 
-        discardEmptySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mDiscardEmptyNotifications = isChecked;
-            }
+        discardEmptySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> mDiscardEmptyNotifications = isChecked);
+
+        discardOngoingSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> mDiscardOngoingNotifications = isChecked);
+
+        mStartTimeButton.setOnClickListener(v -> {
+            FragmentManager manager = getSupportFragmentManager();
+            TimePickerFragment dialog = TimePickerFragment.newInstance(mStartTimeHour,
+                                                                       mStartTimeMinute,
+                                                                       mStopTimeHour,
+                                                                       mStopTimeMinute,
+                                                                       START_TIME_REQUEST);
+            dialog.show(manager, DIALOG_TIME);
         });
 
-        discardOngoingSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mDiscardOngoingNotifications = isChecked;
-            }
+        mStopTimeButton.setOnClickListener(v -> {
+            FragmentManager manager = getSupportFragmentManager();
+            TimePickerFragment dialog = TimePickerFragment.newInstance(mStopTimeHour,
+                                                                       mStopTimeMinute,
+                                                                       mStartTimeHour,
+                                                                       mStartTimeMinute,
+                                                                       STOP_TIME_REQUEST);
+            dialog.show(manager, DIALOG_TIME);
         });
 
-        mStartTimeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager manager = getSupportFragmentManager();
-                TimePickerFragment dialog = TimePickerFragment.newInstance(mStartTimeHour,
-                                                                           mStartTimeMinute,
-                                                                           mStopTimeHour,
-                                                                           mStopTimeMinute,
-                                                                           START_TIME_REQUEST);
-                dialog.show(manager, DIALOG_TIME);
-            }
-        });
-
-        mStopTimeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager manager = getSupportFragmentManager();
-                TimePickerFragment dialog = TimePickerFragment.newInstance(mStopTimeHour,
-                                                                           mStopTimeMinute,
-                                                                           mStartTimeHour,
-                                                                           mStartTimeMinute,
-                                                                           STOP_TIME_REQUEST);
-                dialog.show(manager, DIALOG_TIME);
-            }
-        });
-
-        allDaySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mAllDaySchedule = isChecked;
-                setupScheduleSettings();
-            }
+        allDaySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mAllDaySchedule = isChecked;
+            setupScheduleSettings();
         });
     }
 
@@ -226,94 +196,73 @@ public class AppSettingsActivity extends AppCompatActivity implements TimePicker
     }
 
     private void setupWeekdayButtonsOnClickListeners() {
-        mSundayBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if ((mDaysOfWeek & SUNDAY) > 0) { // This means Sunday was already selected. Now, turn it off.
-                    mDaysOfWeek &= ~SUNDAY;
-                    mSundayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
-                } else { // AppSettingsActivity.this means Sunday was already off. Now, turn it on.
-                    mDaysOfWeek |= SUNDAY;
-                    mSundayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
-                }
+        mSundayBtn.setOnClickListener(v -> {
+            if ((mDaysOfWeek & SUNDAY) > 0) { // This means Sunday was already selected. Now, turn it off.
+                mDaysOfWeek &= ~SUNDAY;
+                mSundayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
+            } else { // AppSettingsActivity.this means Sunday was already off. Now, turn it on.
+                mDaysOfWeek |= SUNDAY;
+                mSundayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
             }
         });
 
-        mMondayBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if ((mDaysOfWeek & MONDAY) > 0) {
-                    mDaysOfWeek &= ~MONDAY;
-                    mMondayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
-                } else {
-                    mDaysOfWeek |= MONDAY;
-                    mMondayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
-                }
+        mMondayBtn.setOnClickListener(v -> {
+            if ((mDaysOfWeek & MONDAY) > 0) {
+                mDaysOfWeek &= ~MONDAY;
+                mMondayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
+            } else {
+                mDaysOfWeek |= MONDAY;
+                mMondayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
             }
         });
 
-        mTuesdayBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if ((mDaysOfWeek & TUESDAY) > 0) {
-                    mDaysOfWeek &= ~TUESDAY;
-                    mTuesdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
-                } else {
-                    mDaysOfWeek |= TUESDAY;
-                    mTuesdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
-                }
+        mTuesdayBtn.setOnClickListener(v -> {
+            if ((mDaysOfWeek & TUESDAY) > 0) {
+                mDaysOfWeek &= ~TUESDAY;
+                mTuesdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
+            } else {
+                mDaysOfWeek |= TUESDAY;
+                mTuesdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
             }
         });
 
-        mWednesdayBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if ((mDaysOfWeek & WEDNESDAY) > 0) {
-                    mDaysOfWeek &= ~WEDNESDAY;
-                    mWednesdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
-                } else {
-                    mDaysOfWeek |= WEDNESDAY;
-                    mWednesdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
-                }
+        mWednesdayBtn.setOnClickListener(v -> {
+            if ((mDaysOfWeek & WEDNESDAY) > 0) {
+                mDaysOfWeek &= ~WEDNESDAY;
+                mWednesdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
+            } else {
+                mDaysOfWeek |= WEDNESDAY;
+                mWednesdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
             }
         });
 
-        mThursdayBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if ((mDaysOfWeek & THURSDAY) > 0) {
-                    mDaysOfWeek &= ~THURSDAY;
-                    mThursdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
-                } else {
-                    mDaysOfWeek |= THURSDAY;
-                    mThursdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
-                }
+        mThursdayBtn.setOnClickListener(v -> {
+            if ((mDaysOfWeek & THURSDAY) > 0) {
+                mDaysOfWeek &= ~THURSDAY;
+                mThursdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
+            } else {
+                mDaysOfWeek |= THURSDAY;
+                mThursdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
             }
         });
 
-        mFridayBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if ((mDaysOfWeek & FRIDAY) > 0) {
-                    mDaysOfWeek &= ~FRIDAY;
-                    mFridayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
-                } else {
-                    mDaysOfWeek |= FRIDAY;
-                    mFridayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
-                }
+        mFridayBtn.setOnClickListener(v -> {
+            if ((mDaysOfWeek & FRIDAY) > 0) {
+                mDaysOfWeek &= ~FRIDAY;
+                mFridayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
+            } else {
+                mDaysOfWeek |= FRIDAY;
+                mFridayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
             }
         });
 
-        mSaturdayBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if ((mDaysOfWeek & SATURDAY) > 0) {
-                    mDaysOfWeek &= ~SATURDAY;
-                    mSaturdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
-                } else {
-                    mDaysOfWeek |= SATURDAY;
-                    mSaturdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
-                }
+        mSaturdayBtn.setOnClickListener(v -> {
+            if ((mDaysOfWeek & SATURDAY) > 0) {
+                mDaysOfWeek &= ~SATURDAY;
+                mSaturdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_inactive));
+            } else {
+                mDaysOfWeek |= SATURDAY;
+                mSaturdayBtn.setBackground(ContextCompat.getDrawable(AppSettingsActivity.this, R.drawable.button_bg_round_active));
             }
         });
 

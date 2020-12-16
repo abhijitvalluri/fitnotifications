@@ -117,9 +117,8 @@ public class CustomSlideFragment extends SlideFragment {
         return this;
     }
 
-    public CustomSlideFragment setImage(@DrawableRes int resId) {
+    public void setImage(@DrawableRes int resId) {
         mImageResId = resId;
-        return this;
     }
 
     public CustomSlideFragment setTitleText(@StringRes int resId) {

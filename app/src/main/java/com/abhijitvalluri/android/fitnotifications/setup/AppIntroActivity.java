@@ -22,7 +22,6 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -36,7 +35,6 @@ import android.provider.Settings;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.NotificationCompat;
-import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -87,12 +85,7 @@ public class AppIntroActivity extends IntroActivity {
                 .backgroundDark(R.color.colorPrimaryDark)
                 .canGoBackward(true)
                 .buttonCtaLabel(R.string.intro_get_started_button)
-                .buttonCtaClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        nextSlide();
-                    }
-                })
+                .buttonCtaClickListener(v -> nextSlide())
                 .build());
     }
 
@@ -137,17 +130,14 @@ public class AppIntroActivity extends IntroActivity {
                     .background(R.color.purple_intro)
                     .backgroundDark(R.color.purpleDark_intro)
                     .buttonCtaLabel(R.string.enable_notification_access)
-                    .buttonCtaClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Set<String> EnabledListenerPackagesSet = NotificationManagerCompat.
-                                    getEnabledListenerPackages(AppIntroActivity.this);
-                            if (!EnabledListenerPackagesSet.contains(Constants.PACKAGE_NAME)
-                                    || !EnabledListenerPackagesSet.contains(Constants.FITBIT_PACKAGE_NAME)) {
-                                startActivityForResult(
-                                        new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"),
-                                        ENABLE_NOTIFICATION_ACCESS_INTENT);
-                            }
+                    .buttonCtaClickListener(v -> {
+                        Set<String> EnabledListenerPackagesSet1 = NotificationManagerCompat.
+                                getEnabledListenerPackages(AppIntroActivity.this);
+                        if (!EnabledListenerPackagesSet1.contains(Constants.PACKAGE_NAME)
+                                || !EnabledListenerPackagesSet1.contains(Constants.FITBIT_PACKAGE_NAME)) {
+                            startActivityForResult(
+                                    new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"),
+                                    ENABLE_NOTIFICATION_ACCESS_INTENT);
                         }
                     })
                     .build();
@@ -174,61 +164,53 @@ public class AppIntroActivity extends IntroActivity {
                 .background(R.color.colorAccent)
                 .backgroundDark(R.color.colorAccentDark)
                 .buttonCtaLabel(R.string.test_notification)
-                .buttonCtaClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Bundle newExtra = new Bundle();
+                .buttonCtaClickListener(v -> {
+                    Bundle newExtra = new Bundle();
 
-                        NotificationCompat.Builder builder = new NotificationCompat.Builder(AppIntroActivity.this, Constants.NOTIFICATION_CHANNEL_ID_CURRENT);
-                        String notificationText = "Sample notification subject";
-                        String notificationBigText = "Sample notification body. This is where the details of the notification will be shown.";
+                    NotificationCompat.Builder builder = new NotificationCompat.Builder(AppIntroActivity.this, Constants.NOTIFICATION_CHANNEL_ID_CURRENT);
+                    String notificationText = "Sample notification subject";
+                    String notificationBigText = "Sample notification body. This is where the details of the notification will be shown.";
 
 
-                        RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.custom_notification);
-                        contentView.setTextViewText(R.id.customNotificationText, getString(R.string.notification_text));
-                        String content = "[" + "example" + "] " +
-                                notificationText +
-                                " -- " + notificationBigText;
-                        builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
-                                .setContentText(content)
-                                .setExtras(newExtra)
-                                .setContentTitle("Sample Notification Title")
-                                .setContent(contentView);
+                    RemoteViews contentView = new RemoteViews(getPackageName(), R.layout.custom_notification);
+                    contentView.setTextViewText(R.id.customNotificationText, getString(R.string.notification_text));
+                    String content = "[" + "example" + "] " +
+                            notificationText +
+                            " -- " + notificationBigText;
+                    builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
+                            .setContentText(content)
+                            .setExtras(newExtra)
+                            .setContentTitle("Sample Notification Title")
+                            .setContent(contentView);
 
-                        // Creates an explicit intent for the SettingsActivity in the app
-                        Intent settingsIntent = new Intent(AppIntroActivity.this, SettingsActivity.class);
+                    // Creates an explicit intent for the SettingsActivity in the app
+                    Intent settingsIntent = new Intent(AppIntroActivity.this, SettingsActivity.class);
 
-                        // The stack builder object will contain an artificial back stack for the
-                        // started Activity.
-                        // This ensures that navigating backward from the Activity leads out of
-                        // the application to the Home screen.
-                        TaskStackBuilder stackBuilder = TaskStackBuilder.create(AppIntroActivity.this);
-                        // Adds the back stack for the Intent (but not the Intent itself)
-                        stackBuilder.addParentStack(SettingsActivity.class);
-                        // Adds the Intent that starts the Activity to the top of the stack
-                        stackBuilder.addNextIntent(settingsIntent);
-                        PendingIntent settingsPendingIntent =
-                                stackBuilder.getPendingIntent(
-                                        0,
-                                        PendingIntent.FLAG_UPDATE_CURRENT
-                                );
-                        builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
+                    // The stack builder object will contain an artificial back stack for the
+                    // started Activity.
+                    // This ensures that navigating backward from the Activity leads out of
+                    // the application to the Home screen.
+                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(AppIntroActivity.this);
+                    // Adds the back stack for the Intent (but not the Intent itself)
+                    stackBuilder.addParentStack(SettingsActivity.class);
+                    // Adds the Intent that starts the Activity to the top of the stack
+                    stackBuilder.addNextIntent(settingsIntent);
+                    PendingIntent settingsPendingIntent =
+                            stackBuilder.getPendingIntent(
+                                    0,
+                                    PendingIntent.FLAG_UPDATE_CURRENT
+                            );
+                    builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
 
-                        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
-                                .notify(NOTIFICATION_ID, builder.build());
+                    ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
+                            .notify(NOTIFICATION_ID, builder.build());
 
-                        Toast.makeText(AppIntroActivity.this, getString(R.string.test_notification_sent), Toast.LENGTH_LONG)
-                                .show();
+                    Toast.makeText(AppIntroActivity.this, getString(R.string.test_notification_sent), Toast.LENGTH_LONG)
+                            .show();
 
-                        if (dismissPlaceholderNotif) {
-                            handler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
-                                            .cancel(NOTIFICATION_ID);
-                                }
-                            }, placeholderNotifDismissDelayMillis);
-                        }
+                    if (dismissPlaceholderNotif) {
+                        handler.postDelayed(() -> ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
+                                .cancel(NOTIFICATION_ID), placeholderNotifDismissDelayMillis);
                     }
                 })
                 .build());
@@ -244,15 +226,12 @@ public class AppIntroActivity extends IntroActivity {
                 .backgroundDark(R.color.colorAccentDark)
                 .canGoForward(true)
                 .buttonCtaLabel(R.string.start_service)
-                .buttonCtaClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        startService(new Intent(AppIntroActivity.this, NLService.class));
-                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                        preferences.edit().putBoolean(getString(R.string.notification_listener_service_state_key), true).apply();
-                        NLService.setEnabled(true);
-                        nextSlide();
-                    }
+                .buttonCtaClickListener(v -> {
+                    startService(new Intent(AppIntroActivity.this, NLService.class));
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    preferences.edit().putBoolean(getString(R.string.notification_listener_service_state_key), true).apply();
+                    NLService.setEnabled(true);
+                    nextSlide();
                 })
                 .build();
         addSlide(startServiceSlide);
@@ -268,34 +247,28 @@ public class AppIntroActivity extends IntroActivity {
                     .background(R.color.black)
                     .backgroundDark(R.color.grey)
                     .buttonCtaLabel(R.string.intro_dnd_mode_button)
-                    .buttonCtaClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            AlertDialog dialog = new AlertDialog.Builder(AppIntroActivity.this)
-                                    .setPositiveButton(R.string.intro_dnd_mode_button_configure, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            Intent intent = new Intent();
-                                            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                            Uri uri = Uri.fromParts("package", Constants.PACKAGE_NAME, null);
-                                            intent.setData(uri);
-                                            startActivity(intent);
-                                        }
-                                    })
-                                    .setNegativeButton(android.R.string.cancel, null).create();
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                dialog.setTitle(getString(R.string.intro_dnd_mode_button_oreo));
-                                dialog.setMessage(getString(R.string.intro_dnd_mode_oreo_message));
-                            }
-                            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                dialog.setTitle(getString(R.string.intro_dnd_mode_button_nougat));
-                                dialog.setMessage(getString(R.string.intro_dnd_mode_nougat_message));
-                            } else {
-                                dialog.setTitle(getString(R.string.intro_dnd_mode_button_marshmallow));
-                                dialog.setMessage(getString(R.string.intro_dnd_mode_marshmallow_message));
-                            }
-                            dialog.show();
+                    .buttonCtaClickListener(v -> {
+                        AlertDialog dialog = new AlertDialog.Builder(AppIntroActivity.this)
+                                .setPositiveButton(R.string.intro_dnd_mode_button_configure, (dialog1, which) -> {
+                                    Intent intent = new Intent();
+                                    intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    Uri uri = Uri.fromParts("package", Constants.PACKAGE_NAME, null);
+                                    intent.setData(uri);
+                                    startActivity(intent);
+                                })
+                                .setNegativeButton(android.R.string.cancel, null).create();
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            dialog.setTitle(getString(R.string.intro_dnd_mode_button_oreo));
+                            dialog.setMessage(getString(R.string.intro_dnd_mode_oreo_message));
                         }
+                        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            dialog.setTitle(getString(R.string.intro_dnd_mode_button_nougat));
+                            dialog.setMessage(getString(R.string.intro_dnd_mode_nougat_message));
+                        } else {
+                            dialog.setTitle(getString(R.string.intro_dnd_mode_button_marshmallow));
+                            dialog.setMessage(getString(R.string.intro_dnd_mode_marshmallow_message));
+                        }
+                        dialog.show();
                     }).build());
         }
     }
@@ -430,13 +403,8 @@ public class AppIntroActivity extends IntroActivity {
                 .background(R.color.colorPrimary)
                 .backgroundDark(R.color.colorPrimaryDark)
                 .buttonCtaLabel(R.string.app_choices_activity_title)
-                .buttonCtaClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        startActivityForResult(AppChoicesActivity.newIntent(AppIntroActivity.this),
-                                APP_CHOICES_INTENT, LAUNCH_ACTIVITY_ANIM_BUNDLE);
-                    }
-                })
+                .buttonCtaClickListener(v -> startActivityForResult(AppChoicesActivity.newIntent(AppIntroActivity.this),
+                        APP_CHOICES_INTENT, LAUNCH_ACTIVITY_ANIM_BUNDLE))
                 .build();
     }
 
@@ -453,17 +421,14 @@ public class AppIntroActivity extends IntroActivity {
                 .background(R.color.fitbitColor_intro)
                 .backgroundDark(R.color.fitbitColorDark_intro)
                 .buttonCtaLabel(R.string.intro_setup_fitbit_button3)
-                .buttonCtaClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        try {
-                            Intent i = mPackageManager.
-                                    getLaunchIntentForPackage(Constants.FITBIT_PACKAGE_NAME);
-                            startActivityForResult(i, LAUNCH_FITBIT_INTENT);
+                .buttonCtaClickListener(v -> {
+                    try {
+                        Intent i = mPackageManager.
+                                getLaunchIntentForPackage(Constants.FITBIT_PACKAGE_NAME);
+                        startActivityForResult(i, LAUNCH_FITBIT_INTENT);
 
-                        } catch (ActivityNotFoundException e) {
-                            Toast.makeText(AppIntroActivity.this, getString(R.string.intro_get_fitbit_toast_text3), Toast.LENGTH_LONG).show();
-                        }
+                    } catch (ActivityNotFoundException e) {
+                        Toast.makeText(AppIntroActivity.this, getString(R.string.intro_get_fitbit_toast_text3), Toast.LENGTH_LONG).show();
                     }
                 })
                 .build();
@@ -482,21 +447,18 @@ public class AppIntroActivity extends IntroActivity {
                 .background(R.color.fitbitColor_intro)
                 .backgroundDark(R.color.fitbitColorDark_intro)
                 .buttonCtaLabel(R.string.intro_get_fitbit_button)
-                .buttonCtaClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (!isFitbitAppInstalled()) {
-                            try {
-                                startActivityForResult(new Intent(Intent.ACTION_VIEW,
-                                        Uri.parse("market://details?id=" +
-                                                  Constants.FITBIT_PACKAGE_NAME)),
-                                        INSTALL_FITBIT_INTENT);
-                            } catch (android.content.ActivityNotFoundException e) {
-                                startActivityForResult(new Intent(Intent.ACTION_VIEW,
-                                        Uri.parse("https://play.google.com/store/apps/details?id=" +
-                                                  Constants.FITBIT_PACKAGE_NAME)),
-                                        INSTALL_FITBIT_INTENT);
-                            }
+                .buttonCtaClickListener(v -> {
+                    if (!isFitbitAppInstalled()) {
+                        try {
+                            startActivityForResult(new Intent(Intent.ACTION_VIEW,
+                                    Uri.parse("market://details?id=" +
+                                              Constants.FITBIT_PACKAGE_NAME)),
+                                    INSTALL_FITBIT_INTENT);
+                        } catch (ActivityNotFoundException e) {
+                            startActivityForResult(new Intent(Intent.ACTION_VIEW,
+                                    Uri.parse("https://play.google.com/store/apps/details?id=" +
+                                              Constants.FITBIT_PACKAGE_NAME)),
+                                    INSTALL_FITBIT_INTENT);
                         }
                     }
                 })

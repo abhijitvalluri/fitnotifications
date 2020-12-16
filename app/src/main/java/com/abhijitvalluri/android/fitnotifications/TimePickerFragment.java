@@ -96,45 +96,36 @@ public class TimePickerFragment extends DialogFragment {
                 .setView(v)
                 .setTitle(titleStringId)
                 .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        int hour, minute;
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            hour = mTimePicker.getHour();
-                            minute = mTimePicker.getMinute();
-                        } else {
-                            hour = mTimePicker.getCurrentHour();
-                            minute = mTimePicker.getCurrentMinute();
-                        }
-                        sendResult(mRequestCode, hour, minute);
+                .setPositiveButton(android.R.string.ok, (dialog1, which) -> {
+                    int hour1, minute1;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        hour1 = mTimePicker.getHour();
+                        minute1 = mTimePicker.getMinute();
+                    } else {
+                        hour1 = mTimePicker.getCurrentHour();
+                        minute1 = mTimePicker.getCurrentMinute();
                     }
+                    sendResult(mRequestCode, hour1, minute1);
                 })
                 .create();
 
-        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
-                int hour, minute;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    hour = mTimePicker.getHour();
-                    minute = mTimePicker.getMinute();
-                } else {
-                    hour = mTimePicker.getCurrentHour();
-                    minute = mTimePicker.getCurrentMinute();
-                }
-                Button positiveButton = ((AlertDialog)dialog).getButton(DialogInterface.BUTTON_POSITIVE);
-                sanityCheckTimeChoice(positiveButton, hour, minute);
+        dialog.setOnShowListener(dialog12 -> {
+            int hour12, minute12;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                hour12 = mTimePicker.getHour();
+                minute12 = mTimePicker.getMinute();
+            } else {
+                hour12 = mTimePicker.getCurrentHour();
+                minute12 = mTimePicker.getCurrentMinute();
             }
+            Button positiveButton = ((AlertDialog) dialog12).getButton(DialogInterface.BUTTON_POSITIVE);
+            sanityCheckTimeChoice(positiveButton, hour12, minute12);
         });
 
-        mTimePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
-            @Override
-            public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        mTimePicker.setOnTimeChangedListener((view, hourOfDay, minute13) -> {
+            Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
 
-                sanityCheckTimeChoice(positiveButton, hourOfDay, minute);
-            }
+            sanityCheckTimeChoice(positiveButton, hourOfDay, minute13);
         });
 
         return dialog;

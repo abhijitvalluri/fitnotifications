@@ -46,7 +46,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
@@ -152,64 +151,53 @@ public class HomeFragment extends Fragment {
             mLogStatus.setVisibility(View.GONE);
         }
 
-        mEnableLogs.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mPreferences.edit().putBoolean(getString(R.string.enable_debug_logs), isChecked).apply();
-                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    mSendLogs.setVisibility((isChecked ? View.VISIBLE : View.GONE));
-                    mLogStatus.setVisibility((isChecked ? View.VISIBLE : View.GONE));
-                } else {
-                    mSendLogs.setVisibility(View.GONE);
-                    mLogStatus.setVisibility(View.GONE);
-                }
-
-                DebugLog log = DebugLog.get(getActivity());
-                int status = isChecked ? log.enable() : log.disable();
-                updateLogStatus(status);
-                if (isChecked) {
-                    new AlertDialog.Builder(mContext)
-                            .setTitle("Warning: Storage Usage!")
-                            .setMessage("Please note that enabling logging will use storage space on your phone. We will limit log file size to 10 MB.\n\n" +
-                                    "If you enable logging for too long, then old log contents will be over-written to stay within the 10 MB file size limit. " +
-                                    "To avoid this, and preserve debugging information, please enable logs for only a brief period during troubleshooting.")
-                            .setPositiveButton(android.R.string.ok, null)
-                            .create().show();
-                }
+        mEnableLogs.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mPreferences.edit().putBoolean(getString(R.string.enable_debug_logs), isChecked).apply();
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                mSendLogs.setVisibility((isChecked ? View.VISIBLE : View.GONE));
+                mLogStatus.setVisibility((isChecked ? View.VISIBLE : View.GONE));
+            } else {
+                mSendLogs.setVisibility(View.GONE);
+                mLogStatus.setVisibility(View.GONE);
             }
-        });
 
-        mSendLogs.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+            DebugLog log = DebugLog.get(getActivity());
+            int status = isChecked ? log.enable() : log.disable();
+            updateLogStatus(status);
+            if (isChecked) {
                 new AlertDialog.Builder(mContext)
-                        .setTitle("Send logs to developer?")
-                        .setMessage("If you send logs to the developer now, the app will stop collecting logs immediately and send whatever logs are present. It will then delete the logs from your phone. Do you want to proceed?")
-                        .setPositiveButton("SEND", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                StringBuilder logcat=new StringBuilder();
-                                try {
-                                    Process process = Runtime.getRuntime().exec("logcat -d");
-                                    BufferedReader bufferedReader = new BufferedReader(
-                                            new InputStreamReader(process.getInputStream()));
-
-                                    String line;
-                                    while ((line = bufferedReader.readLine()) != null) {
-                                        logcat.append(line).append('\n');
-                                    }
-                                } catch (Exception e) {
-                                    logcat.append("Exception when accessing logcat. Exception: ")
-                                          .append(e.getMessage());
-                                }
-
-                                sendDebugLogEmail(logcat);
-                            }
-                        })
-                        .setNegativeButton("CANCEL", null)
+                        .setTitle("Warning: Storage Usage!")
+                        .setMessage("Please note that enabling logging will use storage space on your phone. We will limit log file size to 10 MB.\n\n" +
+                                "If you enable logging for too long, then old log contents will be over-written to stay within the 10 MB file size limit. " +
+                                "To avoid this, and preserve debugging information, please enable logs for only a brief period during troubleshooting.")
+                        .setPositiveButton(android.R.string.ok, null)
                         .create().show();
             }
         });
+
+        mSendLogs.setOnClickListener(v1 -> new AlertDialog.Builder(mContext)
+                .setTitle("Send logs to developer?")
+                .setMessage("If you send logs to the developer now, the app will stop collecting logs immediately and send whatever logs are present. It will then delete the logs from your phone. Do you want to proceed?")
+                .setPositiveButton("SEND", (dialog, which) -> {
+                    StringBuilder logcat=new StringBuilder();
+                    try {
+                        Process process = Runtime.getRuntime().exec("logcat -d");
+                        BufferedReader bufferedReader = new BufferedReader(
+                                new InputStreamReader(process.getInputStream()));
+
+                        String line;
+                        while ((line = bufferedReader.readLine()) != null) {
+                            logcat.append(line).append('\n');
+                        }
+                    } catch (Exception e) {
+                        logcat.append("Exception when accessing logcat. Exception: ")
+                              .append(e.getMessage());
+                    }
+
+                    sendDebugLogEmail(logcat);
+                })
+                .setNegativeButton("CANCEL", null)
+                .create().show());
 
         DebugLog log = DebugLog.get(getActivity());
 
@@ -252,33 +240,25 @@ public class HomeFragment extends Fragment {
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
 
-        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+        dialog.setOnShowListener((DialogInterface.OnShowListener) dialogInterface -> {
 
-            @Override
-            public void onShow(DialogInterface dialogInterface) {
+            Button button = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+            button.setOnClickListener(view -> {
+                String issue = input.getText().toString();
+                issue = issue.trim();
+                if (issue.isEmpty()) {
+                    Toast.makeText(mContext, "You must describe the problem you are facing to proceed!", Toast.LENGTH_SHORT).show();
+                } else {
+                    body.insert(0, "\n\n------\n\n");
+                    body.insert(0, issue);
 
-                Button button = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
-                button.setOnClickListener(new View.OnClickListener() {
+                    DebugLog log = DebugLog.get(getActivity());
+                    startActivity(log.emailLogIntent(mContext, body.toString()));
 
-                    @Override
-                    public void onClick(View view) {
-                        String issue = input.getText().toString();
-                        issue = issue.trim();
-                        if (issue.isEmpty()) {
-                            Toast.makeText(mContext, "You must describe the problem you are facing to proceed!", Toast.LENGTH_SHORT).show();
-                        } else {
-                            body.insert(0, "\n\n------\n\n");
-                            body.insert(0, issue);
-
-                            DebugLog log = DebugLog.get(getActivity());
-                            startActivity(log.emailLogIntent(mContext, body.toString()));
-
-                            mEnableLogs.setChecked(false);
-                            dialog.dismiss();
-                        }
-                    }
-                });
-            }
+                    mEnableLogs.setChecked(false);
+                    dialog.dismiss();
+                }
+            });
         });
 
         dialog.show();
@@ -323,19 +303,9 @@ public class HomeFragment extends Fragment {
 
     private void activateTextViewLinks() {
         mInstructionTV.setText(R.string.instructions);
-        mInstructionTV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(AppIntroActivity.newIntent(mContext), LAUNCH_ACTIVITY_ANIM_BUNDLE);
-            }
-        });
+        mInstructionTV.setOnClickListener(v -> startActivity(AppIntroActivity.newIntent(mContext), LAUNCH_ACTIVITY_ANIM_BUNDLE));
 
-        mAppSelectionTV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(AppChoicesActivity.newIntent(mContext), LAUNCH_ACTIVITY_ANIM_BUNDLE);
-            }
-        });
+        mAppSelectionTV.setOnClickListener(v -> startActivity(AppChoicesActivity.newIntent(mContext), LAUNCH_ACTIVITY_ANIM_BUNDLE));
     }
 
     private void initializeSettings() {
@@ -353,26 +323,23 @@ public class HomeFragment extends Fragment {
         initializeDemoButton();
         initializeEnableNotificationButton();
 
-        mBannerTV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mIsDonateBanner) {
-                    mPreferences.edit().putBoolean(getString(R.string.probably_donated), true).apply();
-                    startActivity(HomeActivity.userDonationIntent());
-                } else {
-                    Uri uri = Uri.parse("market://details?id=" + Constants.PACKAGE_NAME);
-                    Intent gotoPlayStore = new Intent(Intent.ACTION_VIEW, uri);
-                    // To count with Play market backstack, After pressing back button,
-                    // to taken back to our application, we need to add following flags to intent.
-                    gotoPlayStore.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
-                            Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                    try {
-                        mPreferences.edit().putBoolean(getString(R.string.probably_rated_app), true).apply();
-                        startActivity(gotoPlayStore);
-                    } catch (ActivityNotFoundException e) {
-                        startActivity(new Intent(Intent.ACTION_VIEW,
-                                Uri.parse("http://play.google.com/store/apps/details?id=" + Constants.PACKAGE_NAME)));
-                    }
+        mBannerTV.setOnClickListener(v -> {
+            if (mIsDonateBanner) {
+                mPreferences.edit().putBoolean(getString(R.string.probably_donated), true).apply();
+                startActivity(HomeActivity.userDonationIntent());
+            } else {
+                Uri uri = Uri.parse("market://details?id=" + Constants.PACKAGE_NAME);
+                Intent gotoPlayStore = new Intent(Intent.ACTION_VIEW, uri);
+                // To count with Play market backstack, After pressing back button,
+                // to taken back to our application, we need to add following flags to intent.
+                gotoPlayStore.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
+                        Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+                try {
+                    mPreferences.edit().putBoolean(getString(R.string.probably_rated_app), true).apply();
+                    startActivity(gotoPlayStore);
+                } catch (ActivityNotFoundException e) {
+                    startActivity(new Intent(Intent.ACTION_VIEW,
+                            Uri.parse("http://play.google.com/store/apps/details?id=" + Constants.PACKAGE_NAME)));
                 }
             }
         });
@@ -380,68 +347,55 @@ public class HomeFragment extends Fragment {
 
     private void initializeEnableNotificationButton() {
         updateNotificationAccessText();
-        mNotificationAccessTV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new
-                        Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"));
-            }
-        });
+        mNotificationAccessTV.setOnClickListener(v -> startActivity(new
+                Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")));
     }
 
     private void initializeDemoButton() {
-        mDemoTV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Bundle newExtra = new Bundle();
+        mDemoTV.setOnClickListener(v -> {
+            Bundle newExtra = new Bundle();
 
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext, Constants.NOTIFICATION_CHANNEL_ID_CURRENT);
-                String notificationText = "Sample notification subject";
-                String notificationBigText = "Sample notification body. This is where the details of the notification will be shown.";
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext, Constants.NOTIFICATION_CHANNEL_ID_CURRENT);
+            String notificationText = "Sample notification subject";
+            String notificationBigText = "Sample notification body. This is where the details of the notification will be shown.";
 
-                RemoteViews contentView = new RemoteViews(mContext.getPackageName(), R.layout.custom_notification);
-                contentView.setTextViewText(R.id.customNotificationText, getString(R.string.notification_text));
-                String content = "[" + "example" + "] " + notificationText + " -- " + notificationBigText;
-                builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
-                        .setContentText(content)
-                        .setExtras(newExtra)
-                        .setContentTitle("Sample Notification Title")
-                        .setContent(contentView);
+            RemoteViews contentView = new RemoteViews(mContext.getPackageName(), R.layout.custom_notification);
+            contentView.setTextViewText(R.id.customNotificationText, getString(R.string.notification_text));
+            String content = "[" + "example" + "] " + notificationText + " -- " + notificationBigText;
+            builder.setSmallIcon(R.drawable.ic_sms_white_24dp)
+                    .setContentText(content)
+                    .setExtras(newExtra)
+                    .setContentTitle("Sample Notification Title")
+                    .setContent(contentView);
 
-                // Creates an explicit intent for the SettingsActivity in the app
-                Intent settingsIntent = new Intent(mContext, SettingsActivity.class);
+            // Creates an explicit intent for the SettingsActivity in the app
+            Intent settingsIntent = new Intent(mContext, SettingsActivity.class);
 
-                // The stack builder object will contain an artificial back stack for the
-                // started Activity.
-                // This ensures that navigating backward from the Activity leads out of
-                // the application to the Home screen.
-                TaskStackBuilder stackBuilder = TaskStackBuilder.create(mContext);
-                // Adds the back stack for the Intent (but not the Intent itself)
-                stackBuilder.addParentStack(SettingsActivity.class);
-                // Adds the Intent that starts the Activity to the top of the stack
-                stackBuilder.addNextIntent(settingsIntent);
-                PendingIntent settingsPendingIntent =
-                        stackBuilder.getPendingIntent(
-                                0,
-                                PendingIntent.FLAG_UPDATE_CURRENT
-                        );
-                builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
+            // The stack builder object will contain an artificial back stack for the
+            // started Activity.
+            // This ensures that navigating backward from the Activity leads out of
+            // the application to the Home screen.
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(mContext);
+            // Adds the back stack for the Intent (but not the Intent itself)
+            stackBuilder.addParentStack(SettingsActivity.class);
+            // Adds the Intent that starts the Activity to the top of the stack
+            stackBuilder.addNextIntent(settingsIntent);
+            PendingIntent settingsPendingIntent =
+                    stackBuilder.getPendingIntent(
+                            0,
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    );
+            builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
 
-                ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
-                        .notify(Constants.NOTIFICATION_ID, builder.build());
+            ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
+                    .notify(Constants.NOTIFICATION_ID, builder.build());
 
-                Toast.makeText(mContext, getString(R.string.test_notification_sent), Toast.LENGTH_LONG)
-                        .show();
+            Toast.makeText(mContext, getString(R.string.test_notification_sent), Toast.LENGTH_LONG)
+                    .show();
 
-                if (mDismissPlaceholderNotif) {
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
-                                    .cancel(Constants.NOTIFICATION_ID);
-                        }
-                    }, mPlaceholderNotifDismissDelayMillis);
-                }
+            if (mDismissPlaceholderNotif) {
+                mHandler.postDelayed(() -> ((NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE))
+                        .cancel(Constants.NOTIFICATION_ID), mPlaceholderNotifDismissDelayMillis);
             }
         });
     }
@@ -472,29 +426,23 @@ public class HomeFragment extends Fragment {
             mServiceButton.setText(R.string.turn_off_service);
             mServiceStateTV.setText(R.string.service_on);
             mServiceStateTV.setTextColor(ContextCompat.getColor(mContext, R.color.brightGreen));
-            mServiceButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mContext.stopService(new Intent(mContext, NLService.class));
-                    mPreferences.edit().putBoolean(getString(R.string.notification_listener_service_state_key), false).apply();
-                    NLService.setEnabled(false);
-                    updateWidget();
-                    initializeServiceButtons();
-                }
+            mServiceButton.setOnClickListener(v -> {
+                mContext.stopService(new Intent(mContext, NLService.class));
+                mPreferences.edit().putBoolean(getString(R.string.notification_listener_service_state_key), false).apply();
+                NLService.setEnabled(false);
+                updateWidget();
+                initializeServiceButtons();
             });
         } else {
             mServiceButton.setText(R.string.turn_on_service);
             mServiceStateTV.setText(R.string.service_off);
             mServiceStateTV.setTextColor(ContextCompat.getColor(mContext, R.color.red));
-            mServiceButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mContext.startService(new Intent(mContext, NLService.class));
-                    mPreferences.edit().putBoolean(getString(R.string.notification_listener_service_state_key), true).apply();
-                    NLService.setEnabled(true);
-                    updateWidget();
-                    initializeServiceButtons();
-                }
+            mServiceButton.setOnClickListener(v -> {
+                mContext.startService(new Intent(mContext, NLService.class));
+                mPreferences.edit().putBoolean(getString(R.string.notification_listener_service_state_key), true).apply();
+                NLService.setEnabled(true);
+                updateWidget();
+                initializeServiceButtons();
             });
         }
     }

@@ -199,38 +199,30 @@ public class HomeActivity extends AppCompatActivity {
             .setNegativeButton(android.R.string.cancel, null)
             .create();
 
-        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+        dialog.setOnShowListener((DialogInterface.OnShowListener) dialogInterface -> {
 
-            @Override
-            public void onShow(DialogInterface dialogInterface) {
+            Button button = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+            button.setOnClickListener(view -> {
+                String feedback = input.getText().toString();
+                feedback = feedback.trim();
+                if (feedback.isEmpty()) {
+                    Toast.makeText(HomeActivity.this, R.string.no_feedback_message, Toast.LENGTH_SHORT).show();
+                } else {
+                    feedback += "\n\n";
+                    String uriText =
+                            "mailto:android@abhijitvalluri.com" +
+                                    "?subject=" + Uri.encode(getString(R.string.email_subject)) +
+                                    "&body=" + Uri.encode(feedback);
 
-                Button button = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
-                button.setOnClickListener(new View.OnClickListener() {
+                    Uri uri = Uri.parse(uriText);
 
-                    @Override
-                    public void onClick(View view) {
-                        String feedback = input.getText().toString();
-                        feedback = feedback.trim();
-                        if (feedback.isEmpty()) {
-                            Toast.makeText(HomeActivity.this, R.string.no_feedback_message, Toast.LENGTH_SHORT).show();
-                        } else {
-                            feedback += "\n\n";
-                            String uriText =
-                                    "mailto:android@abhijitvalluri.com" +
-                                            "?subject=" + Uri.encode(getString(R.string.email_subject)) +
-                                            "&body=" + Uri.encode(feedback);
+                    Intent sendIntent = new Intent(Intent.ACTION_SENDTO);
+                    sendIntent.setData(uri);
+                    startActivity(Intent.createChooser(sendIntent, getString(R.string.select_send_feedback_app)));
 
-                            Uri uri = Uri.parse(uriText);
-
-                            Intent sendIntent = new Intent(Intent.ACTION_SENDTO);
-                            sendIntent.setData(uri);
-                            startActivity(Intent.createChooser(sendIntent, getString(R.string.select_send_feedback_app)));
-
-                            dialog.dismiss();
-                        }
-                    }
-                });
-            }
+                    dialog.dismiss();
+                }
+            });
         });
 
         dialog.show();
@@ -238,13 +230,10 @@ public class HomeActivity extends AppCompatActivity {
 
     private void setupDrawerContent(NavigationView navigationView) {
         navigationView.setNavigationItemSelectedListener(
-            new NavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                menuItem -> {
                     selectDrawerItem(menuItem);
                     return true;
-                }
-            });
+                });
     }
 
     public static Intent userDonationIntent() {
@@ -341,13 +330,10 @@ public class HomeActivity extends AppCompatActivity {
         menuItem.setChecked(true);
         // Set action bar title
         if (frag != null) {
-            mDrawerToggle.runWhenIdle(new Runnable() {
-                @Override
-                public void run() {
-                    // Insert the fragment by replacing any existing fragment
-                    FragmentManager fragmentManager = getSupportFragmentManager();
-                    fragmentManager.beginTransaction().replace(R.id.flContent, frag).commit();
-                }
+            mDrawerToggle.runWhenIdle(() -> {
+                // Insert the fragment by replacing any existing fragment
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.flContent, frag).commit();
             });
         }
 
@@ -399,18 +385,10 @@ public class HomeActivity extends AppCompatActivity {
                 new AlertDialog.Builder(HomeActivity.this)
                         .setMessage(getString(R.string.setup_incomplete))
                         .setTitle(getString(R.string.setup_incomplete_title))
-                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                startActivityForResult(new Intent(HomeActivity.this, AppIntroActivity.class), APP_INTRO_FIRST_LAUNCH_INTENT, LAUNCH_ACTIVITY_ANIM_BUNDLE);
-                            }
-                        })
-                        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                mPreferences.edit().putBoolean(getString(R.string.done_first_launch_key), true).apply();
-                                Toast.makeText(HomeActivity.this, R.string.setup_incomplete_cancel, Toast.LENGTH_LONG).show();
-                            }
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> startActivityForResult(new Intent(HomeActivity.this, AppIntroActivity.class), APP_INTRO_FIRST_LAUNCH_INTENT, LAUNCH_ACTIVITY_ANIM_BUNDLE))
+                        .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+                            mPreferences.edit().putBoolean(getString(R.string.done_first_launch_key), true).apply();
+                            Toast.makeText(HomeActivity.this, R.string.setup_incomplete_cancel, Toast.LENGTH_LONG).show();
                         })
                         .create()
                         .show();

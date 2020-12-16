@@ -80,12 +80,7 @@ public class AppSelectionsStore {
             }
         }
 
-        Collections.sort(appSelections, new Comparator<AppSelection>() {
-            @Override
-            public int compare(AppSelection lhs, AppSelection rhs) {
-                return String.CASE_INSENSITIVE_ORDER.compare(lhs.getAppName(), rhs.getAppName());
-            }
-        });
+        Collections.sort(appSelections, (lhs, rhs) -> String.CASE_INSENSITIVE_ORDER.compare(lhs.getAppName(), rhs.getAppName()));
 
         return appSelections;
     }
