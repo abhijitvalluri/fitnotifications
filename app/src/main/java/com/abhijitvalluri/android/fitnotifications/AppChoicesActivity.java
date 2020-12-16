@@ -23,8 +23,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 
@@ -55,6 +56,8 @@ import com.abhijitvalluri.android.fitnotifications.utils.Func;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * AppChoicesActivity is an activity that holds the recycler view of a list of apps and their choices.
@@ -82,15 +85,17 @@ public class AppChoicesActivity extends AppCompatActivity {
         return new Intent(packageContext, AppChoicesActivity.class);
     }
 
-    private class AppListSetup extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... params) {
-            return appListTask();
-        }
+    private class AppListSetupTaskRunner {
+        private final Executor executor = Executors.newSingleThreadExecutor();
+        private final Handler handler = new Handler(Looper.getMainLooper());
 
-        @Override
-        protected void onPostExecute(Void result) {
-            setupAdapter();
+        public void executeAsync() {
+            executor.execute(() -> {
+                final boolean success = appListTask();
+                if (success) {
+                    handler.post(AppChoicesActivity.this::setupAdapter);
+                }
+            });
         }
     }
 
@@ -151,7 +156,7 @@ public class AppChoicesActivity extends AppCompatActivity {
             mRecyclerView.setVisibility(View.GONE);
             mLoadingView.setVisibility(View.VISIBLE);
             mProgressBar.setVisibility(View.VISIBLE);
-            new AppListSetup().execute();
+            new AppListSetupTaskRunner().executeAsync();
         }
     }
 
@@ -278,7 +283,7 @@ public class AppChoicesActivity extends AppCompatActivity {
         return null;
     }
 
-    private Void appListTask() {
+    private boolean appListTask() {
         DebugLog log = DebugLog.get(getApplicationContext());
         List<ResolveInfo> packages = Func.getInstalledPackages(mPackageManager, getApplicationContext());
 
@@ -308,16 +313,12 @@ public class AppChoicesActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             Log.e("DB_INSERT", "Error inserting appSelection entry into database. Exception: " + e.getMessage());
-            AppChoicesActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    new AlertDialog.Builder(AppChoicesActivity.this)
-                            .setTitle("Error processing apps")
-                            .setMessage("There was an error while processing the apps. Please enable logs and send them to the developer.")
-                            .setPositiveButton(android.R.string.ok, null)
-                            .create().show();
-                }
-            });
+            AppChoicesActivity.this.runOnUiThread(() -> new AlertDialog.Builder(AppChoicesActivity.this)
+                    .setTitle("Error processing apps")
+                    .setMessage("There was an error while processing the apps. Please enable logs and send them to the developer.")
+                    .setPositiveButton(android.R.string.ok, null)
+                    .create().show());
+            return false;
         }
 
         if (log.isEnabled()) {
@@ -335,7 +336,7 @@ public class AppChoicesActivity extends AppCompatActivity {
             log.writeLog("Number of apps in App selection store after deletions: " + mAppSelectionsStore.size());
         }
 
-        return null;
+        return true;
     }
 
     private void recyclerViewShowEnabled() {
@@ -449,17 +450,14 @@ public class AppChoicesActivity extends AppCompatActivity {
             ImageButton settingsIB = (ImageButton) itemView.findViewById(R.id.appSettingsIcon);
 
             mAppSelectCB.setOnClickListener(this);
-            settingsIB.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(getApplicationContext(), AppSettingsActivity.class);
-                    AppSelection appSelection = getAppSelection(mAppSelection.getAppPackageName());
-                    if (appSelection == null) { // Never going to happen but let's cover our bases
-                        appSelection = mAppSelection;
-                    }
-                    intent.putExtra(AppSettingsActivity.APP_SELECTION_EXTRA, appSelection);
-                    startActivityForResult(intent, APP_SELECTIONS_REQUEST, LAUNCH_ACTIVITY_ANIM_BUNDLE);
+            settingsIB.setOnClickListener(v -> {
+                Intent intent = new Intent(getApplicationContext(), AppSettingsActivity.class);
+                AppSelection appSelection = getAppSelection(mAppSelection.getAppPackageName());
+                if (appSelection == null) { // Never going to happen but let's cover our bases
+                    appSelection = mAppSelection;
                 }
+                intent.putExtra(AppSettingsActivity.APP_SELECTION_EXTRA, appSelection);
+                startActivityForResult(intent, APP_SELECTIONS_REQUEST, LAUNCH_ACTIVITY_ANIM_BUNDLE);
             });
         }
 
