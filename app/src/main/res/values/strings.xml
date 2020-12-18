@@ -1,47 +1,31 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- General App strings -->
     <string name="app_name">Fit Notifications</string>
-    <string name="app_icon">Fit Notifications App Icon</string>
     <string name="other_app_icon">App icon of an installed app</string>
     <string name="about_app">About app</string>
-    <string name="app_info">Fit Notifications Menu</string>
     <string name="instructions">Start interactive setup</string>
-    <string name="instructions_heading">Setup</string>
     <string name="manual_setup_instructions">Setup Instructions</string>
     <string name="faqs">Frequently asked questions</string>
     <string name="smart_dinosaurs">Smart Dinosaurs Entertainment</string>
     <string name="donate">Donate</string>
     <string name="support_dev">Support the developer!</string>
     <string name="whats_new">What\'s new</string>
-    <string name="disclaimer">Disclaimer</string>
     <string name="opensource">Open source licenses</string>
     <string name="credits">Credits</string>
     <string name="app_choices">Setup Apps</string>
     <string name="app_choices_activity_title">Select Apps</string>
     <string name="enabled_apps_filter_menu">Filter Enabled Apps</string>
-    <string name="notification_service_started">Fit Notifications Service started</string>
     <string name="rate_app">Like our app? Then rate it!</string>
     <string name="feedback_step1_title">Send Feedback: Step 1</string>
     <string name="feedback_step1_message">Enter your feedback below:</string>
     <string name="no_feedback_message">You must type some feedback to proceed!</string>
     <string name="select_send_feedback_app">Step 2: Select app to send feedback</string>
-    <string name="send_email">Send Email</string>
     <string name="email_subject">Feedback for Fit Notifications app</string>
-    <string name="email_body">Please provide your feedback or suggestions here: </string>
-    <string name="transliteration_feature">Transliteration Feature</string>
-    <string name="transliteration_feature_text">The transliteration feature is enabled for you!
-                                           This feature converts non-latin characters to latin.
-                                           Does it have issues with your language? If so, you can
-                                           help fix it by sending us feedback from the side menu bar!\n\nYou can turn off the
-                                           feature by going to the settings page in this app.</string>
     <string name="notification_text">[Placeholder notification] Enabling auto-dismiss setting for this may cause the notification to be removed from your Fitbit device as well</string>
     <string name="test_notification">Test Notification</string>
     <string name="test_notification_sent">Test notification sent</string>
-    <string name="notification_access_enable_textView">Enable Notification Access</string>
-    <string name="notification_access_disable_textView">Disable Notification Access</string>
     <string name="enable_notification_access">Enable Notification Access</string>
     <string name="disable_notification_access">Disable Notification Access</string>
-    <string name="start_service_info_text">Starting the notification service&#8230;</string>
     <string name="start_service">Start Service</string>
     <string name="turn_on_service">TURN ON</string>
     <string name="turn_off_service">TURN OFF</string>
@@ -90,7 +74,6 @@
     <string name="intro_setup_fitbit_button3">Open Fitbit app</string>
     <string name="intro_get_fitbit_toast_text3">Fitbit app not found! Go back and install the official Fitbit app!</string>
 
-    <string name="intro_select_apps_title">Choose the apps you want notifications for</string>
     <string name="intro_select_apps_desc">You can now choose the apps whose notifications you want to receive on your Fitbit device.
         They will appear like Text Notifications on the device and will have the app name for clarity.
         \n\nYou can also configure additional settings using the gear icon (settings icon) for each app individually.</string>
@@ -144,10 +127,6 @@
     <string name="setup_incomplete_title">Incomplete Setup</string>
     <string name="setup_incomplete_cancel">Okay, you can check out the new setup process at any time!</string>
 
-    <!-- Home activity -->
-    <string name="verify_settings_button">Verify Settings</string>
-    <string name="never_show_again_button">Never show again</string>
-
     <!-- Preference keys -->
     <string name="show_enabled_apps_key">ShowEnabledApps</string>
     <string name="enable_debug_logs">enableDebugLogs</string>
@@ -171,17 +150,13 @@
     <!-- Misc. -->
     <string name="dismiss_after">after</string>
     <string name="one_notification">1 notification every</string>
-    <string name="second">second</string>
     <string name="seconds">seconds</string>
-    <string name="requested_transliteration_improvement">requestedTransliterationImprovement</string>
 
     <!-- Settings Menu headings -->
     <string name="settings_menu">Settings</string>
-    <string name="save_settings">Save Settings</string>
     <string name="placeholder_notif_settings">Placeholder Notification Settings</string>
     <string name="relayed_notif_settings">Relayed Notification Settings</string>
     <string name="limit_notif_settings">Notification Limit Settings</string>
-    <string name="debug_settings">Troubleshooting Settings</string>
     <string name="dnd_settings">Do Not Disturb Settings</string>
     <string name="notification_service_settings">Notification Service Settings</string>
 

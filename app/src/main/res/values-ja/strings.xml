@@ -21,8 +21,6 @@
     <string name="notification_text">[プレースホルダ通知]このための自動非表示設定を有効にすると、Fitbitデバイスから通知が削除される場合もあります</string>
     <string name="test_notification">テスト通知</string>
     <string name="test_notification_sent">テスト通知を送信しました</string>
-    <string name="notification_access_enable_textView">通知アクセスの有効化</string>
-    <string name="notification_access_disable_textView">通知アクセスの無効化</string>
     <string name="enable_notification_access">通知アクセスの有効化</string>
     <string name="disable_notification_access">通知アクセスの無効化</string>
     <string name="start_service">サービスの開始</string>
@@ -119,10 +117,6 @@
     <string name="setup_incomplete_title">セットアップ未完了</string>
     <string name="setup_incomplete_cancel">セットアップは後からいつでも実行できます</string>
 
-    <!-- Home activity -->
-    <string name="verify_settings_button">設定を確認</string>
-    <string name="never_show_again_button">以降表示しない</string>
-
     <!-- Notification Channel strings -->
     <string name="notification_channel_name">プレースホルダ通知</string>
     <string name="notification_channel_desc">これは、Fit Notificationsアプリのプレースホルダ通知のチャンネルです。
@@ -132,7 +126,6 @@
     <!-- Misc. -->
     <string name="dismiss_after"> </string>
     <string name="one_notification">1つの通知は</string>
-    <string name="second">秒</string>
     <string name="seconds">秒</string>
 
     <!-- Settings Menu headings -->
@@ -140,7 +133,6 @@
     <string name="placeholder_notif_settings">プレースホルダ通知の設定</string>
     <string name="relayed_notif_settings">中継した通知の設定</string>
     <string name="limit_notif_settings">通知制限の設定</string>
-    <string name="debug_settings">トラブルシューティングの設定</string>
     <string name="dnd_settings">マナーモードの設定</string>
     <string name="notification_service_settings">通知サービスの設定</string>
 

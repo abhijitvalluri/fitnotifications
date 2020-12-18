@@ -408,9 +408,9 @@ public class HomeFragment extends Fragment {
                 getEnabledListenerPackages(mContext);
         if (EnabledListenerPackagesSet.contains(Constants.PACKAGE_NAME)
                 && EnabledListenerPackagesSet.contains(Constants.FITBIT_PACKAGE_NAME)) {
-            mNotificationAccessTV.setText(getString(R.string.notification_access_disable_textView));
+            mNotificationAccessTV.setText(getString(R.string.disable_notification_access));
         } else {
-            mNotificationAccessTV.setText(getString(R.string.notification_access_enable_textView));
+            mNotificationAccessTV.setText(getString(R.string.enable_notification_access));
         }
     }
 

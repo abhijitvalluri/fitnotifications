@@ -49,6 +49,7 @@ import com.abhijitvalluri.android.fitnotifications.utils.Func;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -369,7 +370,7 @@ public class AppChoicesActivity extends AppCompatActivity {
         List<AppSelection> appSelectionsSubList = new ArrayList<>();
 
         for (AppSelection appSelection : mAppSelections) {
-            if (appSelection.getAppName().toLowerCase().contains(appNameSubStr.toLowerCase())
+            if (appSelection.getAppName().toLowerCase(Locale.getDefault()).contains(appNameSubStr.toLowerCase(Locale.getDefault()))
                     && (!mShowOnlyEnabledApps || appSelection.isSelected())) {
                 appSelectionsSubList.add(appSelection);
             }
