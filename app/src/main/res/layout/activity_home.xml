@@ -10,10 +10,8 @@
 
     <!-- The main content view -->
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
         android:orientation="vertical">
 
         <!-- The ToolBar displayed at the top -->
@@ -36,7 +34,9 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@android:color/white"
+        app:itemBackground="@drawable/nav_view_item_background"
+        app:itemTextColor="@drawable/nav_view_item_color"
+        app:itemIconTint="@drawable/nav_view_item_color"
         app:menu="@menu/drawer_view"
         app:headerLayout="@layout/nav_header"/>
 

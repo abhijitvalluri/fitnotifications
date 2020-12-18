@@ -28,21 +28,6 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-
-import androidx.annotation.NonNull;
-
-import com.abhijitvalluri.android.fitnotifications.R;
-import com.abhijitvalluri.android.fitnotifications.settings.SettingsActivity;
-import com.google.android.material.navigation.NavigationView;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -53,9 +38,22 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.abhijitvalluri.android.fitnotifications.setup.AppIntroActivity;
+import com.abhijitvalluri.android.fitnotifications.R;
 import com.abhijitvalluri.android.fitnotifications.appchoices.store.AppSelectionsStore;
+import com.abhijitvalluri.android.fitnotifications.settings.SettingsActivity;
+import com.abhijitvalluri.android.fitnotifications.setup.AppIntroActivity;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
+import com.google.android.material.navigation.NavigationView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.preference.PreferenceManager;
 
 
 /**

@@ -27,14 +27,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcelable;
-import android.preference.PreferenceManager;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -42,7 +34,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -61,6 +52,14 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 /**
  * AppChoicesActivity is an activity that holds the recycler view of a list of apps and their choices.
  */
@@ -68,8 +67,8 @@ public class AppChoicesActivity extends AppCompatActivity {
 
     private static final int APP_SELECTIONS_REQUEST = 0;
     private static final String STATE_APP_SELECTIONS = "appSelections";
-    private static final String STATE_RECYCLER_VIEW  = "recyclerView";
-    private static final String STATE_SETUP_COMPLETE  = "setupComplete";
+    private static final String STATE_RECYCLER_VIEW = "recyclerView";
+    private static final String STATE_SETUP_COMPLETE = "setupComplete";
 
     private RecyclerView mRecyclerView;
     private TextView mLoadingView;
@@ -371,7 +370,7 @@ public class AppChoicesActivity extends AppCompatActivity {
 
         for (AppSelection appSelection : mAppSelections) {
             if (appSelection.getAppName().toLowerCase().contains(appNameSubStr.toLowerCase())
-                    &&(!mShowOnlyEnabledApps || appSelection.isSelected())) {
+                    && (!mShowOnlyEnabledApps || appSelection.isSelected())) {
                 appSelectionsSubList.add(appSelection);
             }
         }
@@ -388,8 +387,7 @@ public class AppChoicesActivity extends AppCompatActivity {
             mLoadingView.setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
             mLoadingView.setText(getString(R.string.app_list_empty_search));
-        }
-         else {
+        } else {
             mLoadingView.setVisibility(View.GONE);
             mRecyclerView.setVisibility(View.VISIBLE);
         }
@@ -449,10 +447,10 @@ public class AppChoicesActivity extends AppCompatActivity {
             mAppNameTB = (TextView) itemView.findViewById(R.id.appNameTextBox);
             mAppSelectCB = (CheckBox) itemView.findViewById(R.id.appSelectCheckBox);
             mImageView = (ImageView) itemView.findViewById(R.id.appIconImageView);
-            ImageButton settingsIB = (ImageButton) itemView.findViewById(R.id.appSettingsIcon);
+            ImageView settings = (ImageView) itemView.findViewById(R.id.appSettingsIcon);
 
             mAppSelectCB.setOnClickListener(this);
-            settingsIB.setOnClickListener(v -> {
+            settings.setOnClickListener(v -> {
                 Intent intent = new Intent(getApplicationContext(), AppSettingsActivity.class);
                 AppSelection appSelection = getAppSelection(mAppSelection.getAppPackageName());
                 if (appSelection == null) { // Never going to happen but let's cover our bases

@@ -16,10 +16,15 @@
 
 package com.abhijitvalluri.android.fitnotifications.home;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.webkit.WebSettingsCompat;
+import androidx.webkit.WebViewFeature;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,10 +49,24 @@ public class InfoFragment extends Fragment {
 
         mWebView = (WebView) v.findViewById(R.id.infoActivityWV);
 
+        switch (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) {
+            case Configuration.UI_MODE_NIGHT_YES:
+                if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
+                    WebSettingsCompat.setForceDark(mWebView.getSettings(), WebSettingsCompat.FORCE_DARK_ON);
+                }
+                break;
+            case Configuration.UI_MODE_NIGHT_NO:
+            case Configuration.UI_MODE_NIGHT_UNDEFINED:
+                if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
+                    WebSettingsCompat.setForceDark(mWebView.getSettings(), WebSettingsCompat.FORCE_DARK_OFF);
+                }
+                break;
+        }
+
         if (getArguments() != null) {
             String webViewHtml = getArguments().getString(WEBVIEW_HTML);
             if (webViewHtml != null) {
-                mWebView.loadDataWithBaseURL(null, webViewHtml, "text/html", "utf-8", null);
+                mWebView.loadDataWithBaseURL(null, getHtmlWithThemeStyling(webViewHtml), "text/html", "utf-8", null);
             }
         }
 
@@ -55,7 +74,18 @@ public class InfoFragment extends Fragment {
     }
 
     public void updateWebViewContent(@NonNull String webViewHtml) {
-        mWebView.loadDataWithBaseURL(null, webViewHtml, "text/html", "utf-8", null);
+        mWebView.loadDataWithBaseURL(null, getHtmlWithThemeStyling(webViewHtml), "text/html", "utf-8", null);
+    }
+
+    private String getHtmlWithThemeStyling(@NonNull String webViewHtml) {
+        String textColor = "#" + Integer.toHexString(ContextCompat.getColor(getContext(), R.color.normal_text)).substring(2);
+        String backgroundColor = "#" + Integer.toHexString(ContextCompat.getColor(getContext(), R.color.normal_background)).substring(2);
+
+        return "<html><head>"
+                + "<style type=\"text/css\">body { color: " + textColor + "; background-color: " + backgroundColor + "; } "
+                + "a:link { color: #42A5F5; }"
+                + "</style></head>"
+                + "<body>" + webViewHtml + "</body></html>";
     }
 
     public static Fragment newInstance(@NonNull String webViewHtml) {

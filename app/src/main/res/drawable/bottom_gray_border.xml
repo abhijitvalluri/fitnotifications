@@ -2,16 +2,16 @@
     <item>
         <shape
             android:shape="rectangle">
-            <stroke android:width="1dp" android:color="#DDDDDD" />
-            <solid android:color="#DDDDDD" />
+            <stroke android:width="1dp" android:color="@color/normal_border" />
+            <solid android:color="@color/normal_border" />
         </shape>
     </item>
 
     <item android:bottom="1dp">
         <shape
             android:shape="rectangle">
-            <stroke android:width="1dp" android:color="#FFFFFF" />
-            <solid android:color="#FFFFFF" />
+            <stroke android:width="1dp" android:color="@color/normal_background" />
+            <solid android:color="@color/normal_background" />
 
         </shape>
     </item>

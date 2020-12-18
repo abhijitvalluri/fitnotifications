@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="white">#ffffff</color>
+    <color name="normal_background">#fafafa</color> <!-- material_grey_50 -->
+    <color name="normal_text">#424242</color> <!-- material_grey_800 -->
+    <color name="normal_border">#ffe0e0e0</color> <!-- material_grey_300 -->
+    <color name="normal_backgroundFloating">@color/white</color>
     <color name="black_translucent">#000000</color>
     <color name="grey_translucent">#d2424242</color>
     <color name="veryLightGrey">#bdbdbd</color>
+    <color name="navDrawerTextPrimary">#666666</color>
     <color name="black">#000000</color>
     <color name="grey">#FF3D3D3D</color>
     <color name="material_grey900">#212121</color>

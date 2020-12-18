@@ -369,7 +369,7 @@
     that the application is working correctly! Issues? Please contact us!</p>
     ]]></string>
     <string name="faqs_text" tools:ignore="TypographyDashes"><![CDATA[
-    <!-- FAQ #1 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- FAQ #1 - TODO ABHI - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <p><b>Q. Is my Fitbit device supported?</b></p>
     <p>This app will work with any Fitbit device that <b>supports text notifications</b>. This includes Fitbit Alta, Alta HR, Blaze,
        Surge, Charge 2, Charge 3, Versa, Ionic and any future Fitbit models that support text notifications.</p>
@@ -458,9 +458,9 @@
     ]]></string>
     <string name="whats_new_text"><![CDATA[
     <br />
-    <p>Changes in <b>version 2.10.0:</b></p>
+    <p>Changes in <b>version 2.11.0: TODO: ABHI</b></p>
     <ol>
-        <li>Updated app with Android 10 platform, and general stability improvements.<br /><br /></li>
+        <li>Updated app with Android 11 platform, and general stability improvements.<br /><br /></li>
         <li>Fixed issue on Android 10 where the placeholder notification is suppressing the
             notification sound of the actual notification. <br /><br />
             If your Fitbit device does not vibrate but still receives notifications, then
@@ -487,31 +487,6 @@
         WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
         See the License for the specific language governing permissions and
         limitations under the License.
-    </p>
-    <hr /><hr />
-    <p><b>Library: </b><a href=\"https://github.com/Alobar/AndroidPreferenceTest\">Alobar/AndroidPreferenceTest</a></p>
-    <p>
-        The MIT License (MIT)<br /><br />
-
-        Copyright &#169; 2016 Alobar<br /><br />
-
-        Permission is hereby granted, free of charge, to any person obtaining a copy
-        of this software and associated documentation files (the \"Software\"), to deal
-        in the Software without restriction, including without limitation the rights
-        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-        copies of the Software, and to permit persons to whom the Software is
-        furnished to do so, subject to the following conditions:<br /><br />
-
-        The above copyright notice and this permission notice shall be included in all
-        copies or substantial portions of the Software.<br /><br />
-
-        THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-        SOFTWARE.
     </p>
     <hr /><hr />
     <p><b>Library: </b>International Components for Unicode for Java (ICU4J) 57.1</p>

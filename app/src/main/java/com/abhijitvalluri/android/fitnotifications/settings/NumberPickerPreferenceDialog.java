@@ -30,18 +30,27 @@ import androidx.preference.PreferenceDialogFragmentCompat;
 
 public class NumberPickerPreferenceDialog extends PreferenceDialogFragmentCompat {
 
-    private final int minValue;
-    private final int maxValue;
-    private final String beforeText;
-    private final String afterText;
+    private static final String ARG_MIN_VALUE = "minValue";
+    private static final String ARG_MAX_VALUE = "maxValue";
+    private static final String ARG_BEFORE_TEXT = "beforeText";
+    private static final String ARG_AFTER_TEXT = "afterText";
+
+    private int minValue;
+    private int maxValue;
+    private String beforeText;
+    private String afterText;
 
     private NumberPicker numberPicker;
 
-    private NumberPickerPreferenceDialog(int minVal, int maxVal, String beforeTxt, String afterTxt) {
-        minValue = minVal;
-        maxValue = maxVal;
-        beforeText = beforeTxt;
-        afterText = afterTxt;
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        assert getArguments() != null; // Should never be null if created via newInstance
+        minValue = getArguments().getInt(ARG_MIN_VALUE);
+        maxValue = getArguments().getInt(ARG_MAX_VALUE);
+        beforeText = getArguments().getString(ARG_BEFORE_TEXT);
+        afterText = getArguments().getString(ARG_AFTER_TEXT);
     }
 
     @Override
@@ -101,14 +110,18 @@ public class NumberPickerPreferenceDialog extends PreferenceDialogFragmentCompat
         }
     }
 
-    protected static NumberPickerPreferenceDialog newInstance(String key,
-                                                              int minValue,
-                                                              int maxValue,
-                                                              String beforeText,
-                                                              String afterText) {
-        NumberPickerPreferenceDialog dialog = new NumberPickerPreferenceDialog(minValue, maxValue, beforeText, afterText);
+    public static NumberPickerPreferenceDialog newInstance(String key,
+                                                           int minValue,
+                                                           int maxValue,
+                                                           String beforeText,
+                                                           String afterText) {
+        NumberPickerPreferenceDialog dialog = new NumberPickerPreferenceDialog();
         Bundle b = new Bundle();
         b.putString(ARG_KEY, key);
+        b.putInt(ARG_MIN_VALUE, minValue);
+        b.putInt(ARG_MAX_VALUE, maxValue);
+        b.putString(ARG_BEFORE_TEXT, beforeText);
+        b.putString(ARG_AFTER_TEXT, afterText);
         dialog.setArguments(b);
 
         return dialog;

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="normal_background">#212121</color> <!-- material_grey_900 -->
+    <color name="normal_text">#e0e0e0</color> <!-- material_grey_300 -->
+    <color name="normal_border">#ff424242</color> <!-- material_grey_800 -->
+    <color name="normal_backgroundFloating">#ff303030</color> <!-- material_grey_850 -->
+    <color name="colorPrimary">#3f51b5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#ff4081</color>
+    <color name="navDrawerTextPrimary">#DDDDDD</color>
+
+</resources>
