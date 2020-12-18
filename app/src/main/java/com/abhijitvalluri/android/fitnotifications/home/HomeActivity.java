@@ -40,6 +40,7 @@ import android.widget.Toast;
 
 import com.abhijitvalluri.android.fitnotifications.R;
 import com.abhijitvalluri.android.fitnotifications.appchoices.store.AppSelectionsStore;
+import com.abhijitvalluri.android.fitnotifications.services.NLService;
 import com.abhijitvalluri.android.fitnotifications.settings.SettingsActivity;
 import com.abhijitvalluri.android.fitnotifications.setup.AppIntroActivity;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
@@ -115,6 +116,12 @@ public class HomeActivity extends AppCompatActivity {
             // on the Fitbit device when the notification is dismissed on the phone.
             mPreferences.edit()
                     .putBoolean(getString(R.string.dismiss_placeholder_notif_key), false).apply();
+
+            int delaySeconds = mPreferences.getInt(
+                    getString(R.string.placeholder_dismiss_delay_key),
+                    Constants.DEFAULT_DELAY_SECONDS);
+            HomeFragment.onPlaceholderNotifSettingUpdated(false, delaySeconds);
+            NLService.onPlaceholderNotifSettingUpdated(false, delaySeconds);
 
             navDrawer.setCheckedItem(R.id.nav_whats_new);
             setTitle(R.string.whats_new);
