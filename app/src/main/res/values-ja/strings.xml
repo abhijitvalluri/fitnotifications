@@ -314,10 +314,26 @@
 
 
     <!-- FAQ #2.1 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <p><b>Q. What is the placeholder notification and why is it important?</b></p>
+    <p>The placeholder notification is crucial for the proper functioning of this app. For example, if you setup
+       this app to forward notifications from your email app to your Fitbit device, then whenever you receive
+       an email notification, this app creates a corresponding \"Placeholder notification\" which contains
+       the relevant info from your email notification. It is this placeholder notification that is then sent to your
+       Fitbit device, and you see the info contained in your email notification on your Fitbit device.</p>
+
+    <p><b>Note:</b> If your Fitbit device allows you to dismiss the notification on the watch, then the placeholder
+       notification will be dismissed on your phone as well. Similarly, if you dismiss the placeholder notification
+       on your phone either manually, or by using the \"Dismiss placeholder notification\" feature from this
+       app\'s settings, then the notification will get dismissed from your Fitbit device as well. So, please keep this
+       in mind if you enable this setting in the app, as it can cause the notifications to be dismissed automatically
+       after a delay on your Fitbit device as well!</p>
+
+
+    <!-- FAQ #2.2 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <p><b>Q. Why is my Fitbit device not vibrating when it receives a notification?</b></p>
     <p>Please be aware that your Fitbit device may actually be receiving notifications, but may not be
        alerting you because it is not vibrating. This can happen in silent mode or do not disturb mode,
-       or may occur on Android 10 devices, because of the way Fit Notifications app creates a new,
+       or may occur on devices running Android 10 and above, because of the way Fit Notifications app creates a new,
        silent notification (placeholder notification).</p>
 
     <p>To fix this problem, you can go to the \"Notifications\" settings for your Fitbit device in the
@@ -355,7 +371,8 @@
     <!-- FAQ #5 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <p><b>Q. このアプリに既知の問題はありますか？</b></p>
     <p>一部のユーザはこのアプリの「プレースホルダ通知の消去」を有効にすると、通知に問題が発生する事象がありました。
-       通知に関する問題が発生している場合は、「通知の消去」の時間を増やす、もしくは消去しないように設定してください。</p>
+       通知に関する問題が発生している場合は、「通知の消去」の時間を増やす、もしくは消去しないように設定してください。
+       また、一部のFitbitデバイスが電話で削除された通知を処理する方法の詳細については、「プレースホルダ通知」に関する上記のFAQを参照してください。</p>
 
 
     <!-- FAQ #6 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

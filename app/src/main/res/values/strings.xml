@@ -344,10 +344,10 @@
     that the application is working correctly! Issues? Please contact us!</p>
     ]]></string>
     <string name="faqs_text" tools:ignore="TypographyDashes"><![CDATA[
-    <!-- FAQ #1 - TODO ABHI - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- FAQ #1 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <p><b>Q. Is my Fitbit device supported?</b></p>
     <p>This app will work with any Fitbit device that <b>supports text notifications</b>. This includes Fitbit Alta, Alta HR, Blaze,
-       Surge, Charge 2, Charge 3, Versa, Ionic and any future Fitbit models that support text notifications.</p>
+       Surge, Charge 2, Charge 3, Versa, Ionic and <b>any future Fitbit models that support text notifications</b>.</p>
 
     <p>Please note that Fitbit, Inc. may modify the behavior of text notifications at any
        time for the compatible devices. This is not in our control.</p>
@@ -365,10 +365,26 @@
 
 
     <!-- FAQ #2.1 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <p><b>Q. What is the placeholder notification and why is it important?</b></p>
+    <p>The placeholder notification is crucial for the proper functioning of this app. For example, if you setup
+       this app to forward notifications from your email app to your Fitbit device, then whenever you receive
+       an email notification, this app creates a corresponding \"Placeholder notification\" which contains
+       the relevant info from your email notification. It is this placeholder notification that is then sent to your
+       Fitbit device, and you see the info contained in your email notification on your Fitbit device.</p>
+
+    <p><b>Note:</b> If your Fitbit device allows you to dismiss the notification on the watch, then the placeholder
+       notification will be dismissed on your phone as well. Similarly, if you dismiss the placeholder notification
+       on your phone either manually, or by using the \"Dismiss placeholder notification\" feature from this
+       app\'s settings, then the notification will get dismissed from your Fitbit device as well. So, please keep this
+       in mind if you enable this setting in the app, as it can cause the notifications to be dismissed automatically
+       after a delay on your Fitbit device as well!</p>
+
+
+    <!-- FAQ #2.2 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <p><b>Q. Why is my Fitbit device not vibrating when it receives a notification?</b></p>
     <p>Please be aware that your Fitbit device may actually be receiving notifications, but may not be
        alerting you because it is not vibrating. This can happen in silent mode or do not disturb mode,
-       or may occur on Android 10 devices, because of the way Fit Notifications app creates a new,
+       or may occur on devices running Android 10 and above, because of the way Fit Notifications app creates a new,
        silent notification (placeholder notification).</p>
 
     <p>To fix this problem, you can go to the \"Notifications\" settings for your Fitbit device in the
@@ -407,7 +423,8 @@
     <p><b>Q. Are there any known issues with this app?</b></p>
     <p>Some users have experienced issues receiving notifications when they enable the \"Dismiss placeholder notification\"
        setting within this app. If you are experiencing issues with notifications, please try increasing the \"Dismiss\" delay,
-       or try disabling this setting completely.</p>
+       or try disabling this setting completely. Also, refer to the above FAQ on \"placeholder notifications\" for more
+       details about how some Fitbit devices deal with notifications being dismissed on the phone.</p>
 
 
     <!-- FAQ #6 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
