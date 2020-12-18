@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "com.abhijitvalluri.android.fitnotifications",
+  "variantName": "processReleaseResources",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "versionCode": 44,
+      "versionName": "2.11.0",
+      "outputFile": "app-release.apk"
+    }
+  ]
+}

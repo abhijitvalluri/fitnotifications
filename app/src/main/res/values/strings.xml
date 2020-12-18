@@ -449,16 +449,16 @@
        killers or at least allow them to keep the \"Fit Notifications\" service running.</p>
     ]]></string>
     <string name="whats_new_text"><![CDATA[
-    <br />
-    <p>Changes in <b>version 2.11.0: TODO: ABHI</b></p>
-    <ol>
-        <li>Updated app with Android 11 platform, and general stability improvements.<br /><br /></li>
-        <li>Fixed issue on Android 10 where the placeholder notification is suppressing the
-            notification sound of the actual notification. <br /><br />
-            If your Fitbit device does not vibrate but still receives notifications, then
-            please try enabling the \"Always Vibrate\" setting in the Fitbit app, under
-            the \"Notifications\" settings for your Fitbit device.</li>
-    </ol>
+    <p style=\"font-size: 140%;\">Changes in <b>version 2.11.0:</b></p>
+    <ul>
+        <li>Updated app to support Android 11 platform, general stability improvements, bug fixes, and UI tweaks.<br /><br /></li>
+        <li>Updated placeholder notification message and added an FAQ entry to explain the importance of placeholder
+            notifications, and clarify potential issues when using the \"Dismiss placeholder notification\" setting in the app.<br /><br /></li>
+        <li>Implemented a proper dark theme! Now the app should look even better when you use a system-wide dark/night theme!<br /><br /></li>
+    </ul>
+    <p><b>Note: </b>If your Fitbit device does not vibrate but still receives notifications, then
+       try enabling the \"Always Vibrate\" setting in the Fitbit app, under the \"Notifications\"
+       settings for your Fitbit device.</p>
     <p><b>Support the developer!</b> You can <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer by visiting the donation web page! More details on the website.</p>
 
     ]]></string>
