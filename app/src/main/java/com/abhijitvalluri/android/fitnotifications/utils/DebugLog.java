@@ -3,7 +3,6 @@ package com.abhijitvalluri.android.fitnotifications.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import androidx.core.content.FileProvider;
 import android.util.Log;
 
 import java.io.File;
@@ -15,6 +14,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+
+import androidx.core.content.FileProvider;
 
 /**
  * Created by Abhijit Valluri on 6/14/2017.

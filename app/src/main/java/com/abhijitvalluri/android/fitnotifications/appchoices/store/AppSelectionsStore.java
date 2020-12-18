@@ -24,10 +24,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.abhijitvalluri.android.fitnotifications.appchoices.models.AppSelection;
 import com.abhijitvalluri.android.fitnotifications.database.AppSelectionCursorWrapper;
 import com.abhijitvalluri.android.fitnotifications.database.AppSelectionDbHelper;
 import com.abhijitvalluri.android.fitnotifications.database.AppSelectionDbSchema.AppChoiceTable;
-import com.abhijitvalluri.android.fitnotifications.appchoices.models.AppSelection;
 
 import java.util.ArrayList;
 import java.util.Collections;

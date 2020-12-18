@@ -18,10 +18,6 @@ package com.abhijitvalluri.android.fitnotifications.setup;
 
 import android.content.Context;
 import android.os.Bundle;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
-import androidx.core.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +26,11 @@ import android.widget.TextView;
 
 import com.abhijitvalluri.android.fitnotifications.R;
 import com.heinrichreimersoftware.materialintro.app.SlideFragment;
+
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
+import androidx.core.content.ContextCompat;
 
 /**
  * Custom Slide Fragment for the app intro.

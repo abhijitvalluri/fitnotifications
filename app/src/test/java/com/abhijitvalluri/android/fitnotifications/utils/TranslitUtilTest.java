@@ -3,15 +3,15 @@ package com.abhijitvalluri.android.fitnotifications.utils;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 
 public class TranslitUtilTest {
 
     @Test
-    public void testRussianTransliteration() throws UnsupportedEncodingException {
+    public void testRussianTransliteration() {
         String replacements =
                 "ъ   '\n" +
                 "ь   '\n" +
@@ -37,7 +37,7 @@ public class TranslitUtilTest {
                 "Ю   Yu\n" +
                 "Я   Ya\n";
 
-        TranslitUtil tu = new TranslitUtil(new ByteArrayInputStream(replacements.getBytes("UTF-8")));
+        TranslitUtil tu = new TranslitUtil(new ByteArrayInputStream(replacements.getBytes(StandardCharsets.UTF_8)));
 
         assertEquals("a b v g d e e zh z i j k l m n o p r s t u f h ts ch sh sch ' y ' e yu ya",
                 tu.transliterate("а б в г д е ё ж з и й к л м н о п р с т у ф х ц ч ш щ ъ ы ь э ю я"));
@@ -48,7 +48,7 @@ public class TranslitUtilTest {
 
 
     @Test
-    public void testEmojiTransliteration() throws UnsupportedEncodingException {
+    public void testEmojiTransliteration() {
         String replacements =
                 "U+263A      :-)\n" +
                 "U+1F641     :-(\n" +
@@ -57,7 +57,7 @@ public class TranslitUtilTest {
                 // skin tone modifier
                 "U+1F3FD\n";
 
-        TranslitUtil tu = new TranslitUtil(new ByteArrayInputStream(replacements.getBytes("UTF-8")));
+        TranslitUtil tu = new TranslitUtil(new ByteArrayInputStream(replacements.getBytes(StandardCharsets.UTF_8)));
 
         assertEquals(":-) o_O \\m/ \uD83D\uDC4D",
                 tu.transliterate("☺ \uD83D\uDE32 \uD83E\uDD18 \uD83D\uDC4D\uD83C\uDFFD"));

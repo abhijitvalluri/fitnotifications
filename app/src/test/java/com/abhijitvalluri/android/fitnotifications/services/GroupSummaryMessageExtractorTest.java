@@ -9,8 +9,9 @@ import com.abhijitvalluri.android.fitnotifications.R;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 
 public class GroupSummaryMessageExtractorTest {

@@ -30,17 +30,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
-import androidx.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import androidx.annotation.NonNull;
-import androidx.core.app.NotificationCompat;
 import android.widget.RemoteViews;
 
 import com.abhijitvalluri.android.fitnotifications.R;
-import com.abhijitvalluri.android.fitnotifications.settings.SettingsActivity;
 import com.abhijitvalluri.android.fitnotifications.appchoices.models.AppSelection;
 import com.abhijitvalluri.android.fitnotifications.appchoices.store.AppSelectionsStore;
+import com.abhijitvalluri.android.fitnotifications.settings.SettingsActivity;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
 import com.abhijitvalluri.android.fitnotifications.utils.DebugLog;
 import com.abhijitvalluri.android.fitnotifications.utils.TranslitUtil;
@@ -53,6 +50,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+import androidx.preference.PreferenceManager;
 
 /**
  * Fit Notification Service

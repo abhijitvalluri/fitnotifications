@@ -23,12 +23,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import androidx.preference.PreferenceManager;
-import androidx.core.content.ContextCompat;
 import android.widget.RemoteViews;
 
 import com.abhijitvalluri.android.fitnotifications.R;
 import com.abhijitvalluri.android.fitnotifications.services.NLService;
+
+import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 
 /**
  * Widget for the Fit Notifications app

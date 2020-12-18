@@ -30,18 +30,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.preference.PreferenceManager;
 import android.provider.Settings;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.NotificationCompat;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
-import com.abhijitvalluri.android.fitnotifications.appchoices.AppChoicesActivity;
 import com.abhijitvalluri.android.fitnotifications.R;
-import com.abhijitvalluri.android.fitnotifications.settings.SettingsActivity;
+import com.abhijitvalluri.android.fitnotifications.appchoices.AppChoicesActivity;
 import com.abhijitvalluri.android.fitnotifications.services.NLService;
+import com.abhijitvalluri.android.fitnotifications.settings.SettingsActivity;
 import com.abhijitvalluri.android.fitnotifications.utils.Constants;
 import com.abhijitvalluri.android.fitnotifications.utils.Func;
 import com.heinrichreimersoftware.materialintro.app.IntroActivity;
@@ -51,6 +47,11 @@ import com.heinrichreimersoftware.materialintro.slide.SimpleSlide;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.preference.PreferenceManager;
 
 /**
  * Intro activity to display a helpful setup tutorial

@@ -18,12 +18,6 @@ package com.abhijitvalluri.android.fitnotifications.appchoices.settings;
 
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.appcompat.widget.SwitchCompat;
-import androidx.fragment.app.FragmentManager;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.format.DateFormat;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,6 +29,12 @@ import android.widget.TextView;
 import com.abhijitvalluri.android.fitnotifications.R;
 import com.abhijitvalluri.android.fitnotifications.appchoices.models.AppSelection;
 import com.abhijitvalluri.android.fitnotifications.utils.Func;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
 
 /**
  * AppSettingsActivity is an activity that allows user to set additional preferences regarding each app
