@@ -32,6 +32,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.abhijitvalluri.android.fitnotifications.R;
@@ -60,6 +61,7 @@ import androidx.preference.PreferenceManager;
  */
 public class NLService extends NotificationListenerService {
 
+    private static final String LOG_TAG = "FitNotif_NLService";
     private static final Integer NOTIFICATION_ID = (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
 
     private static final MessageExtractor sDefaultExtractor = new GenericMessageExtractor();
@@ -84,7 +86,7 @@ public class NLService extends NotificationListenerService {
     private static int mNotifLimitDurationMillis;
 
     private DebugLog mDebugLog;
-    private TranslitUtil translitUtil;
+    private TranslitUtil translitUtil = null;
     private NotificationManager mNotificationManager;
     private AppSelectionsStore mAppSelectionsStore;
     private Map<String, Long> mLastNotificationTimeMap;
@@ -134,16 +136,17 @@ public class NLService extends NotificationListenerService {
         mNumSplitNotifications = preferences.getInt(
                 getString(R.string.num_split_notifications_key), Constants.DEFAULT_NUM_NOTIF);
         mDisplayAppName = preferences.getBoolean(getString(R.string.display_app_name_key), true);
-    }
 
-    @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-
-        // base context is needed to access Resources
         Resources res = getResources();
 
-        translitUtil = new TranslitUtil(res);
+        try {
+            translitUtil = new TranslitUtil(res);
+        } catch (Throwable e) { // FIXME: Ugly hack for now. Next app update should update the ICU4J lib, and/or clean up the transliteration code to fix these horrible errors! :)
+            if (mDebugLog.isEnabled()) {
+                mDebugLog.writeLog("Failed to initialize TranslitUtil class. icu4j Transliterator threw: " + e);
+            }
+            Log.e(LOG_TAG, "Failed to initialize TranslitUtil class. icu4j Transliterator threw: " + e);
+        }
 
         // Telegram
         mMessageExtractors.put("org.telegram.messenger", new GroupSummaryMessageExtractor(res, true));
@@ -314,7 +317,7 @@ public class NLService extends NotificationListenerService {
             notificationText = "[" + mAppSelectionsStore.getAppName(appPackageName) + "] " + notificationText;
         }
 
-        if (mTransliterateNotif) {
+        if (mTransliterateNotif && translitUtil != null) {
             notificationTitle = translitUtil.transliterate(notificationTitle);
             notificationText = translitUtil.transliterate(notificationText);
         }

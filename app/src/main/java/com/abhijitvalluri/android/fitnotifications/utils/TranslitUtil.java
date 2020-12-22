@@ -21,8 +21,8 @@ import java.util.TreeSet;
  * Some Latin symbols returned by ICU4J are not supported by Fitbit.
  * This class takes care of replacing them with the supported ones.
  */
-public class TranslitUtil {
-    private static final Transliterator ANY_TO_LATIN = Transliterator.getInstance("Any-Latin");
+public class TranslitUtil { // FIXME: See below (line 25)
+    private static final Transliterator ANY_TO_LATIN = Transliterator.getInstance("Any-Latin"); // FIXME: Throws a java.lang.NoSuchMethodError exception on SDK 28 and below (potentially buggy ICU4J lib, needs updating)
 
     private static final String TAG = "TranslitUtil";
 

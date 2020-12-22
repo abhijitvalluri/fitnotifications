@@ -449,12 +449,14 @@
        killers or at least allow them to keep the \"Fit Notifications\" service running.</p>
     ]]></string>
     <string name="whats_new_text"><![CDATA[
-    <p style=\"font-size: 140%;\">Changes in <b>version 2.11.0:</b></p>
+    <p style=\"font-size: 140%;\">Changes in <b>version 2.11.1:</b></p>
     <ul>
         <li>Updated app to support Android 11 platform, general stability improvements, bug fixes, and UI tweaks.<br /><br /></li>
         <li>Updated placeholder notification message and added an FAQ entry to explain the importance of placeholder
             notifications, and clarify potential issues when using the \"Dismiss placeholder notification\" setting in the app.<br /><br /></li>
         <li>Implemented a proper dark theme! Now the app should look even better when you use a system-wide dark/night theme!<br /><br /></li>
+        <li><b>Emergency update:</b> Fixed a crash observed in the previous update (2.11.0) that occurs on older Android devices.
+            This crash was due to the transliteration feature not initializing correctly on phones running Android 9 or lower.<br /></li>
     </ul>
     <p><b>Note: </b>If your Fitbit device does not vibrate but still receives notifications, then
        try enabling the \"Always Vibrate\" setting in the Fitbit app, under the \"Notifications\"
