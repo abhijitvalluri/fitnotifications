@@ -26,7 +26,6 @@ public class TransliterationTest {
     }
 
     @Test
-    @Ignore(value = "Transliterating Thai is not supported")
     public void transliterateThai() {
         assertEquals("tạw xạks̄ʹr", Transliterator.getInstance("Any-Latin").transform("ตัวอักษร"));
     }

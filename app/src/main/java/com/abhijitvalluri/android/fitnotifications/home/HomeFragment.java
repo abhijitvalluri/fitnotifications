@@ -386,7 +386,7 @@ public class HomeFragment extends Fragment {
             PendingIntent settingsPendingIntent =
                     stackBuilder.getPendingIntent(
                             0,
-                            PendingIntent.FLAG_UPDATE_CURRENT
+                            PendingIntent.FLAG_UPDATE_CURRENT & PendingIntent.FLAG_IMMUTABLE
                     );
             builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
 

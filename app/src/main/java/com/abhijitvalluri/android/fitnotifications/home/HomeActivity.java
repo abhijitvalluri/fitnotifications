@@ -256,11 +256,7 @@ public class HomeActivity extends AppCompatActivity {
         // Create a new fragment and specify the fragment to show based on nav item clicked
         final Fragment frag;
         Fragment currFrag = getSupportFragmentManager().findFragmentById(R.id.flContent);
-        boolean isInfoFragment = false;
-
-        if (currFrag instanceof InfoFragment) {
-            isInfoFragment = true;
-        }
+        boolean isInfoFragment = currFrag instanceof InfoFragment;
 
         if (menuItem.getItemId() != R.id.send_feedback &&
             menuItem.getItemId() != R.id.nav_donate) {

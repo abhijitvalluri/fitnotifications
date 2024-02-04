@@ -182,18 +182,20 @@ public class AppChoicesActivity extends AppCompatActivity {
         MenuItem filterEnabledAppsItem = menu.findItem(R.id.menu_filter_enabled);
 
         SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setQueryHint(getString(R.string.search_query_hint));
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return recyclerViewShowSearchResult(query);
-            }
+        if (searchView != null) {
+            searchView.setQueryHint(getString(R.string.search_query_hint));
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    return recyclerViewShowSearchResult(query);
+                }
 
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return recyclerViewShowSearchResult(newText);
-            }
-        });
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    return recyclerViewShowSearchResult(newText);
+                }
+            });
+        }
 
         searchItem.setEnabled(false);
         filterEnabledAppsItem.setEnabled(false);

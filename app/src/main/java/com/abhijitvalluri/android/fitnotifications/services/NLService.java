@@ -348,7 +348,7 @@ public class NLService extends NotificationListenerService {
             for (int i = 0; i < slices.size(); i++) {
                 builder.setContentText(slices.get(i));
                 final Notification notif = builder.build();
-                mHandler.postDelayed(() -> mNotificationManager.notify(NOTIFICATION_ID, notif), 500 * (i + 1));
+                mHandler.postDelayed(() -> mNotificationManager.notify(NOTIFICATION_ID, notif), 500L * (i + 1));
             }
         } else { // Do not split the notification
             builder.setContentText(notificationText);

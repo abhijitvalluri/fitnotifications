@@ -26,6 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceDialogFragmentCompat;
 
 public class NumberPickerPreferenceDialog extends PreferenceDialogFragmentCompat {
@@ -54,7 +55,7 @@ public class NumberPickerPreferenceDialog extends PreferenceDialogFragmentCompat
     }
 
     @Override
-    protected View onCreateDialogView(Context context) {
+    protected View onCreateDialogView(@NonNull Context context) {
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         layoutParams.gravity = Gravity.CENTER;
         layoutParams.weight = 1;
@@ -91,7 +92,7 @@ public class NumberPickerPreferenceDialog extends PreferenceDialogFragmentCompat
     }
 
     @Override
-    protected void onBindDialogView(View view) {
+    protected void onBindDialogView(@NonNull View view) {
         super.onBindDialogView(view);
         numberPicker.setMinValue(minValue);
         numberPicker.setMaxValue(maxValue);

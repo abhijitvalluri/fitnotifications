@@ -125,7 +125,7 @@ public class AppSelectionDbHelper extends SQLiteOpenHelper {
         }
     }
 
-        @Override
+    @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.d("DB_UPGRADE", "Updating " + AppChoiceTable.NAME + " table to version " +
                             newVersion + " from version " + oldVersion);

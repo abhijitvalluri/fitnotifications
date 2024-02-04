@@ -188,7 +188,6 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
 
     /**
      * Returns the index of the first new message in the <code>lines</code>.
-     *
      * The index is negative in case the new messages are from several different senders.
      * In such case it can be converted to the actual position like this: <code>-pos - 1</code>.
      * This is needed to make sure the returned value is negative even when the first message is at position 0.
