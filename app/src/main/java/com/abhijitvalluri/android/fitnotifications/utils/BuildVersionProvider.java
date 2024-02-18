@@ -1,2 +1,5 @@
-package com.abhijitvalluri.android.fitnotifications.utils;public interface BuildVersionProvider {
+package com.abhijitvalluri.android.fitnotifications.utils;
+
+public interface BuildVersionProvider {
+    int currentVersion();
 }

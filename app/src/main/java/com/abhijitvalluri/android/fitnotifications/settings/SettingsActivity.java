@@ -91,7 +91,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onDisplayPreferenceDialog(Preference preference) {
+        public void onDisplayPreferenceDialog(@NonNull Preference preference) {
             if (getParentFragmentManager().findFragmentByTag(DIALOG_FRAGMENT_TAG) != null) {
                 return;
             }
@@ -203,6 +203,8 @@ public class SettingsActivity extends AppCompatActivity {
 
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (key == null) return;
+
             if (key.equals(getString(R.string.dismiss_placeholder_notif_key))
                     || key.equals(getString(R.string.placeholder_dismiss_delay_key))) {
                 boolean dismissNotif = mPreferences.getBoolean(

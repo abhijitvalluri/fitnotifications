@@ -7,7 +7,9 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.abhijitvalluri.android.fitnotifications.R;
+import com.abhijitvalluri.android.fitnotifications.utils.BuildVersionProvider;
 import com.abhijitvalluri.android.fitnotifications.utils.DebugLog;
+import com.abhijitvalluri.android.fitnotifications.utils.DefaultBuildVersionProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,23 +30,29 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
     private final Pattern[] mAllNewMessagesPatterns;
     private final Pattern[] mNewMessagesMultipleChatsPatterns;
     private final Pattern[] mPhotoMessagePatterns;
+    private final BuildVersionProvider mBuildVersionProvider;
 
     // some apps (Telegram) put new messages at the beginning of EXTRA_TEXT_LINES, other (WhatsApp) at the end
     private final boolean mNewMessagesFirst;
     private int mLastSeenMessageHash = 0;
 
 
-    public GroupSummaryMessageExtractor(boolean newMessagesFirst) {
+    public GroupSummaryMessageExtractor(boolean newMessagesFirst, BuildVersionProvider buildVersionProvider) {
         mNewMessagesFirst = newMessagesFirst;
+        mBuildVersionProvider = buildVersionProvider;
 
         mAllNewMessagesPatterns = new Pattern[] { NEW_MESSAGES, NEW_MESSAGES_MULTIPLE_CHATS };
         mNewMessagesMultipleChatsPatterns = new Pattern[] { NEW_MESSAGES_MULTIPLE_CHATS };
         mPhotoMessagePatterns = new Pattern[] { PHOTO_MESSAGE };
     }
 
-
     public GroupSummaryMessageExtractor(Resources res, boolean newMessagesFirst) {
+        this(res, newMessagesFirst, new DefaultBuildVersionProvider());
+    }
+
+    public GroupSummaryMessageExtractor(Resources res, boolean newMessagesFirst, BuildVersionProvider buildVersionProvider) {
         mNewMessagesFirst = newMessagesFirst;
+        mBuildVersionProvider = buildVersionProvider;
 
         // avoid doubling the patterns in case of missing translation
         Pattern newMessagesPatternLocalized =
@@ -163,7 +171,7 @@ class GroupSummaryMessageExtractor extends BasicMessageExtractor {
             if (isLoggingEnabled()) {
                 debugLog.writeLog("Notification is not a group summary.");
             }
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT_WATCH) { // < 20, i.e. == 19
+            if (mBuildVersionProvider.currentVersion() < Build.VERSION_CODES.KITKAT_WATCH) { // < 20, i.e. == 19
                 if (isLoggingEnabled()) {
                     debugLog.writeLog("App is running on Kitkat device. " +
                             "No group summary available on SDK 19. Use generic extractor");

@@ -26,6 +26,7 @@
     <string name="test_notification_sent">Test notification sent</string>
     <string name="enable_notification_access">Enable Notification Access</string>
     <string name="disable_notification_access">Disable Notification Access</string>
+    <string name="enable_app_notifications">Enable App Notifications</string>
     <string name="start_service">Start Service</string>
     <string name="turn_on_service">TURN ON</string>
     <string name="turn_off_service">TURN OFF</string>
@@ -36,6 +37,7 @@
     <!-- Home screen -->
     <string name="service_state">Notification service state: </string>
     <string name="enable_logging">Enable logging: </string>
+    <string name="notification_permission_toast">This app requires your permission to send notifications to function properly</string>
 
     <!-- Intro Strings Activity -->
     <string name="intro_get_started_button">Get started</string>
@@ -50,6 +52,19 @@
 
     <string name="intro_enable_access_success_title">Great, you already enabled notification access!</string>
     <string name="intro_enable_access_success_desc">This app requires notification access to work. And looks like you have already enabled it! Move on to the next step!</string>
+
+    <string name="intro_enable_app_notifications_title">Allow this app to send notifications</string>
+    <string name="intro_enable_app_notifications_desc">You must allow the Fit Notifications app to send you notifications in order for this app to function properly. Since the key functionality of this app is to send notifications to your Fitbit device, this permission is required for this app to function properly.</string>
+
+    <string name="intro_enable_app_notifications_update_title">App notifications enabled!</string>
+    <string name="intro_enable_app_notifications_update_desc">Nice, you granted this app permission to show notifications! Let\'s move on to the next step.</string>
+
+    <string name="intro_enable_app_notifications_update_fail_dialog_title">App notification permission is required!</string>
+    <string name="intro_enable_app_notifications_update_fail_dialog_message">Please grant this app permission to show notifications so that it can function properly! You can enable notifications for this app by going to the app\'s settings by clicking the button below.</string>
+    <string name="intro_enable_app_notifications_settings">Open Settings</string>
+
+    <string name="intro_enable_app_notifications_success_title">Great, you already enabled app notifications!</string>
+    <string name="intro_enable_app_notifications_success_desc">This app requires your permission to send notifications to function properly. And looks like you have already allowed this permission! Move on to the next step!</string>
 
     <string name="intro_get_fitbit_title">Install the official Fitbit app!</string>
     <string name="intro_get_fitbit_desc">Looks like you don\'t have the official Fitbit app installed. We\'ll need that, so let\'s install it by clicking the button below.</string>

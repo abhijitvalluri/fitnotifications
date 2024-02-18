@@ -1,7 +1,6 @@
 package com.abhijitvalluri.android.fitnotifications.services;
 
 import android.app.Notification;
-import android.os.Build;
 import android.os.Bundle;
 
 import com.abhijitvalluri.android.fitnotifications.utils.DebugLog;
@@ -22,11 +21,7 @@ class BasicMessageExtractor extends MessageExtractor {
 
         CharSequence notificationTitle = extras.getCharSequence(Notification.EXTRA_TITLE);
         CharSequence notificationText = extras.getCharSequence(Notification.EXTRA_TEXT);
-        CharSequence notificationBigText = null;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            notificationBigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
-        }
+        CharSequence notificationBigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT);
 
         if (startsWith(notificationBigText, notificationText)) {
             // if notification "big text" starts with the short text - just use the big one

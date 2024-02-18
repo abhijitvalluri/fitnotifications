@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -99,8 +98,7 @@ public class NLService extends NotificationListenerService {
         mAppSelectionsStore = AppSelectionsStore.get(this);
         mDebugLog = DebugLog.get(this);
         mLastNotificationTimeMap = new HashMap<>();
-        mInterruptionFilter = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-                              ? getCurrentInterruptionFilter() : 0;
+        mInterruptionFilter = getCurrentInterruptionFilter();
 
         mSelectedAppsPackageNames = mAppSelectionsStore.getSelectedAppsPackageNames();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -338,10 +336,8 @@ public class NLService extends NotificationListenerService {
                 .setContentIntent(createSettingsIntent())
                 .setAutoCancel(true);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // prevent notification from appearing on the lock screen
-            builder.setVisibility(NotificationCompat.VISIBILITY_SECRET);
-        }
+        // prevent notification from appearing on the lock screen
+        builder.setVisibility(NotificationCompat.VISIBILITY_SECRET);
 
         if (mSplitNotification && notificationText.length() > mFitbitNotifCharLimit) {
             List<String> slices = sliceNotificationText(notificationText);
@@ -361,13 +357,7 @@ public class NLService extends NotificationListenerService {
         }
 
         if (mDismissRelayedNotif) {
-            mHandler.postDelayed(() -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    cancelNotification(sbn.getKey());
-                } else {
-                    cancelNotification(appPackageName, sbn.getTag(), sbn.getId());
-                }
-            }, mRelayedNotifDismissDelayMillis);
+            mHandler.postDelayed(() -> cancelNotification(sbn.getKey()), mRelayedNotifDismissDelayMillis);
         }
 
         if (mDebugLog.isEnabled()) {
@@ -396,8 +386,7 @@ public class NLService extends NotificationListenerService {
                                      NotificationListenerService.RankingMap rankingMap) {
 
         if (mForwardOnlyPriorityNotifs) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
-                    mInterruptionFilter == INTERRUPTION_FILTER_PRIORITY) {
+            if (mInterruptionFilter == INTERRUPTION_FILTER_PRIORITY) {
                 String packageName = sbn.getPackageName();
                 String rankingKey = null;
                 for (String s : rankingMap.getOrderedKeys()) {
@@ -443,7 +432,7 @@ public class NLService extends NotificationListenerService {
         stackBuilder.addParentStack(SettingsActivity.class);
         // Adds the Intent that starts the Activity to the top of the stack
         stackBuilder.addNextIntent(settingsIntent);
-        return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     /**
@@ -498,14 +487,8 @@ public class NLService extends NotificationListenerService {
     private boolean isScreenOn() {
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            // API >= 20
-            return pm.isInteractive();
-        }
-
-        // API <= 19, use deprecated
-        //noinspection deprecation
-        return pm.isScreenOn();
+        // API >= 20
+        return pm.isInteractive();
     }
 
     /**

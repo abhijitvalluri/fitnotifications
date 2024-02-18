@@ -132,7 +132,7 @@ public class AppSelectionsStore {
         ContentValues values = getContentValues(appSelection);
 
         if (mDatabase.insertOrThrow(AppChoiceTable.NAME, null, values) == -1) {
-            throw new SQLException("An error occurred while inserting " + values.toString());
+            throw new SQLException("An error occurred while inserting " + values);
         }
     }
 

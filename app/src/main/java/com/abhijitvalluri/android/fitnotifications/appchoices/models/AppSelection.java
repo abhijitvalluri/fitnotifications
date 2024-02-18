@@ -211,7 +211,7 @@ public class AppSelection implements Parcelable {
     }
 
     @SuppressWarnings("unused")
-    public static final Parcelable.Creator<AppSelection> CREATOR = new Parcelable.Creator<AppSelection>() {
+    public static final Parcelable.Creator<AppSelection> CREATOR = new Parcelable.Creator<>() {
         @Override
         public AppSelection createFromParcel(Parcel in) {
             return new AppSelection(in);

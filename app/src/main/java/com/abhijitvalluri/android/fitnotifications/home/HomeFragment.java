@@ -16,6 +16,7 @@
 
 package com.abhijitvalluri.android.fitnotifications.home;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.app.NotificationManager;
@@ -28,6 +29,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
@@ -57,6 +59,7 @@ import java.io.InputStreamReader;
 import java.util.Set;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.NotificationCompat;
@@ -222,6 +225,17 @@ public class HomeFragment extends Fragment {
         return v;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED
+        ) {
+            Toast.makeText(mContext, getString(R.string.notification_permission_toast), Toast.LENGTH_LONG).show();
+            startActivity(AppIntroActivity.newIntentForRequestingNotificationPermission(mContext), LAUNCH_ACTIVITY_ANIM_BUNDLE);
+        }
+    }
+
     @SuppressLint("SetTextI18n")
     private void sendDebugLogEmail(final StringBuilder body) {
         final LinearLayout layout = new LinearLayout(mContext);
@@ -297,8 +311,6 @@ public class HomeFragment extends Fragment {
         updateNotificationAccessText();
     }
 
-    // TODO: implement proper callbacks where possible
-    //TODO: use Google Analytics! HIGH PRIORITY!
     public static void onPlaceholderNotifSettingUpdated(boolean dismissNotif, int delaySeconds) {
         mDismissPlaceholderNotif = dismissNotif;
         mPlaceholderNotifDismissDelayMillis = delaySeconds*1000;
@@ -356,6 +368,14 @@ public class HomeFragment extends Fragment {
 
     private void initializeDemoButton() {
         mDemoTV.setOnClickListener(v -> {
+            if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.POST_NOTIFICATIONS) !=
+                    PackageManager.PERMISSION_GRANTED
+            ) {
+                Toast.makeText(mContext, getString(R.string.notification_permission_toast), Toast.LENGTH_LONG).show();
+                startActivity(AppIntroActivity.newIntentForRequestingNotificationPermission(mContext), LAUNCH_ACTIVITY_ANIM_BUNDLE);
+                return;
+            }
+
             Bundle newExtra = new Bundle();
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext, Constants.NOTIFICATION_CHANNEL_ID_CURRENT);
@@ -386,7 +406,7 @@ public class HomeFragment extends Fragment {
             PendingIntent settingsPendingIntent =
                     stackBuilder.getPendingIntent(
                             0,
-                            PendingIntent.FLAG_UPDATE_CURRENT & PendingIntent.FLAG_IMMUTABLE
+                            PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
                     );
             builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
 

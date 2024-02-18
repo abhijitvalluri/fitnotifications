@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.Manifest;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -48,9 +49,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
 /**
@@ -63,10 +68,13 @@ public class AppIntroActivity extends IntroActivity {
     private static final int INSTALL_FITBIT_INTENT = 2;
     private static final int LAUNCH_FITBIT_INTENT = 3;
     private static final int APP_CHOICES_INTENT = 4;
+    private static final int NOTIF_PERMISSION_REQUEST_CODE = 100;
+    private static final String EXTRA_REQUEST_NOTIFICATION_PERMISSION = "ExtraRequestNotificationPermission";
 
     private Bundle LAUNCH_ACTIVITY_ANIM_BUNDLE;
 
-    private FragmentSlide mEnableNotificationSlide;
+    private FragmentSlide mEnableNotificationAccessSlide;
+    private FragmentSlide mEnableAppNotificationsSlide;
     private FragmentSlide mFitbitInstallSlide;
     private FragmentSlide mLaunchFitbitSlide;
     private FragmentSlide mAppChoicesSlide;
@@ -74,6 +82,12 @@ public class AppIntroActivity extends IntroActivity {
 
     public static Intent newIntent(Context packageContext) {
         return new Intent(packageContext, AppIntroActivity.class);
+    }
+
+    public static Intent newIntentForRequestingNotificationPermission(Context packageContext) {
+        Intent intent = new Intent(packageContext, AppIntroActivity.class);
+        intent.putExtra(EXTRA_REQUEST_NOTIFICATION_PERMISSION, true);
+        return intent;
     }
 
     private void addIntroSlide() {
@@ -114,7 +128,7 @@ public class AppIntroActivity extends IntroActivity {
                     .setDescriptionText(R.string.intro_enable_access_success_desc)
                     .setImage(R.drawable.intro_enable_notifications);
 
-            mEnableNotificationSlide = new FragmentSlide.Builder()
+            mEnableNotificationAccessSlide = new FragmentSlide.Builder()
                     .fragment(fragment)
                     .background(R.color.purple_intro)
                     .backgroundDark(R.color.purpleDark_intro)
@@ -126,7 +140,7 @@ public class AppIntroActivity extends IntroActivity {
                     .setDescriptionText(R.string.intro_enable_access_desc)
                     .setImage(R.drawable.intro_enable_notifications);
 
-            mEnableNotificationSlide = new FragmentSlide.Builder()
+            mEnableNotificationAccessSlide = new FragmentSlide.Builder()
                     .fragment(fragment)
                     .background(R.color.purple_intro)
                     .backgroundDark(R.color.purpleDark_intro)
@@ -144,7 +158,54 @@ public class AppIntroActivity extends IntroActivity {
                     .build();
         }
 
-        addSlide(mEnableNotificationSlide);
+        addSlide(mEnableNotificationAccessSlide);
+    }
+
+    private void addEnableAppNotificationsSlide() {
+        // This is only necessary for API level >= 33 (TIRAMISU)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            CustomSlideFragment fragment = new CustomSlideFragment();
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                    PackageManager.PERMISSION_GRANTED
+            ) {
+                fragment.setCanGoForward(true)
+                        .setCanGoBackward(true)
+                        .setTitleText(R.string.intro_enable_app_notifications_success_title)
+                        .setDescriptionText(R.string.intro_enable_app_notifications_success_desc)
+                        .setImage(R.drawable.intro_enable_app_notifications);
+
+                mEnableAppNotificationsSlide = new FragmentSlide.Builder()
+                        .fragment(fragment)
+                        .background(R.color.purple_intro)
+                        .backgroundDark(R.color.purpleDark_intro)
+                        .build();
+            } else {
+                fragment.setCanGoForward(false)
+                        .setCanGoBackward(true)
+                        .setTitleText(R.string.intro_enable_app_notifications_title)
+                        .setDescriptionText(R.string.intro_enable_app_notifications_desc)
+                        .setImage(R.drawable.intro_enable_app_notifications);
+
+                mEnableAppNotificationsSlide = new FragmentSlide.Builder()
+                        .fragment(fragment)
+                        .background(R.color.purple_intro)
+                        .backgroundDark(R.color.purpleDark_intro)
+                        .buttonCtaLabel(R.string.enable_app_notifications)
+                        .buttonCtaClickListener(v -> {
+                            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+                                    PackageManager.PERMISSION_GRANTED) {
+                                ActivityCompat.requestPermissions(
+                                        this,
+                                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                                        NOTIF_PERMISSION_REQUEST_CODE);
+                            }
+                        })
+                        .build();
+            }
+
+
+            addSlide(mEnableAppNotificationsSlide);
+        }
     }
 
     private void addDemoSlide() {
@@ -199,7 +260,7 @@ public class AppIntroActivity extends IntroActivity {
                     PendingIntent settingsPendingIntent =
                             stackBuilder.getPendingIntent(
                                     0,
-                                    PendingIntent.FLAG_UPDATE_CURRENT
+                                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
                             );
                     builder.setContentIntent(settingsPendingIntent).setAutoCancel(true);
 
@@ -284,6 +345,15 @@ public class AppIntroActivity extends IntroActivity {
                         R.transition.left_out).toBundle();
         mPackageManager = getPackageManager();
 
+        boolean launchForNotificationPermission = getIntent().getBooleanExtra(EXTRA_REQUEST_NOTIFICATION_PERMISSION, false);
+        if (launchForNotificationPermission) {
+            addEnableAppNotificationsSlide();
+            setButtonBackVisible(false);
+            setButtonNextVisible(true);
+            setButtonNextFunction(BUTTON_NEXT_FUNCTION_NEXT_FINISH);
+            return;
+        }
+
         boolean setupDone = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.done_first_launch_key), false);
         if (setupDone) { // Setup already finished once. So, this is repeat setup
             new AlertDialog.Builder(AppIntroActivity.this)
@@ -302,6 +372,9 @@ public class AppIntroActivity extends IntroActivity {
 
         // Enable notifications slide
         addEnableNotificationAccessSlide();
+
+        // Enable app notifications slide, for API level >= 33 (TIRAMISU)
+        addEnableAppNotificationsSlide();
 
         // Fitbit setup - 3 steps (3 slides)
         // Step 1
@@ -362,10 +435,20 @@ public class AppIntroActivity extends IntroActivity {
                         getEnabledListenerPackages(this);
                 if (EnabledListenerPackagesSet.contains(Constants.PACKAGE_NAME)
                         && EnabledListenerPackagesSet.contains(Constants.FITBIT_PACKAGE_NAME)) {
-                    CustomSlideFragment fragment = (CustomSlideFragment) mEnableNotificationSlide.getFragment();
+                    CustomSlideFragment fragment = (CustomSlideFragment) mEnableNotificationAccessSlide.getFragment();
                     fragment.setCanGoForward(true)
                             .setTitleText(R.string.intro_enable_access_update_title)
                             .setDescriptionText(R.string.intro_enable_access_update_desc);
+                }
+                return;
+            }
+            case NOTIF_PERMISSION_REQUEST_CODE: {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                        PackageManager.PERMISSION_GRANTED) {
+                    CustomSlideFragment fragment = (CustomSlideFragment) mEnableAppNotificationsSlide.getFragment();
+                    fragment.setCanGoForward(true)
+                            .setTitleText(R.string.intro_enable_app_notifications_update_title)
+                            .setDescriptionText(R.string.intro_enable_app_notifications_update_desc);
                 }
                 return;
             }
@@ -388,6 +471,35 @@ public class AppIntroActivity extends IntroActivity {
                 return;
             }
             default:
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == NOTIF_PERMISSION_REQUEST_CODE) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                CustomSlideFragment fragment = (CustomSlideFragment) mEnableAppNotificationsSlide.getFragment();
+                fragment.setCanGoForward(true)
+                        .setTitleText(R.string.intro_enable_app_notifications_update_title)
+                        .setDescriptionText(R.string.intro_enable_app_notifications_update_desc);
+            } else {
+                new AlertDialog.Builder(AppIntroActivity.this)
+                        .setTitle(getString(R.string.intro_enable_app_notifications_update_fail_dialog_title))
+                        .setMessage(getString(R.string.intro_enable_app_notifications_update_fail_dialog_message))
+                        .setPositiveButton(R.string.intro_enable_app_notifications_settings, (dialog, which) -> {
+                            Intent intent = new Intent();
+                            intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                            intent.putExtra(Settings.EXTRA_APP_PACKAGE, Constants.PACKAGE_NAME);
+                            startActivityForResult(intent, NOTIF_PERMISSION_REQUEST_CODE);
+                        })
+                        .create()
+                        .show();
+            }
         }
     }
 
@@ -426,8 +538,12 @@ public class AppIntroActivity extends IntroActivity {
                     try {
                         Intent i = mPackageManager.
                                 getLaunchIntentForPackage(Constants.FITBIT_PACKAGE_NAME);
-                        startActivityForResult(i, LAUNCH_FITBIT_INTENT);
 
+                        if (i != null) {
+                            startActivityForResult(i, LAUNCH_FITBIT_INTENT);
+                        } else {
+                            Toast.makeText(AppIntroActivity.this, getString(R.string.intro_get_fitbit_toast_text3), Toast.LENGTH_LONG).show();
+                        }
                     } catch (ActivityNotFoundException e) {
                         Toast.makeText(AppIntroActivity.this, getString(R.string.intro_get_fitbit_toast_text3), Toast.LENGTH_LONG).show();
                     }

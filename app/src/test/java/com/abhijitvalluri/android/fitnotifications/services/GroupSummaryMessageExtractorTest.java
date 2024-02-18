@@ -2,9 +2,11 @@ package com.abhijitvalluri.android.fitnotifications.services;
 
 import android.app.Notification;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.abhijitvalluri.android.fitnotifications.R;
+import com.abhijitvalluri.android.fitnotifications.utils.BuildVersionProvider;
 
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -19,10 +21,11 @@ public class GroupSummaryMessageExtractorTest {
     private static final int SUMMARY = Notification.FLAG_GROUP_SUMMARY;
     private static final int REGULAR = 0;
 
+    private static final BuildVersionProvider MOCK_BUILD_VERSION = () -> Build.VERSION_CODES.CUR_DEVELOPMENT;
 
     @Test
     public void testTelegramStyleMessagesPattern() {
-        MessageExtractor extractor = new GroupSummaryMessageExtractor(true);
+        MessageExtractor extractor = new GroupSummaryMessageExtractor(true, MOCK_BUILD_VERSION);
 
         assertTitleAndTextEqual("Alice", null,
                 getTitleAndText(extractor, REGULAR, "Alice", "Hello there!"));
@@ -72,7 +75,7 @@ public class GroupSummaryMessageExtractorTest {
 
     @Test
     public void testWhatsAppStyleMessagesPattern() {
-        MessageExtractor extractor = new GroupSummaryMessageExtractor(false);
+        MessageExtractor extractor = new GroupSummaryMessageExtractor(false, MOCK_BUILD_VERSION);
 
         assertTitleAndTextEqual("Alice", "Hello there!",
                 getTitleAndText(extractor, SUMMARY, "Alice", "Hello there!"));
@@ -122,7 +125,7 @@ public class GroupSummaryMessageExtractorTest {
 
     @Test
     public void testSameMessageInMultipleChats() {
-        MessageExtractor extractor = new GroupSummaryMessageExtractor(false);
+        MessageExtractor extractor = new GroupSummaryMessageExtractor(false, MOCK_BUILD_VERSION);
 
         assertTitleAndTextEqual("Alice", "Ok",
                 getTitleAndText(extractor, SUMMARY, "Alice", "Ok"));
@@ -140,7 +143,7 @@ public class GroupSummaryMessageExtractorTest {
 
     @Test
     public void testRepeatedText() {
-        MessageExtractor extractor = new GroupSummaryMessageExtractor(false);
+        MessageExtractor extractor = new GroupSummaryMessageExtractor(false, MOCK_BUILD_VERSION);
 
         assertTitleAndTextEqual("Bob", "Ok",
                 getTitleAndText(extractor, SUMMARY, "Bob", "Ok"));
@@ -166,7 +169,7 @@ public class GroupSummaryMessageExtractorTest {
                 .when(resourcesMock).getString(R.string.new_messages_multiple_chats_summary_pattern);
 
 
-        MessageExtractor extractor = new GroupSummaryMessageExtractor(resourcesMock, false);
+        MessageExtractor extractor = new GroupSummaryMessageExtractor(resourcesMock, false, MOCK_BUILD_VERSION);
 
         assertTitleAndTextEqual("Alice", "Marco",
                 getTitleAndText(extractor, SUMMARY, "Alice", "Marco"));
@@ -189,7 +192,7 @@ public class GroupSummaryMessageExtractorTest {
 
     @Test
     public void testPhotoMessages() {
-        MessageExtractor extractor = new GroupSummaryMessageExtractor(false);
+        MessageExtractor extractor = new GroupSummaryMessageExtractor(false, MOCK_BUILD_VERSION);
 
         // Telegram
         assertTitleAndTextEqual("Alice", "sent you a photo",

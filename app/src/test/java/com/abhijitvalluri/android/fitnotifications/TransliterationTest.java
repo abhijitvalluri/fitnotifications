@@ -2,7 +2,6 @@ package com.abhijitvalluri.android.fitnotifications;
 
 import com.ibm.icu.text.Transliterator;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

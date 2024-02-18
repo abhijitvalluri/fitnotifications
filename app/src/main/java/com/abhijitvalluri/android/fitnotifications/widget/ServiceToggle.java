@@ -103,6 +103,6 @@ public class ServiceToggle extends AppWidgetProvider {
     private PendingIntent getPendingSelfIntent(Context context, int appWidgetId) {
         Intent intent = new Intent(context, getClass());
         intent.setAction(ServiceToggle.TOGGLE_CLICKED);
-        return PendingIntent.getBroadcast(context, appWidgetId, intent, PendingIntent.FLAG_IMMUTABLE);
+        return PendingIntent.getBroadcast(context, appWidgetId, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }
