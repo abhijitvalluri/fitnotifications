@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  *   Copyright (C) 2009-2016, International Business Machines
@@ -26,7 +26,7 @@ import com.ibm.icu.util.ICUUncheckedIOException;
  * The primary functions are to produce a normalized string and to detect whether
  * a string is already normalized.
  * The most commonly used normalization forms are those defined in
- * http://www.unicode.org/unicode/reports/tr15/
+ * https://www.unicode.org/reports/tr15/
  * However, this API supports additional normalization forms for specialized purposes.
  * For example, NFKC_Casefold is provided via getInstance("nfkc_cf", COMPOSE)
  * and can be used in implementations of UTS #46.
@@ -65,7 +65,7 @@ public abstract class Normalizer2 {
      * Constants for normalization modes.
      * For details about standard Unicode normalization forms
      * and about the algorithms which are also used with custom mapping tables
-     * see http://www.unicode.org/unicode/reports/tr15/
+     * see https://www.unicode.org/reports/tr15/
      * @stable ICU 4.4
      */
     public enum Mode {
@@ -74,7 +74,7 @@ public abstract class Normalizer2 {
          * Same as standard NFC when using an "nfc" instance.
          * Same as standard NFKC when using an "nfkc" instance.
          * For details about standard Unicode normalization forms
-         * see http://www.unicode.org/unicode/reports/tr15/
+         * see https://www.unicode.org/reports/tr15/
          * @stable ICU 4.4
          */
         COMPOSE,
@@ -83,7 +83,7 @@ public abstract class Normalizer2 {
          * Same as standard NFD when using an "nfc" instance.
          * Same as standard NFKD when using an "nfkc" instance.
          * For details about standard Unicode normalization forms
-         * see http://www.unicode.org/unicode/reports/tr15/
+         * see https://www.unicode.org/reports/tr15/
          * @stable ICU 4.4
          */
         DECOMPOSE,
@@ -157,14 +157,31 @@ public abstract class Normalizer2 {
     }
 
     /**
-     * Returns a Normalizer2 instance for Unicode NFKC_Casefold normalization.
-     * Same as getInstance(null, "nfkc_cf", Mode.COMPOSE).
+     * Returns a Normalizer2 instance for Unicode toNFKC_Casefold() normalization
+     * which is equivalent to applying the NFKC_Casefold mappings and then NFC.
+     * See https://www.unicode.org/reports/tr44/#NFKC_Casefold
+     *
+     * <p>Same as getInstance(null, "nfkc_cf", Mode.COMPOSE).
      * Returns an unmodifiable singleton instance.
      * @return the requested Normalizer2, if successful
      * @stable ICU 49
      */
     public static Normalizer2 getNFKCCasefoldInstance() {
         return Norm2AllModes.getNFKC_CFInstance().comp;
+    }
+
+    /**
+     * Returns a Normalizer2 instance for a variant of Unicode toNFKC_Casefold() normalization
+     * which is equivalent to applying the NFKC_Simple_Casefold mappings and then NFC.
+     * See https://www.unicode.org/reports/tr44/#NFKC_Simple_Casefold
+     *
+     * <p>Same as getInstance(null, "nfkc_scf", Mode.COMPOSE).
+     * Returns an unmodifiable singleton instance.
+     * @return the requested Normalizer2, if successful
+     * @draft ICU 74
+     */
+    public static Normalizer2 getNFKCSimpleCasefoldInstance() {
+        return Norm2AllModes.getNFKC_SCFInstance().comp;
     }
 
     /**
@@ -184,7 +201,7 @@ public abstract class Normalizer2 {
      * for non-ICU data as well.
      * <p>Any {@link java.io.IOException} is wrapped into a {@link com.ibm.icu.util.ICUUncheckedIOException}.
      * @param data the binary, big-endian normalization (.nrm file) data, or null for ICU data
-     * @param name "nfc" or "nfkc" or "nfkc_cf" or name of custom data file
+     * @param name "nfc" or "nfkc" or "nfkc_cf" or "nfkc_scf" or name of custom data file
      * @param mode normalization mode (compose or decompose etc.)
      * @return the requested Normalizer2, if successful
      * @stable ICU 4.4
@@ -223,8 +240,10 @@ public abstract class Normalizer2 {
             if(spanLength==src.length()) {
                 return (String)src;
             }
-            StringBuilder sb=new StringBuilder(src.length()).append(src, 0, spanLength);
-            return normalizeSecondAndAppend(sb, src.subSequence(spanLength, src.length())).toString();
+            if (spanLength != 0) {
+                StringBuilder sb=new StringBuilder(src.length()).append(src, 0, spanLength);
+                return normalizeSecondAndAppend(sb, src.subSequence(spanLength, src.length())).toString();
+            }
         }
         return normalize(src, new StringBuilder(src.length())).toString();
     }

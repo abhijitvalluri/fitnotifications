@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2014-2016, International Business Machines Corporation and
@@ -64,6 +64,14 @@ public class KeyTypeData {
         }
     }
 
+    private static class ScriptCodeTypeHandler extends SpecialTypeHandler {
+        private static final Pattern pat = Pattern.compile("[a-zA-Z]{4}(-[a-zA-Z]{4})*");
+        @Override
+        boolean isWellFormed(String value) {
+            return pat.matcher(value).matches();
+        }
+    }
+
     private static class SubdivisionKeyValueTypeHandler extends SpecialTypeHandler {
         private static final Pattern pat = Pattern.compile("([a-zA-Z]{2}|[0-9]{3})");
         @Override
@@ -84,6 +92,7 @@ public class KeyTypeData {
         CODEPOINTS(new CodepointsTypeHandler()),
         REORDER_CODE(new ReorderCodeTypeHandler()),
         RG_KEY_VALUE(new RgKeyValueTypeHandler()),
+        SCRIPT_CODE(new ScriptCodeTypeHandler()),
         SUBDIVISION_CODE(new SubdivisionKeyValueTypeHandler()),
         PRIVATE_USE(new PrivateUseKeyValueTypeHandler()),
         ;
@@ -210,10 +219,11 @@ public class KeyTypeData {
     }
 
     private static void initFromResourceBundle() {
-        UResourceBundle keyTypeDataRes = UResourceBundle.getBundleInstance(
+        UResourceBundle keyTypeDataRes = ICUResourceBundle.getBundleInstance(
                 ICUData.ICU_BASE_NAME,
                 "keyTypeData",
-                ICUResourceBundle.ICU_DATA_CLASS_LOADER);
+                ICUResourceBundle.ICU_DATA_CLASS_LOADER,
+                ICUResourceBundle.OpenType.DIRECT);
 
         getKeyInfo(keyTypeDataRes.get("keyInfo"));
         getTypeInfo(keyTypeDataRes.get("typeInfo"));
@@ -411,6 +421,7 @@ keyInfo{
     }
     valueType{
         ca{"incremental"}
+        h0{"single"}
         kr{"multiple"}
         vt{"multiple"}
         x0{"any"}

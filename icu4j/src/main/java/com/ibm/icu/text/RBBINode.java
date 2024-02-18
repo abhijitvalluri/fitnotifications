@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /********************************************************************
  * COPYRIGHT:
  * Copyright (c) 2001-2016, International Business Machines Corporation and
@@ -82,7 +82,7 @@ class RBBINode {
     int           fLastPos;             //  Last position in the rule source string
                                         //    of any text associated with this node.
                                         //    If there's a right child, this will be the same
-                                        //    as that child's last postion.
+                                        //    as that child's last position.
 
     boolean      fNullable;            //  See Aho DFA table generation algorithm
     int           fVal;                 // For leafChar nodes, the value.
@@ -90,7 +90,7 @@ class RBBINode {
                                         //   corresponds to columns in the final
                                         //   state transition table.
 
-    boolean      fLookAheadEnd;        // For endMark nodes, set TRUE if
+    boolean      fLookAheadEnd;        // For endMark nodes, set true if
                                        //   marking the end of a look-ahead rule.
 
     boolean      fRuleRoot;             // True if this node is the root of a rule.
@@ -349,7 +349,7 @@ class RBBINode {
         }
         printNode(this);
             // Only dump the definition under a variable reference if asked to.
-            // Unconditinally dump children of all other node types.
+            // Unconditionally dump children of all other node types.
             if (fType != varRef) {
                 if (fLeftChild != null) {
                     fLeftChild.printTree(false);

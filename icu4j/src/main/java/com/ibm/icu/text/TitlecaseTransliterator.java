@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  * Copyright (C) 1996-2011, International Business Machines Corporation and
  * others. All Rights Reserved.
@@ -42,7 +42,7 @@ class TitlecaseTransliterator extends Transliterator {
     private final UCaseProps csp;
     private ReplaceableContextIterator iter;
     private StringBuilder result;
-    private int[] locCache;
+    private int caseLocale;
 
    /**
      * Constructs a transliterator.
@@ -55,8 +55,7 @@ class TitlecaseTransliterator extends Transliterator {
         csp=UCaseProps.INSTANCE;
         iter=new ReplaceableContextIterator();
         result = new StringBuilder();
-        locCache = new int[1];
-        locCache[0]=0;
+        caseLocale = UCaseProps.getCaseLocale(locale);
     }
 
     /**
@@ -119,9 +118,9 @@ class TitlecaseTransliterator extends Transliterator {
             type=csp.getTypeOrIgnorable(c);
             if(type>=0) { // not case-ignorable
                 if(doTitle) {
-                    c=csp.toFullTitle(c, iter, result, locale, locCache);
+                    c=csp.toFullTitle(c, iter, result, caseLocale);
                 } else {
-                    c=csp.toFullLower(c, iter, result, locale, locCache);
+                    c=csp.toFullLower(c, iter, result, caseLocale);
                 }
                 doTitle = type==0; // doTitle=isUncased
 

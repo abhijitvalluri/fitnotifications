@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2007-2010, International Business Machines Corporation and    *
@@ -114,7 +114,7 @@ public class DateTimeRule implements Serializable {
     }
 
     /**
-     * Constructs a <code>DateTimeRule</code> by the day of week and its oridinal
+     * Constructs a <code>DateTimeRule</code> by the day of week and its ordinal
      * number and the time rule.  The date rule type for an instance created
      * by this constructor is <code>DOW</code>.
      *

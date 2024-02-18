@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 1996-2014, International Business Machines Corporation and
@@ -92,7 +92,7 @@ final class BreakTransliterator extends Transliterator {
 
         for(boundary = bi.first(); boundary != BreakIterator.DONE && boundary < pos.limit; boundary = bi.next()) {
             if (boundary == 0) continue;
-            // HACK: Check to see that preceeding item was a letter
+            // HACK: Check to see that preceding item was a letter
 
             int cp = UTF16.charAt(text, boundary-1);
             int type = UCharacter.getType(cp);

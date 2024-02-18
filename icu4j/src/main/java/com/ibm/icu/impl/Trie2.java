@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2009-2015, International Business Machines Corporation and
@@ -194,8 +194,8 @@ public abstract class Trie2 implements Iterable<Trie2.Range> {
      * @param is   an InputStream containing the serialized form
      *             of a UTrie, version 1 or 2.  The stream must support mark() and reset().
      *             The position of the input stream will be left unchanged.
-     * @param littleEndianOk If FALSE, only big-endian (Java native) serialized forms are recognized.
-     *                    If TRUE, little-endian serialized forms are recognized as well.
+     * @param littleEndianOk If false, only big-endian (Java native) serialized forms are recognized.
+     *                    If true, little-endian serialized forms are recognized as well.
      * @return     the Trie version of the serialized form, or 0 if it is not
      *             recognized as a serialized UTrie
      * @throws     IOException on errors in reading from the input stream.

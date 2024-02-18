@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  **********************************************************************
  * Copyright (c) 2004-2016, International Business Machines
@@ -18,12 +18,11 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.ObjectStreamException;
+import java.math.RoundingMode;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -31,20 +30,27 @@ import java.util.MissingResourceException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.ibm.icu.impl.DontCareFieldPosition;
+import com.ibm.icu.impl.FormattedStringBuilder;
+import com.ibm.icu.impl.FormattedValueStringBuilderImpl;
 import com.ibm.icu.impl.ICUData;
 import com.ibm.icu.impl.ICUResourceBundle;
 import com.ibm.icu.impl.SimpleCache;
 import com.ibm.icu.impl.SimpleFormatterImpl;
-import com.ibm.icu.impl.StandardPlural;
-import com.ibm.icu.impl.UResource;
-import com.ibm.icu.math.BigDecimal;
-import com.ibm.icu.text.PluralRules.Factory;
+import com.ibm.icu.impl.Utility;
+import com.ibm.icu.impl.number.DecimalQuantity;
+import com.ibm.icu.impl.number.DecimalQuantity_DualStorageBCD;
+import com.ibm.icu.impl.number.LongNameHandler;
+import com.ibm.icu.impl.number.RoundingUtils;
+import com.ibm.icu.number.IntegerWidth;
+import com.ibm.icu.number.LocalizedNumberFormatter;
+import com.ibm.icu.number.NumberFormatter;
+import com.ibm.icu.number.NumberFormatter.UnitWidth;
+import com.ibm.icu.number.Precision;
+import com.ibm.icu.text.ListFormatter.FormattedListBuilder;
 import com.ibm.icu.util.Currency;
-import com.ibm.icu.util.CurrencyAmount;
-import com.ibm.icu.util.ICUException;
+import com.ibm.icu.util.ICUUncheckedIOException;
 import com.ibm.icu.util.Measure;
 import com.ibm.icu.util.MeasureUnit;
-import com.ibm.icu.util.TimeZone;
 import com.ibm.icu.util.ULocale;
 import com.ibm.icu.util.ULocale.Category;
 import com.ibm.icu.util.UResourceBundle;
@@ -53,59 +59,57 @@ import com.ibm.icu.util.UResourceBundle;
 /**
  * A formatter for Measure objects.
  *
- * <p>To format a Measure object, first create a formatter
- * object using a MeasureFormat factory method.  Then use that
- * object's format or formatMeasures methods.
- * 
+ * <p>
+ * <strong>IMPORTANT:</strong> New users are strongly encouraged to see if
+ * {@link NumberFormatter} fits their use case.  Although not deprecated, this
+ * class, MeasureFormat, is provided for backwards compatibility only, and has
+ * much more limited capabilities.
+ * <hr>
+ *
+ * <p>
+ * To format a Measure object, first create a formatter object using a MeasureFormat factory method. Then
+ * use that object's format or formatMeasures methods.
+ *
  * Here is sample code:
+ *
  * <pre>
- *      MeasureFormat fmtFr = MeasureFormat.getInstance(
- *              ULocale.FRENCH, FormatWidth.SHORT);
- *      Measure measure = new Measure(23, MeasureUnit.CELSIUS);
- *      
- *      // Output: 23 °C
- *      System.out.println(fmtFr.format(measure));
+ * MeasureFormat fmtFr = MeasureFormat.getInstance(ULocale.FRENCH, FormatWidth.SHORT);
+ * Measure measure = new Measure(23, MeasureUnit.CELSIUS);
  *
- *      Measure measureF = new Measure(70, MeasureUnit.FAHRENHEIT);
+ * // Output: 23 °C
+ * System.out.println(fmtFr.format(measure));
  *
- *      // Output: 70 °F
- *      System.out.println(fmtFr.format(measureF));
- *     
- *      MeasureFormat fmtFrFull = MeasureFormat.getInstance(
- *              ULocale.FRENCH, FormatWidth.WIDE);
- *      // Output: 70 pieds et 5,3 pouces
- *      System.out.println(fmtFrFull.formatMeasures(
- *              new Measure(70, MeasureUnit.FOOT),
- *              new Measure(5.3, MeasureUnit.INCH)));
- *              
- *      // Output: 1 pied et 1 pouce
- *      System.out.println(fmtFrFull.formatMeasures(
- *              new Measure(1, MeasureUnit.FOOT),
- *              new Measure(1, MeasureUnit.INCH)));
- *  
- *      MeasureFormat fmtFrNarrow = MeasureFormat.getInstance(
-                ULocale.FRENCH, FormatWidth.NARROW);
- *      // Output: 1′ 1″
- *      System.out.println(fmtFrNarrow.formatMeasures(
- *              new Measure(1, MeasureUnit.FOOT),
- *              new Measure(1, MeasureUnit.INCH)));
- *      
- *      
- *      MeasureFormat fmtEn = MeasureFormat.getInstance(ULocale.ENGLISH, FormatWidth.WIDE);
- *      
- *      // Output: 1 inch, 2 feet
- *      fmtEn.formatMeasures(
- *              new Measure(1, MeasureUnit.INCH),
- *              new Measure(2, MeasureUnit.FOOT));
+ * Measure measureF = new Measure(70, MeasureUnit.FAHRENHEIT);
+ *
+ * // Output: 70 °F
+ * System.out.println(fmtFr.format(measureF));
+ *
+ * MeasureFormat fmtFrFull = MeasureFormat.getInstance(ULocale.FRENCH, FormatWidth.WIDE);
+ * // Output: 70 pieds et 5,3 pouces
+ * System.out.println(fmtFrFull.formatMeasures(new Measure(70, MeasureUnit.FOOT),
+ *         new Measure(5.3, MeasureUnit.INCH)));
+ *
+ * // Output: 1 pied et 1 pouce
+ * System.out.println(
+ *         fmtFrFull.formatMeasures(new Measure(1, MeasureUnit.FOOT), new Measure(1, MeasureUnit.INCH)));
+ *
+ * MeasureFormat fmtFrNarrow = MeasureFormat.getInstance(ULocale.FRENCH, FormatWidth.NARROW);
+ * // Output: 1′ 1″
+ * System.out.println(fmtFrNarrow.formatMeasures(new Measure(1, MeasureUnit.FOOT),
+ *         new Measure(1, MeasureUnit.INCH)));
+ *
+ * MeasureFormat fmtEn = MeasureFormat.getInstance(ULocale.ENGLISH, FormatWidth.WIDE);
+ *
+ * // Output: 1 inch, 2 feet
+ * fmtEn.formatMeasures(new Measure(1, MeasureUnit.INCH), new Measure(2, MeasureUnit.FOOT));
  * </pre>
  * <p>
- * This class does not do conversions from one unit to another. It simply formats
- * whatever units it is given
+ * This class does not do conversions from one unit to another. It simply formats whatever units it is
+ * given
  * <p>
- * This class is immutable and thread-safe so long as its deprecated subclass,
- * TimeUnitFormat, is never used. TimeUnitFormat is not thread-safe, and is
- * mutable. Although this class has existing subclasses, this class does not support new
- * sub-classes.   
+ * This class is immutable and thread-safe so long as its deprecated subclass, TimeUnitFormat, is never
+ * used. TimeUnitFormat is not thread-safe, and is mutable. Although this class has existing subclasses,
+ * this class does not support new sub-classes.
  *
  * @see com.ibm.icu.text.UFormat
  * @author Alan Liu
@@ -113,13 +117,8 @@ import com.ibm.icu.util.UResourceBundle;
  */
 public class MeasureFormat extends UFormat {
 
-
     // Generated by serialver from JDK 1.4.1_01
     static final long serialVersionUID = -7182021401701778240L;
-
-    private final transient MeasureFormatData cache;
-
-    private final transient ImmutableNumberFormat numberFormat;
 
     private final transient FormatWidth formatWidth;
 
@@ -128,18 +127,13 @@ public class MeasureFormat extends UFormat {
 
     private final transient NumericFormatters numericFormatters;
 
-    private final transient ImmutableNumberFormat currencyFormat;
+    private final transient NumberFormat numberFormat;
 
-    private final transient ImmutableNumberFormat integerFormat;
+    private final transient LocalizedNumberFormatter numberFormatter;
 
-    private static final SimpleCache<ULocale, MeasureFormatData> localeMeasureFormatData
-    = new SimpleCache<ULocale, MeasureFormatData>();
+    private static final SimpleCache<ULocale, NumericFormatters> localeToNumericDurationFormatters = new SimpleCache<>();
 
-    private static final SimpleCache<ULocale, NumericFormatters> localeToNumericDurationFormatters
-    = new SimpleCache<ULocale,NumericFormatters>();
-
-    private static final Map<MeasureUnit, Integer> hmsTo012 =
-            new HashMap<MeasureUnit, Integer>();
+    private static final Map<MeasureUnit, Integer> hmsTo012 = new HashMap<>();
 
     static {
         hmsTo012.put(MeasureUnit.HOUR, 0);
@@ -154,7 +148,7 @@ public class MeasureFormat extends UFormat {
 
     /**
      * Formatting width enum.
-     * 
+     *
      * @stable ICU 53
      */
     // Be sure to update MeasureUnitTest.TestSerialFormatWidthEnum
@@ -163,60 +157,75 @@ public class MeasureFormat extends UFormat {
 
         /**
          * Spell out everything.
-         * 
+         *
          * @stable ICU 53
          */
-        WIDE(ListFormatter.Style.DURATION, NumberFormat.PLURALCURRENCYSTYLE), 
+        WIDE(ListFormatter.Width.WIDE, UnitWidth.FULL_NAME, UnitWidth.FULL_NAME),
 
         /**
          * Abbreviate when possible.
-         * 
+         *
          * @stable ICU 53
          */
-        SHORT(ListFormatter.Style.DURATION_SHORT, NumberFormat.ISOCURRENCYSTYLE), 
+        SHORT(ListFormatter.Width.SHORT, UnitWidth.SHORT, UnitWidth.ISO_CODE),
 
         /**
          * Brief. Use only a symbol for the unit when possible.
-         * 
+         *
          * @stable ICU 53
          */
-        NARROW(ListFormatter.Style.DURATION_NARROW, NumberFormat.CURRENCYSTYLE),
+        NARROW(ListFormatter.Width.NARROW, UnitWidth.NARROW, UnitWidth.SHORT),
 
         /**
-         * Identical to NARROW except when formatMeasures is called with
-         * an hour and minute; minute and second; or hour, minute, and second Measures.
-         * In these cases formatMeasures formats as 5:37:23 instead of 5h, 37m, 23s.
-         * 
+         * Identical to NARROW except when formatMeasures is called with an hour and minute; minute and
+         * second; or hour, minute, and second Measures. In these cases formatMeasures formats as 5:37:23
+         * instead of 5h, 37m, 23s.
+         *
          * @stable ICU 53
          */
-        NUMERIC(ListFormatter.Style.DURATION_NARROW, NumberFormat.CURRENCYSTYLE);
+        NUMERIC(ListFormatter.Width.NARROW, UnitWidth.NARROW, UnitWidth.SHORT),
 
-        // Be sure to update the toFormatWidth and fromFormatWidth() functions
-        // when adding an enum value.
-        private static final int INDEX_COUNT = 3;  // NARROW.ordinal() + 1
+        /**
+         * The default format width for getCurrencyFormat(), which is to show the symbol for currency
+         * (UnitWidth.SHORT) but wide for other units.
+         *
+         * @internal Use {@link #getCurrencyFormat()}
+         * @deprecated ICU 61 This API is ICU internal only.
+         */
+        @Deprecated
+        DEFAULT_CURRENCY(ListFormatter.Width.SHORT, UnitWidth.FULL_NAME, UnitWidth.SHORT);
 
-        private final ListFormatter.Style listFormatterStyle;
-        private final int currencyStyle;
+        final ListFormatter.Width listWidth;
 
-        private FormatWidth(ListFormatter.Style style, int currencyStyle) {
-            this.listFormatterStyle = style;
-            this.currencyStyle = currencyStyle;
-        }
+        /**
+         * The {@link UnitWidth} (used for newer NumberFormatter API) that corresponds to this
+         * FormatWidth (used for the older APIs) for all units except currencies.
+         */
+        final UnitWidth unitWidth;
 
-        ListFormatter.Style getListFormatterStyle() {
-            return listFormatterStyle;
-        }
+        /**
+         * The {@link UnitWidth} (used for newer NumberFormatter API) that corresponds to this
+         * FormatWidth (used for the older APIs) for currencies.
+         */
+        final UnitWidth currencyWidth;
 
-        int getCurrencyStyle() {
-            return currencyStyle;
+        private FormatWidth(
+                ListFormatter.Width listWidth,
+                UnitWidth unitWidth,
+                UnitWidth currencyWidth) {
+            this.listWidth = listWidth;
+            this.unitWidth = unitWidth;
+            this.currencyWidth = currencyWidth;
         }
     }
 
     /**
      * Create a format from the locale, formatWidth, and format.
      *
-     * @param locale the locale.
-     * @param formatWidth hints how long formatted strings should be.
+     * @param locale
+     *            the locale.
+     * @param formatWidth
+     *            hints how long formatted strings should be.
      * @return The new MeasureFormat object.
      * @stable ICU 53
      */
@@ -227,8 +236,10 @@ public class MeasureFormat extends UFormat {
     /**
      * Create a format from the {@link java.util.Locale} and formatWidth.
      *
-     * @param locale the {@link java.util.Locale}.
-     * @param formatWidth hints how long formatted strings should be.
+     * @param locale
+     *            the {@link java.util.Locale}.
+     * @param formatWidth
+     *            hints how long formatted strings should be.
      * @return The new MeasureFormat object.
      * @stable ICU 54
      */
@@ -239,78 +250,65 @@ public class MeasureFormat extends UFormat {
     /**
      * Create a format from the locale, formatWidth, and format.
      *
-     * @param locale the locale.
-     * @param formatWidth hints how long formatted strings should be.
-     * @param format This is defensively copied.
+     * @param locale
+     *            the locale.
+     * @param formatWidth
+     *            hints how long formatted strings should be.
+     * @param format
+     *            This is defensively copied.
      * @return The new MeasureFormat object.
      * @stable ICU 53
      */
-    public static MeasureFormat getInstance(ULocale locale, FormatWidth formatWidth, NumberFormat format) {
-        PluralRules rules = PluralRules.forLocale(locale);
-        NumericFormatters formatters = null;
-        MeasureFormatData data = localeMeasureFormatData.get(locale);
-        if (data == null) {
-            data = loadLocaleData(locale);
-            localeMeasureFormatData.put(locale, data);
-        }
-        if (formatWidth == FormatWidth.NUMERIC) {
-            formatters = localeToNumericDurationFormatters.get(locale);
-            if (formatters == null) {
-                formatters = loadNumericFormatters(locale);
-                localeToNumericDurationFormatters.put(locale, formatters);
-            }
-        }
-        NumberFormat intFormat = NumberFormat.getInstance(locale);
-        intFormat.setMaximumFractionDigits(0);
-        intFormat.setMinimumFractionDigits(0);
-        intFormat.setRoundingMode(BigDecimal.ROUND_DOWN);
-        return new MeasureFormat(
-                locale,
-                data,
-                formatWidth,
-                new ImmutableNumberFormat(format),
-                rules,
-                formatters,
-                new ImmutableNumberFormat(NumberFormat.getInstance(locale, formatWidth.getCurrencyStyle())),
-                new ImmutableNumberFormat(intFormat));
+    public static MeasureFormat getInstance(
+            ULocale locale,
+            FormatWidth formatWidth,
+            NumberFormat format) {
+        return new MeasureFormat(locale, formatWidth, format, null, null);
     }
 
     /**
      * Create a format from the {@link java.util.Locale}, formatWidth, and format.
      *
-     * @param locale the {@link java.util.Locale}.
-     * @param formatWidth hints how long formatted strings should be.
-     * @param format This is defensively copied.
+     * @param locale
+     *            the {@link java.util.Locale}.
+     * @param formatWidth
+     *            hints how long formatted strings should be.
+     * @param format
+     *            This is defensively copied.
      * @return The new MeasureFormat object.
      * @stable ICU 54
      */
-    public static MeasureFormat getInstance(Locale locale, FormatWidth formatWidth, NumberFormat format) {
+    public static MeasureFormat getInstance(
+            Locale locale,
+            FormatWidth formatWidth,
+            NumberFormat format) {
         return getInstance(ULocale.forLocale(locale), formatWidth, format);
     }
 
     /**
-     * Able to format Collection&lt;? extends Measure&gt;, Measure[], and Measure
-     * by delegating to formatMeasures.
-     * If the pos argument identifies a NumberFormat field,
-     * then its indices are set to the beginning and end of the first such field
-     * encountered. MeasureFormat itself does not supply any fields.
-     * 
-     * Calling a
-     * <code>formatMeasures</code> method is preferred over calling
-     * this method as they give better performance.
-     * 
-     * @param obj must be a Collection&lt;? extends Measure&gt;, Measure[], or Measure object.
-     * @param toAppendTo Formatted string appended here.
-     * @param pos Identifies a field in the formatted text.
+     * Able to format Collection&lt;? extends Measure&gt;, Measure[], and Measure by delegating to
+     * formatMeasures. If the pos argument identifies a NumberFormat field, then its indices are set to
+     * the beginning and end of the first such field encountered. MeasureFormat itself does not supply
+     * any fields.
+     *
+     * Calling a <code>formatMeasures</code> method is preferred over calling this method as they give
+     * better performance.
+     *
+     * @param obj
+     *            must be a Collection&lt;? extends Measure&gt;, Measure[], or Measure object.
+     * @param toAppendTo
+     *            Formatted string appended here.
+     * @param fpos
+     *            Identifies a field in the formatted text.
      * @see java.text.Format#format(java.lang.Object, java.lang.StringBuffer, java.text.FieldPosition)
-     * 
+     *
      * @stable ICU53
      */
     @Override
-    public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+    public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition fpos) {
         int prevLength = toAppendTo.length();
-        FieldPosition fpos =
-                new FieldPosition(pos.getFieldAttribute(), pos.getField());
+        fpos.setBeginIndex(0);
+        fpos.setEndIndex(0);
         if (obj instanceof Collection) {
             Collection<?> coll = (Collection<?>) obj;
             Measure[] measures = new Measure[coll.size()];
@@ -321,27 +319,31 @@ public class MeasureFormat extends UFormat {
                 }
                 measures[idx++] = (Measure) o;
             }
-            toAppendTo.append(formatMeasures(new StringBuilder(), fpos, measures));
+            formatMeasuresInternal(toAppendTo, fpos, measures);
         } else if (obj instanceof Measure[]) {
-            toAppendTo.append(formatMeasures(new StringBuilder(), fpos, (Measure[]) obj));
-        } else if (obj instanceof Measure){
-            toAppendTo.append(formatMeasure((Measure) obj, numberFormat, new StringBuilder(), fpos));
+            formatMeasuresInternal(toAppendTo, fpos, (Measure[]) obj);
+        } else if (obj instanceof Measure) {
+            FormattedStringBuilder result = formatMeasure((Measure) obj);
+            // No offset: toAppendTo.length() is considered below
+            FormattedValueStringBuilderImpl.nextFieldPosition(result, fpos);
+            Utility.appendTo(result, toAppendTo);
         } else {
-            throw new IllegalArgumentException(obj.toString());            
+            throw new IllegalArgumentException(obj.toString());
         }
-        if (fpos.getBeginIndex() != 0 || fpos.getEndIndex() != 0) {
-            pos.setBeginIndex(fpos.getBeginIndex() + prevLength);
-            pos.setEndIndex(fpos.getEndIndex() + prevLength);
+        if (prevLength > 0 && fpos.getEndIndex() != 0) {
+            fpos.setBeginIndex(fpos.getBeginIndex() + prevLength);
+            fpos.setEndIndex(fpos.getEndIndex() + prevLength);
         }
         return toAppendTo;
     }
 
     /**
      * Parses text from a string to produce a <code>Measure</code>.
+     *
      * @see java.text.Format#parseObject(java.lang.String, java.text.ParsePosition)
-     * @throws UnsupportedOperationException Not supported.
+     * @throws UnsupportedOperationException
+     *             Not supported.
      * @draft ICU 53 (Retain)
-     * @provisional This API might change or be removed in a future release.
      */
     @Override
     public Measure parseObject(String source, ParsePosition pos) {
@@ -349,149 +351,36 @@ public class MeasureFormat extends UFormat {
     }
 
     /**
-     * Format a sequence of measures. Uses the ListFormatter unit lists.
-     * So, for example, one could format “3 feet, 2 inches”.
-     * Zero values are formatted (eg, “3 feet, 0 inches”). It is the caller’s
-     * responsibility to have the appropriate values in appropriate order,
-     * and using the appropriate Number values. Typically the units should be
-     * in descending order, with all but the last Measure having integer values
-     * (eg, not “3.2 feet, 2 inches”).
-     * 
-     * @param measures a sequence of one or more measures.
+     * Format a sequence of measures. Uses the ListFormatter unit lists. So, for example, one could
+     * format “3 feet, 2 inches”. Zero values are formatted (eg, “3 feet, 0 inches”). It is the caller’s
+     * responsibility to have the appropriate values in appropriate order, and using the appropriate
+     * Number values. Typically the units should be in descending order, with all but the last Measure
+     * having integer values (eg, not “3.2 feet, 2 inches”).
+     *
+     * @param measures
+     *            a sequence of one or more measures.
      * @return the formatted string.
      * @stable ICU 53
      */
     public final String formatMeasures(Measure... measures) {
-        return formatMeasures(
-                new StringBuilder(),
-                DontCareFieldPosition.INSTANCE,
-                measures).toString();
+        return formatMeasures(new StringBuilder(), DontCareFieldPosition.INSTANCE, measures).toString();
     }
+
+    // NOTE: For formatMeasureRange(), see https://unicode-org.atlassian.net/browse/ICU-12454
 
     /**
-     * Format a range of measures, such as "3.4-5.1 meters". It is the caller’s
-     * responsibility to have the appropriate values in appropriate order,
-     * and using the appropriate Number values.
-     * <br>Note: If the format doesn’t have enough decimals, or lowValue ≥ highValue,
-     * the result will be a degenerate range, like “5-5 meters”.
-     * <br>Currency Units are not yet supported.
-     * 
-     * @param lowValue low value in range
-     * @param highValue high value in range
-     * @return the formatted string.
-     * @internal
-     * @deprecated This API is ICU internal only.
-     */
-    @Deprecated
-    public final String formatMeasureRange(Measure lowValue, Measure highValue) {
-        MeasureUnit unit = lowValue.getUnit();
-        if (!unit.equals(highValue.getUnit())) {
-            throw new IllegalArgumentException("Units must match: " + unit + " ≠ " + highValue.getUnit());
-        }
-        Number lowNumber = lowValue.getNumber();
-        Number highNumber = highValue.getNumber();
-        final boolean isCurrency = unit instanceof Currency;
-
-        UFieldPosition lowFpos = new UFieldPosition();
-        UFieldPosition highFpos = new UFieldPosition();
-        StringBuffer lowFormatted = null;
-        StringBuffer highFormatted = null;
-
-        if (isCurrency) {
-            Currency currency = (Currency) unit;
-            int fracDigits = currency.getDefaultFractionDigits();
-            int maxFrac = numberFormat.nf.getMaximumFractionDigits();
-            int minFrac = numberFormat.nf.getMinimumFractionDigits();
-            if (fracDigits != maxFrac || fracDigits != minFrac) {
-                DecimalFormat currentNumberFormat = (DecimalFormat) numberFormat.get();
-                currentNumberFormat.setMaximumFractionDigits(fracDigits);
-                currentNumberFormat.setMinimumFractionDigits(fracDigits);
-                lowFormatted = currentNumberFormat.format(lowNumber, new StringBuffer(), lowFpos);
-                highFormatted = currentNumberFormat.format(highNumber, new StringBuffer(), highFpos);
-            }
-        }
-        if (lowFormatted == null) {
-            lowFormatted = numberFormat.format(lowNumber, new StringBuffer(), lowFpos);
-            highFormatted = numberFormat.format(highNumber, new StringBuffer(), highFpos);
-        }
-
-        final double lowDouble = lowNumber.doubleValue();
-        String keywordLow = rules.select(new PluralRules.FixedDecimal(lowDouble, 
-                lowFpos.getCountVisibleFractionDigits(), lowFpos.getFractionDigits()));
-
-        final double highDouble = highNumber.doubleValue();
-        String keywordHigh = rules.select(new PluralRules.FixedDecimal(highDouble, 
-                highFpos.getCountVisibleFractionDigits(), highFpos.getFractionDigits()));
-
-        final PluralRanges pluralRanges = Factory.getDefaultFactory().getPluralRanges(getLocale());
-        StandardPlural resolvedPlural = pluralRanges.get(
-                StandardPlural.fromString(keywordLow),
-                StandardPlural.fromString(keywordHigh));
-
-        String rangeFormatter = getRangeFormat(getLocale(), formatWidth);
-        String formattedNumber = SimpleFormatterImpl.formatCompiledPattern(
-                rangeFormatter, lowFormatted, highFormatted);
-
-        if (isCurrency) {
-            // Nasty hack
-            currencyFormat.format(1d); // have to call this for the side effect
-
-            Currency currencyUnit = (Currency) unit;
-            StringBuilder result = new StringBuilder();
-            appendReplacingCurrency(currencyFormat.getPrefix(lowDouble >= 0), currencyUnit, resolvedPlural, result);
-            result.append(formattedNumber);
-            appendReplacingCurrency(currencyFormat.getSuffix(highDouble >= 0), currencyUnit, resolvedPlural, result);
-            return result.toString();
-            //            StringBuffer buffer = new StringBuffer();
-            //            CurrencyAmount currencyLow = (CurrencyAmount) lowValue;
-            //            CurrencyAmount currencyHigh = (CurrencyAmount) highValue;
-            //            FieldPosition pos = new FieldPosition(NumberFormat.INTEGER_FIELD);
-            //            currencyFormat.format(currencyLow, buffer, pos);
-            //            int startOfInteger = pos.getBeginIndex();
-            //            StringBuffer buffer2 = new StringBuffer();
-            //            FieldPosition pos2 = new FieldPosition(0);
-            //            currencyFormat.format(currencyHigh, buffer2, pos2);
-        } else {
-            String formatter =
-                    getPluralFormatter(lowValue.getUnit(), formatWidth, resolvedPlural.ordinal());
-            return SimpleFormatterImpl.formatCompiledPattern(formatter, formattedNumber);
-        }
-    }
-
-    private void appendReplacingCurrency(String affix, Currency unit, StandardPlural resolvedPlural, StringBuilder result) {
-        String replacement = "¤";
-        int pos = affix.indexOf(replacement);
-        if (pos < 0) {
-            replacement = "XXX";
-            pos = affix.indexOf(replacement);
-        }
-        if (pos < 0) {
-            result.append(affix);
-        } else {
-            // for now, just assume single
-            result.append(affix.substring(0,pos));
-            // we have a mismatch between the number style and the currency style, so remap
-            int currentStyle = formatWidth.getCurrencyStyle();
-            if (currentStyle == NumberFormat.ISOCURRENCYSTYLE) {
-                result.append(unit.getCurrencyCode());
-            } else {
-                result.append(unit.getName(currencyFormat.nf.getLocale(ULocale.ACTUAL_LOCALE),
-                        currentStyle == NumberFormat.CURRENCYSTYLE ? Currency.SYMBOL_NAME :  Currency.PLURAL_LONG_NAME,
-                                resolvedPlural.getKeyword(), null));
-            }
-            result.append(affix.substring(pos+replacement.length()));
-        }
-    }
-    
-    /**
-     * Formats a single measure per unit. 
-     * 
+     * Formats a single measure per unit.
+     *
      * An example of such a formatted string is "3.5 meters per second."
      *
-     * @param measure  the measure object. In above example, 3.5 meters.
-     * @param perUnit  the per unit. In above example, it is MeasureUnit.SECOND
-     * @param appendTo formatted string appended here.
-     * @param pos      The field position.
+     * @param measure
+     *            the measure object. In above example, 3.5 meters.
+     * @param perUnit
+     *            the per unit. In above example, it is MeasureUnit.SECOND
+     * @param appendTo
+     *            formatted string appended here.
+     * @param pos
+     *            The field position.
      * @return appendTo.
      * @stable ICU 55
      */
@@ -500,47 +389,59 @@ public class MeasureFormat extends UFormat {
             MeasureUnit perUnit,
             StringBuilder appendTo,
             FieldPosition pos) {
-        MeasureUnit resolvedUnit = MeasureUnit.resolveUnitPerUnit(
-                measure.getUnit(), perUnit);
-        if (resolvedUnit != null) {
-            Measure newMeasure = new Measure(measure.getNumber(), resolvedUnit);
-            return formatMeasure(newMeasure, numberFormat, appendTo, pos);
-        }
-        FieldPosition fpos = new FieldPosition(
-                pos.getFieldAttribute(), pos.getField());
-        int offset = withPerUnitAndAppend(
-                formatMeasure(measure, numberFormat, new StringBuilder(), fpos),
-                perUnit,
-                appendTo);
-        if (fpos.getBeginIndex() != 0 || fpos.getEndIndex() != 0) {
-            pos.setBeginIndex(fpos.getBeginIndex() + offset);
-            pos.setEndIndex(fpos.getEndIndex() + offset);
-        }
+        DecimalQuantity dq = new DecimalQuantity_DualStorageBCD(measure.getNumber());
+        FormattedStringBuilder string = new FormattedStringBuilder();
+        getUnitFormatterFromCache(
+            NUMBER_FORMATTER_STANDARD, measure.getUnit(), perUnit
+        ).formatImpl(dq, string);
+        DecimalFormat.fieldPositionHelper(dq, string, pos, appendTo.length());
+        Utility.appendTo(string, appendTo);
         return appendTo;
     }
 
     /**
      * Formats a sequence of measures.
-     * 
-     * If the fieldPosition argument identifies a NumberFormat field,
-     * then its indices are set to the beginning and end of the first such field
-     * encountered. MeasureFormat itself does not supply any fields.
-     * 
-     * @param appendTo the formatted string appended here.
-     * @param fieldPosition Identifies a field in the formatted text.
-     * @param measures the measures to format.
+     *
+     * If the fieldPosition argument identifies a NumberFormat field, then its indices are set to the
+     * beginning and end of the first such field encountered. MeasureFormat itself does not supply any
+     * fields.
+     *
+     * @param appendTo
+     *            the formatted string appended here.
+     * @param fpos
+     *            Identifies a field in the formatted text.
+     * @param measures
+     *            the measures to format.
      * @return appendTo.
      * @see MeasureFormat#formatMeasures(Measure...)
      * @stable ICU 53
      */
     public StringBuilder formatMeasures(
-            StringBuilder appendTo, FieldPosition fieldPosition, Measure... measures) {
+            StringBuilder appendTo,
+            FieldPosition fpos,
+            Measure... measures) {
+        int prevLength = appendTo.length();
+        formatMeasuresInternal(appendTo, fpos, measures);
+        if (prevLength > 0 && fpos.getEndIndex() > 0) {
+            fpos.setBeginIndex(fpos.getBeginIndex() + prevLength);
+            fpos.setEndIndex(fpos.getEndIndex() + prevLength);
+        }
+        return appendTo;
+    }
+
+    private void formatMeasuresInternal(
+            Appendable appendTo,
+            FieldPosition fieldPosition,
+            Measure... measures) {
         // fast track for trivial cases
         if (measures.length == 0) {
-            return appendTo;
+            return;
         }
         if (measures.length == 1) {
-            return formatMeasure(measures[0], numberFormat, appendTo, fieldPosition);
+            FormattedStringBuilder result = formatMeasure(measures[0]);
+            FormattedValueStringBuilderImpl.nextFieldPosition(result, fieldPosition);
+            Utility.appendTo(result, appendTo);
+            return;
         }
 
         if (formatWidth == FormatWidth.NUMERIC) {
@@ -548,59 +449,51 @@ public class MeasureFormat extends UFormat {
             // track.
             Number[] hms = toHMS(measures);
             if (hms != null) {
-                return formatNumeric(hms, appendTo);
+                formatNumeric(hms, appendTo);
+                return;
             }
         }
 
-        ListFormatter listFormatter = ListFormatter.getInstance(
-                getLocale(), formatWidth.getListFormatterStyle());
+        ListFormatter listFormatter = ListFormatter.getInstance(getLocale(),
+                ListFormatter.Type.UNITS,
+                formatWidth.listWidth);
         if (fieldPosition != DontCareFieldPosition.INSTANCE) {
-            return formatMeasuresSlowTrack(listFormatter, appendTo, fieldPosition, measures);
+            formatMeasuresSlowTrack(listFormatter, appendTo, fieldPosition, measures);
+            return;
         }
         // Fast track: No field position.
         String[] results = new String[measures.length];
         for (int i = 0; i < measures.length; i++) {
-            results[i] = formatMeasure(
-                    measures[i],
-                    i == measures.length - 1 ? numberFormat : integerFormat);
+            if (i == measures.length - 1) {
+                results[i] = formatMeasure(measures[i]).toString();
+            } else {
+                results[i] = formatMeasureInteger(measures[i]).toString();
+            }
         }
-        return appendTo.append(listFormatter.format((Object[]) results));
-
+        FormattedListBuilder builder = listFormatter.formatImpl(Arrays.asList(results), false);
+        builder.appendTo(appendTo);
     }
 
     /**
-     * Gets the display name of the specified {@link MeasureUnit} corresponding to the current
-     * locale and format width.
-     * @param unit  The unit for which to get a display name.
-     * @return  The display name in the locale and width specified in
-     *          {@link MeasureFormat#getInstance}, or null if there is no display name available
-     *          for the specified unit.
+     * Gets the display name of the specified {@link MeasureUnit} corresponding to the current locale and
+     * format width.
      *
-     * @draft ICU 58
-     * @provisional This API might change or be removed in a future release.
+     * @param unit
+     *            The unit for which to get a display name.
+     * @return The display name in the locale and width specified in {@link MeasureFormat#getInstance},
+     *         or null if there is no display name available for the specified unit.
+     *
+     * @stable ICU 58
      */
     public String getUnitDisplayName(MeasureUnit unit) {
-        FormatWidth width = getRegularWidth(formatWidth);
-        Map<FormatWidth, String> styleToDnam = cache.unitToStyleToDnam.get(unit);
-        if (styleToDnam == null) {
-            return null;
-        }
-
-        String dnam = styleToDnam.get(width);
-        if (dnam != null) {
-            return dnam;
-        }
-        FormatWidth fallbackWidth = cache.widthFallback[width.ordinal()];
-        if (fallbackWidth != null) {
-            dnam = styleToDnam.get(fallbackWidth);
-        }
-        return dnam;
+        return LongNameHandler.getUnitDisplayName(getLocale(), unit, formatWidth.unitWidth);
     }
 
     /**
-     * Two MeasureFormats, a and b, are equal if and only if they have the same formatWidth,
-     * locale, and equal number formats.
-     * @stable ICU 53
+     * Two MeasureFormats, a and b, are equal if and only if they have the same formatWidth, locale, and
+     * equal number formats.
+     *
+     * @stable ICU 3.0
      */
     @Override
     public final boolean equals(Object other) {
@@ -612,32 +505,37 @@ public class MeasureFormat extends UFormat {
         }
         MeasureFormat rhs = (MeasureFormat) other;
         // A very slow but safe implementation.
-        return getWidth() == rhs.getWidth() 
-                && getLocale().equals(rhs.getLocale()) 
-                && getNumberFormat().equals(rhs.getNumberFormat());
+        return getWidth() == rhs.getWidth()
+                && getLocale().equals(rhs.getLocale())
+                && getNumberFormatInternal().equals(rhs.getNumberFormatInternal());
     }
 
     /**
      * {@inheritDoc}
-     * @stable ICU 53
+     *
+     * @stable ICU 3.0
      */
     @Override
     public final int hashCode() {
         // A very slow but safe implementation.
-        return (getLocale().hashCode() * 31 
-                + getNumberFormat().hashCode()) * 31 + getWidth().hashCode();
+        return (getLocale().hashCode() * 31 + getNumberFormatInternal().hashCode()) * 31 + getWidth().hashCode();
     }
 
     /**
      * Get the format width this instance is using.
+     *
      * @stable ICU 53
      */
     public MeasureFormat.FormatWidth getWidth() {
+        if (formatWidth == MeasureFormat.FormatWidth.DEFAULT_CURRENCY) {
+            return MeasureFormat.FormatWidth.WIDE;
+        }
         return formatWidth;
     }
 
     /**
      * Get the locale of this instance.
+     *
      * @stable ICU 53
      */
     public final ULocale getLocale() {
@@ -646,16 +544,25 @@ public class MeasureFormat extends UFormat {
 
     /**
      * Get a copy of the number format.
+     *
      * @stable ICU 53
      */
     public NumberFormat getNumberFormat() {
-        return numberFormat.get();
+        return (NumberFormat) numberFormat.clone();
     }
 
     /**
-     * Return a formatter for CurrencyAmount objects in the given
-     * locale.
-     * @param locale desired locale
+     * Get a copy of the number format without cloning. Internal method.
+     */
+    NumberFormat getNumberFormatInternal() {
+        return numberFormat;
+    }
+
+    /**
+     * Return a formatter for CurrencyAmount objects in the given locale.
+     *
+     * @param locale
+     *            desired locale
      * @return a formatter object
      * @stable ICU 3.0
      */
@@ -664,9 +571,10 @@ public class MeasureFormat extends UFormat {
     }
 
     /**
-     * Return a formatter for CurrencyAmount objects in the given
-     * {@link java.util.Locale}.
-     * @param locale desired {@link java.util.Locale}
+     * Return a formatter for CurrencyAmount objects in the given {@link java.util.Locale}.
+     *
+     * @param locale
+     *            desired {@link java.util.Locale}
      * @return a formatter object
      * @stable ICU 54
      */
@@ -675,8 +583,8 @@ public class MeasureFormat extends UFormat {
     }
 
     /**
-     * Return a formatter for CurrencyAmount objects in the default
-     * <code>FORMAT</code> locale.
+     * Return a formatter for CurrencyAmount objects in the default <code>FORMAT</code> locale.
+     *
      * @return a formatter object
      * @see Category#FORMAT
      * @stable ICU 3.0
@@ -691,542 +599,246 @@ public class MeasureFormat extends UFormat {
     }
 
     MeasureFormat withNumberFormat(NumberFormat format) {
-        return new MeasureFormat(
-                getLocale(),
-                this.cache,
+        return new MeasureFormat(getLocale(),
                 this.formatWidth,
-                new ImmutableNumberFormat(format),
+                format,
                 this.rules,
-                this.numericFormatters,
-                this.currencyFormat,
-                this.integerFormat);
+                this.numericFormatters);
+    }
+
+    MeasureFormat(ULocale locale, FormatWidth formatWidth) {
+        this(locale, formatWidth, null, null, null);
     }
 
     private MeasureFormat(
             ULocale locale,
-            MeasureFormatData data,
             FormatWidth formatWidth,
-            ImmutableNumberFormat format,
+            NumberFormat numberFormat,
             PluralRules rules,
-            NumericFormatters formatters,
-            ImmutableNumberFormat currencyFormat,
-            ImmutableNumberFormat integerFormat) {
+            NumericFormatters formatters) {
+        // Needed for getLocale(ULocale.VALID_LOCALE).
         setLocale(locale, locale);
-        this.cache = data;
         this.formatWidth = formatWidth;
-        this.numberFormat = format;
+
+        if (rules == null) {
+            rules = PluralRules.forLocale(locale);
+        }
         this.rules = rules;
+
+        if (numberFormat == null) {
+            numberFormat = NumberFormat.getInstance(locale);
+        } else {
+            numberFormat = (NumberFormat) numberFormat.clone();
+        }
+        this.numberFormat = numberFormat;
+
+        if (formatters == null && formatWidth == FormatWidth.NUMERIC) {
+            formatters = localeToNumericDurationFormatters.get(locale);
+            if (formatters == null) {
+                formatters = loadNumericFormatters(locale);
+                localeToNumericDurationFormatters.put(locale, formatters);
+            }
+        }
         this.numericFormatters = formatters;
-        this.currencyFormat = currencyFormat;
-        this.integerFormat = integerFormat;
+
+        if (!(numberFormat instanceof DecimalFormat)) {
+            throw new IllegalArgumentException();
+        }
+        numberFormatter = ((DecimalFormat) numberFormat).toNumberFormatter()
+                .unitWidth(formatWidth.unitWidth);
     }
 
-    MeasureFormat() {
-        // Make compiler happy by setting final fields to null.
-        this.cache = null;
-        this.formatWidth = null;
-        this.numberFormat = null;
-        this.rules = null;
-        this.numericFormatters = null;
-        this.currencyFormat = null;
-        this.integerFormat = null;
+    MeasureFormat(
+            ULocale locale,
+            FormatWidth formatWidth,
+            NumberFormat numberFormat,
+            PluralRules rules) {
+        this(locale, formatWidth, numberFormat, rules, null);
+        if (formatWidth == FormatWidth.NUMERIC) {
+            throw new IllegalArgumentException(
+                    "The format width 'numeric' is not allowed by this constructor");
+        }
     }
 
     static class NumericFormatters {
-        private DateFormat hourMinute;
-        private DateFormat minuteSecond;
-        private DateFormat hourMinuteSecond;
+        private String hourMinute;
+        private String minuteSecond;
+        private String hourMinuteSecond;
 
         public NumericFormatters(
-                DateFormat hourMinute,
-                DateFormat minuteSecond,
-                DateFormat hourMinuteSecond) {
+                String hourMinute,
+                String minuteSecond,
+                String hourMinuteSecond) {
             this.hourMinute = hourMinute;
             this.minuteSecond = minuteSecond;
             this.hourMinuteSecond = hourMinuteSecond;
         }
 
-        public DateFormat getHourMinute() { return hourMinute; }
-        public DateFormat getMinuteSecond() { return minuteSecond; }
-        public DateFormat getHourMinuteSecond() { return hourMinuteSecond; }
+        public String getHourMinute() {
+            return hourMinute;
+        }
+
+        public String getMinuteSecond() {
+            return minuteSecond;
+        }
+
+        public String getHourMinuteSecond() {
+            return hourMinuteSecond;
+        }
     }
 
-    private static NumericFormatters loadNumericFormatters(
-            ULocale locale) {
-        ICUResourceBundle r = (ICUResourceBundle)UResourceBundle.
-                getBundleInstance(ICUData.ICU_UNIT_BASE_NAME, locale);
-        return new NumericFormatters(
-                loadNumericDurationFormat(r, "hm"),
+    private static NumericFormatters loadNumericFormatters(ULocale locale) {
+        ICUResourceBundle r = (ICUResourceBundle) UResourceBundle
+                .getBundleInstance(ICUData.ICU_UNIT_BASE_NAME, locale);
+        return new NumericFormatters(loadNumericDurationFormat(r, "hm"),
                 loadNumericDurationFormat(r, "ms"),
                 loadNumericDurationFormat(r, "hms"));
     }
 
-    /**
-     * Sink for enumerating all of the measurement unit display names.
-     * Contains inner sink classes, each one corresponding to a type of resource table.
-     * The outer sink handles the top-level units, unitsNarrow, and unitsShort tables.
-     *
-     * More specific bundles (en_GB) are enumerated before their parents (en_001, en, root):
-     * Only store a value if it is still missing, that is, it has not been overridden.
-     *
-     * C++: Each inner sink class has a reference to the main outer sink.
-     * Java: Use non-static inner classes instead.
-     */
-    private static final class UnitDataSink extends UResource.Sink {
-        void setFormatterIfAbsent(int index, UResource.Value value, int minPlaceholders) {
-            if (patterns == null) {
-                EnumMap<FormatWidth, String[]> styleToPatterns =
-                        cacheData.unitToStyleToPatterns.get(unit);
-                if (styleToPatterns == null) {
-                    styleToPatterns =
-                            new EnumMap<FormatWidth, String[]>(FormatWidth.class);
-                    cacheData.unitToStyleToPatterns.put(unit, styleToPatterns);
-                } else {
-                    patterns = styleToPatterns.get(width);
+    /// BEGIN NUMBER FORMATTER CACHING MACHINERY ///
+
+    static final int NUMBER_FORMATTER_STANDARD = 1;
+    static final int NUMBER_FORMATTER_CURRENCY = 2;
+    static final int NUMBER_FORMATTER_INTEGER = 3;
+
+    static class NumberFormatterCacheEntry {
+        int type;
+        MeasureUnit unit;
+        MeasureUnit perUnit;
+        LocalizedNumberFormatter formatter;
+    }
+
+    // formatter1 is most recently used.
+    private transient NumberFormatterCacheEntry formatter1 = null;
+    private transient NumberFormatterCacheEntry formatter2 = null;
+    private transient NumberFormatterCacheEntry formatter3 = null;
+
+    private synchronized LocalizedNumberFormatter getUnitFormatterFromCache(
+            int type,
+            MeasureUnit unit,
+            MeasureUnit perUnit) {
+        if (formatter1 != null) {
+            if (formatter1.type == type && formatter1.unit == unit && formatter1.perUnit == perUnit) {
+                return formatter1.formatter;
+            }
+            if (formatter2 != null) {
+                if (formatter2.type == type
+                        && formatter2.unit == unit
+                        && formatter2.perUnit == perUnit) {
+                    return formatter2.formatter;
                 }
-                if (patterns == null) {
-                    patterns = new String[MeasureFormatData.PATTERN_COUNT];
-                    styleToPatterns.put(width, patterns);
-                }
-            }
-            if (patterns[index] == null) {
-                patterns[index] = SimpleFormatterImpl.compileToStringMinMaxArguments(
-                        value.getString(), sb, minPlaceholders, 1);
-            }
-        }
-
-        void setDnamIfAbsent(UResource.Value value) {
-            EnumMap<FormatWidth, String> styleToDnam = cacheData.unitToStyleToDnam.get(unit);
-            if (styleToDnam == null) {
-                styleToDnam = new EnumMap<FormatWidth, String>(FormatWidth.class);
-                cacheData.unitToStyleToDnam.put(unit, styleToDnam);
-            }
-            if (styleToDnam.get(width) == null) {
-                styleToDnam.put(width, value.getString());
-            }
-        }
-
-        /**
-         * Consume a display pattern. For example,
-         * unitsShort/duration/hour contains other{"{0} hrs"}.
-         */
-        void consumePattern(UResource.Key key, UResource.Value value) {
-            if (key.contentEquals("dnam")) {
-                // The display name for the unit in the current width.
-                setDnamIfAbsent(value);
-            } else if (key.contentEquals("per")) {
-                // For example, "{0}/h".
-                setFormatterIfAbsent(MeasureFormatData.PER_UNIT_INDEX, value, 1);
-            } else {
-                // The key must be one of the plural form strings. For example:
-                // one{"{0} hr"}
-                // other{"{0} hrs"}
-                setFormatterIfAbsent(StandardPlural.indexFromString(key), value, 0);
-            }
-        }
-
-        /**
-         * Consume a table of per-unit tables. For example,
-         * unitsShort/duration contains tables for duration-unit subtypes day & hour.
-         */
-        void consumeSubtypeTable(UResource.Key key, UResource.Value value) {
-            unit = MeasureUnit.internalGetInstance(type, key.toString());  // never null
-            // Trigger a fresh lookup of the patterns for this unit+width.
-            patterns = null;
-
-            if (value.getType() == ICUResourceBundle.STRING) {
-                // Units like "coordinate" that don't have plural variants
-                setFormatterIfAbsent(StandardPlural.OTHER.ordinal(), value, 0);
-            } else if (value.getType() == ICUResourceBundle.TABLE) {
-                // Units that have plural variants
-                UResource.Table patternTableTable = value.getTable();
-                for (int i = 0; patternTableTable.getKeyAndValue(i, key, value); i++) {
-                    consumePattern(key, value);
-                }
-            } else {
-                throw new ICUException("Data for unit '" + unit + "' is in an unknown format");
-            }
-        }
-
-        /**
-         * Consume compound x-per-y display pattern. For example,
-         * unitsShort/compound/per may be "{0}/{1}".
-         */
-        void consumeCompoundPattern(UResource.Key key, UResource.Value value) {
-            if (key.contentEquals("per")) {
-                cacheData.styleToPerPattern.put(width,
-                        SimpleFormatterImpl.compileToStringMinMaxArguments(
-                                value.getString(), sb, 2, 2));
-            }
-        }
-
-        /**
-         * Consume a table of unit type tables. For example,
-         * unitsShort contains tables for area & duration.
-         * It also contains a table for the compound/per pattern.
-         */
-        void consumeUnitTypesTable(UResource.Key key, UResource.Value value) {
-            if (key.contentEquals("currency")) {
-                // Skip.
-            } else if (key.contentEquals("compound")) {
-                if (!cacheData.hasPerFormatter(width)) {
-                    UResource.Table compoundTable = value.getTable();
-                    for (int i = 0; compoundTable.getKeyAndValue(i, key, value); i++) {
-                        consumeCompoundPattern(key, value);
+                if (formatter3 != null) {
+                    if (formatter3.type == type
+                            && formatter3.unit == unit
+                            && formatter3.perUnit == perUnit) {
+                        return formatter3.formatter;
                     }
                 }
-            } else {
-                type = key.toString();
-                UResource.Table subtypeTable = value.getTable();
-                for (int i = 0; subtypeTable.getKeyAndValue(i, key, value); i++) {
-                    consumeSubtypeTable(key, value);
-                }
             }
         }
 
-        UnitDataSink(MeasureFormatData outputData) {
-            cacheData = outputData;
+        // No hit; create a new formatter.
+        LocalizedNumberFormatter formatter;
+        if (type == NUMBER_FORMATTER_STANDARD) {
+            formatter = getNumberFormatter().unit(unit).perUnit(perUnit)
+                    .unitWidth(formatWidth.unitWidth);
+        } else if (type == NUMBER_FORMATTER_CURRENCY) {
+            formatter = NumberFormatter.withLocale(getLocale()).unit(unit).perUnit(perUnit)
+                    .unitWidth(formatWidth.currencyWidth);
+        } else {
+            assert type == NUMBER_FORMATTER_INTEGER;
+            formatter = getNumberFormatter().unit(unit).perUnit(perUnit).unitWidth(formatWidth.unitWidth)
+                    .precision(Precision.integer().withMode(
+                            RoundingUtils.mathContextUnlimited(RoundingMode.DOWN)));
         }
-
-        void consumeAlias(UResource.Key key, UResource.Value value) {
-            // Handle aliases like
-            // units:alias{"/LOCALE/unitsShort"}
-            // which should only occur in the root bundle.
-            FormatWidth sourceWidth = widthFromKey(key);
-            if (sourceWidth == null) {
-                // Alias from something we don't care about.
-                return;
-            }
-            FormatWidth targetWidth = widthFromAlias(value);
-            if (targetWidth == null) {
-                // We do not recognize what to fall back to.
-                throw new ICUException("Units data fallback from " + key +
-                        " to unknown " + value.getAliasString());
-            }
-            // Check that we do not fall back to another fallback.
-            if (cacheData.widthFallback[targetWidth.ordinal()] != null) {
-                throw new ICUException("Units data fallback from " + key +
-                        " to " + value.getAliasString() + " which falls back to something else");
-            }
-            cacheData.widthFallback[sourceWidth.ordinal()] = targetWidth;
-        }
-
-        public void consumeTable(UResource.Key key, UResource.Value value) {
-            if ((width = widthFromKey(key)) != null) {
-                UResource.Table unitTypesTable = value.getTable();
-                for (int i = 0; unitTypesTable.getKeyAndValue(i, key, value); i++) {
-                    consumeUnitTypesTable(key, value);
-                }
-            }
-        }
-
-        static FormatWidth widthFromKey(UResource.Key key) {
-            if (key.startsWith("units")) {
-                if (key.length() == 5) {
-                    return FormatWidth.WIDE;
-                } else if (key.regionMatches(5, "Short")) {
-                    return FormatWidth.SHORT;
-                } else if (key.regionMatches(5, "Narrow")) {
-                    return FormatWidth.NARROW;
-                }
-            }
-            return null;
-        }
-
-        static FormatWidth widthFromAlias(UResource.Value value) {
-            String s = value.getAliasString();
-            // For example: "/LOCALE/unitsShort"
-            if (s.startsWith("/LOCALE/units")) {
-                if (s.length() == 13) {
-                    return FormatWidth.WIDE;
-                } else if (s.length() == 18 && s.endsWith("Short")) {
-                    return FormatWidth.SHORT;
-                } else if (s.length() == 19 && s.endsWith("Narrow")) {
-                    return FormatWidth.NARROW;
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public void put(UResource.Key key, UResource.Value value, boolean noFallback) {
-            // Main entry point to sink
-            UResource.Table widthsTable = value.getTable();
-            for (int i = 0; widthsTable.getKeyAndValue(i, key, value); i++) {
-                if (value.getType() == ICUResourceBundle.ALIAS) {
-                    consumeAlias(key, value);
-                } else {
-                    consumeTable(key, value);
-                }
-            }
-        }
-
-        // Output data.
-        MeasureFormatData cacheData;
-
-        // Path to current data.
-        FormatWidth width;
-        String type;
-        MeasureUnit unit;
-
-        // Temporary
-        StringBuilder sb = new StringBuilder();
-        String[] patterns;
+        formatter3 = formatter2;
+        formatter2 = formatter1;
+        formatter1 = new NumberFormatterCacheEntry();
+        formatter1.type = type;
+        formatter1.unit = unit;
+        formatter1.perUnit = perUnit;
+        formatter1.formatter = formatter;
+        return formatter;
     }
 
-    /**
-     * Returns formatting data for all MeasureUnits except for currency ones.
-     */
-    private static MeasureFormatData loadLocaleData(ULocale locale) {
-        ICUResourceBundle resource =
-                (ICUResourceBundle)UResourceBundle.getBundleInstance(ICUData.ICU_UNIT_BASE_NAME, locale);
-        MeasureFormatData cacheData = new MeasureFormatData();
-        UnitDataSink sink = new UnitDataSink(cacheData);
-        resource.getAllItemsWithFallback("", sink);
-        return cacheData;
+    synchronized void clearCache() {
+        formatter1 = null;
+        formatter2 = null;
+        formatter3 = null;
     }
 
-    private static final FormatWidth getRegularWidth(FormatWidth width) {
-        if (width == FormatWidth.NUMERIC) {
-            return FormatWidth.NARROW;
-        }
-        return width;
+    // Can be overridden by subclasses:
+    LocalizedNumberFormatter getNumberFormatter() {
+        return numberFormatter;
     }
 
-    private String getFormatterOrNull(MeasureUnit unit, FormatWidth width, int index) {
-        width = getRegularWidth(width);
-        Map<FormatWidth, String[]> styleToPatterns = cache.unitToStyleToPatterns.get(unit);
-        String[] patterns = styleToPatterns.get(width);
-        if (patterns != null && patterns[index] != null) {
-            return patterns[index];
-        }
-        FormatWidth fallbackWidth = cache.widthFallback[width.ordinal()];
-        if (fallbackWidth != null) {
-            patterns = styleToPatterns.get(fallbackWidth);
-            if (patterns != null && patterns[index] != null) {
-                return patterns[index];
-            }
-        }
-        return null;
-    }
+    /// END NUMBER FORMATTER CACHING MACHINERY ///
 
-    private String getFormatter(MeasureUnit unit, FormatWidth width, int index) {
-        String pattern = getFormatterOrNull(unit, width, index);
-        if (pattern == null) {
-            throw new MissingResourceException(
-                    "no formatting pattern for " + unit + ", width " + width + ", index " + index,
-                    null, null);
-        }
-        return pattern;
-    }
-
-    private String getPluralFormatter(MeasureUnit unit, FormatWidth width, int index) {
-        if (index != StandardPlural.OTHER_INDEX) {
-            String pattern = getFormatterOrNull(unit, width, index);
-            if (pattern != null) {
-                return pattern;
-            }
-        }
-        return getFormatter(unit, width, StandardPlural.OTHER_INDEX);
-    }
-
-    private String getPerFormatter(FormatWidth width) {
-        width = getRegularWidth(width);
-        String perPattern = cache.styleToPerPattern.get(width);
-        if (perPattern != null) {
-            return perPattern;
-        }
-        FormatWidth fallbackWidth = cache.widthFallback[width.ordinal()];
-        if (fallbackWidth != null) {
-            perPattern = cache.styleToPerPattern.get(fallbackWidth);
-            if (perPattern != null) {
-                return perPattern;
-            }
-        }
-        throw new MissingResourceException("no x-per-y pattern for width " + width, null, null);
-    }
-
-    private int withPerUnitAndAppend(
-            CharSequence formatted, MeasureUnit perUnit, StringBuilder appendTo) {
-        int[] offsets = new int[1];
-        String perUnitPattern =
-                getFormatterOrNull(perUnit, formatWidth, MeasureFormatData.PER_UNIT_INDEX);
-        if (perUnitPattern != null) {
-            SimpleFormatterImpl.formatAndAppend(perUnitPattern, appendTo, offsets, formatted);
-            return offsets[0];
-        }
-        String perPattern = getPerFormatter(formatWidth);
-        String pattern = getPluralFormatter(perUnit, formatWidth, StandardPlural.ONE.ordinal());
-        String perUnitString = SimpleFormatterImpl.getTextWithNoArguments(pattern).trim();
-        SimpleFormatterImpl.formatAndAppend(
-                perPattern, appendTo, offsets, formatted, perUnitString);
-        return offsets[0];
-    }
-
-    private String formatMeasure(Measure measure, ImmutableNumberFormat nf) {
-        return formatMeasure(
-                measure, nf, new StringBuilder(),
-                DontCareFieldPosition.INSTANCE).toString();
-    }
-
-    private StringBuilder formatMeasure(
-            Measure measure,
-            ImmutableNumberFormat nf,
-            StringBuilder appendTo,
-            FieldPosition fieldPosition) {
-        Number n = measure.getNumber();
+    private FormattedStringBuilder formatMeasure(Measure measure) {
         MeasureUnit unit = measure.getUnit();
+        DecimalQuantity dq = new DecimalQuantity_DualStorageBCD(measure.getNumber());
+        FormattedStringBuilder string = new FormattedStringBuilder();
         if (unit instanceof Currency) {
-            return appendTo.append(
-                    currencyFormat.format(
-                            new CurrencyAmount(n, (Currency) unit),
-                            new StringBuffer(),
-                            fieldPosition));
-
+            getUnitFormatterFromCache(NUMBER_FORMATTER_CURRENCY, unit, null)
+                    .formatImpl(dq, string);
+        } else {
+            getUnitFormatterFromCache(NUMBER_FORMATTER_STANDARD, unit, null)
+                    .formatImpl(dq, string);
         }
-        StringBuffer formattedNumber = new StringBuffer();
-        StandardPlural pluralForm = QuantityFormatter.selectPlural(
-                n, nf.nf, rules, formattedNumber, fieldPosition);
-        String formatter = getPluralFormatter(unit, formatWidth, pluralForm.ordinal());
-        return QuantityFormatter.format(formatter, formattedNumber, appendTo, fieldPosition);
+        return string;
     }
 
-    /**
-     * Instances contain all MeasureFormat specific data for a particular locale.
-     * This data is cached. It is never copied, but is shared via shared pointers.
-     *
-     * Note: We might change the cache data to have
-     * an array[WIDTH_INDEX_COUNT] or EnumMap<FormatWidth, ...> of
-     * complete sets of unit & per patterns,
-     * to correspond to the resource data and its aliases.
-     */
-    private static final class MeasureFormatData {
-        static final int PER_UNIT_INDEX = StandardPlural.COUNT;
-        static final int PATTERN_COUNT = PER_UNIT_INDEX + 1;
-
-        boolean hasPerFormatter(FormatWidth width) {
-            return styleToPerPattern.containsKey(width);
-        }
-
-        /**
-         * Redirection data from root-bundle, top-level sideways aliases.
-         * - null: initial value, just fall back to root
-         * - FormatWidth.WIDE/SHORT/NARROW: sideways alias for missing data
-         */
-        final FormatWidth widthFallback[] = new FormatWidth[FormatWidth.INDEX_COUNT];
-        /** Measure unit -> format width -> array of patterns ("{0} meters") (plurals + PER_UNIT_INDEX) */
-        final Map<MeasureUnit, EnumMap<FormatWidth, String[]>> unitToStyleToPatterns =
-                new HashMap<MeasureUnit, EnumMap<FormatWidth, String[]>>();
-        final Map<MeasureUnit, EnumMap<FormatWidth, String>> unitToStyleToDnam =
-                new HashMap<MeasureUnit, EnumMap<FormatWidth, String>>();
-        final EnumMap<FormatWidth, String> styleToPerPattern =
-                new EnumMap<FormatWidth, String>(FormatWidth.class);;
+    private FormattedStringBuilder formatMeasureInteger(Measure measure) {
+        DecimalQuantity dq = new DecimalQuantity_DualStorageBCD(measure.getNumber());
+        FormattedStringBuilder string = new FormattedStringBuilder();
+        getUnitFormatterFromCache(NUMBER_FORMATTER_INTEGER, measure.getUnit(), null)
+                .formatImpl(dq, string);
+        return string;
     }
 
-    // Wrapper around NumberFormat that provides immutability and thread-safety.
-    private static final class ImmutableNumberFormat {
-        private NumberFormat nf;
-
-        public ImmutableNumberFormat(NumberFormat nf) {
-            this.nf = (NumberFormat) nf.clone();
-        }
-
-        public synchronized NumberFormat get() {
-            return (NumberFormat) nf.clone();
-        }
-
-        public synchronized StringBuffer format(
-                Number n, StringBuffer buffer, FieldPosition pos) {
-            return nf.format(n, buffer, pos);
-        }
-
-        public synchronized StringBuffer format(
-                CurrencyAmount n, StringBuffer buffer, FieldPosition pos) {
-            return nf.format(n, buffer, pos);
-        }
-
-        @SuppressWarnings("unused")
-        public synchronized String format(Number number) {
-            return nf.format(number);
-        }
-
-        public String getPrefix(boolean positive) {
-            return positive ? ((DecimalFormat)nf).getPositivePrefix() : ((DecimalFormat)nf).getNegativePrefix();
-        }
-        public String getSuffix(boolean positive) {
-            return positive ? ((DecimalFormat)nf).getPositiveSuffix() : ((DecimalFormat)nf).getNegativeSuffix();
-        }
-    }
-
-    static final class PatternData {
-        final String prefix;
-        final String suffix;
-        public PatternData(String pattern) {
-            int pos = pattern.indexOf("{0}");
-            if (pos < 0) {
-                prefix = pattern;
-                suffix = null;
-            } else {
-                prefix = pattern.substring(0,pos);
-                suffix = pattern.substring(pos+3);
-            }
-        }
-        public String toString() {
-            return prefix + "; " + suffix;
-        }
-
-    }
-
-    Object toTimeUnitProxy() {
-        return new MeasureProxy(getLocale(), formatWidth, numberFormat.get(), TIME_UNIT_FORMAT);
-    }
-
-    Object toCurrencyProxy() {
-        return new MeasureProxy(getLocale(), formatWidth, numberFormat.get(), CURRENCY_FORMAT);
-    }
-
-    private StringBuilder formatMeasuresSlowTrack(
+    private void formatMeasuresSlowTrack(
             ListFormatter listFormatter,
-            StringBuilder appendTo,
+            Appendable appendTo,
             FieldPosition fieldPosition,
             Measure... measures) {
         String[] results = new String[measures.length];
 
         // Zero out our field position so that we can tell when we find our field.
-        FieldPosition fpos = new FieldPosition(
-                fieldPosition.getFieldAttribute(), fieldPosition.getField());
+        FieldPosition fpos = new FieldPosition(fieldPosition.getFieldAttribute(),
+                fieldPosition.getField());
 
         int fieldPositionFoundIndex = -1;
         for (int i = 0; i < measures.length; ++i) {
-            ImmutableNumberFormat nf = (i == measures.length - 1 ? numberFormat : integerFormat);
-            if (fieldPositionFoundIndex == -1) {
-                results[i] = formatMeasure(measures[i], nf, new StringBuilder(), fpos).toString();
-                if (fpos.getBeginIndex() != 0 || fpos.getEndIndex() != 0) {
-                    fieldPositionFoundIndex = i;    
-                }
+            FormattedStringBuilder result;
+            if (i == measures.length - 1) {
+                result = formatMeasure(measures[i]);
             } else {
-                results[i] = formatMeasure(measures[i], nf);
+                result = formatMeasureInteger(measures[i]);
             }
+            if (fieldPositionFoundIndex == -1) {
+                FormattedValueStringBuilderImpl.nextFieldPosition(result, fpos);
+                if (fpos.getEndIndex() != 0) {
+                    fieldPositionFoundIndex = i;
+                }
+            }
+            results[i] = result.toString();
         }
-        ListFormatter.FormattedListBuilder builder =
-                listFormatter.format(Arrays.asList(results), fieldPositionFoundIndex);
+        ListFormatter.FormattedListBuilder builder = listFormatter.formatImpl(Arrays.asList(results), true);
 
         // Fix up FieldPosition indexes if our field is found.
-        if (builder.getOffset() != -1) {
-            fieldPosition.setBeginIndex(fpos.getBeginIndex() + builder.getOffset() + appendTo.length());
-            fieldPosition.setEndIndex(fpos.getEndIndex() + builder.getOffset() + appendTo.length());
+        int offset = builder.getOffset(fieldPositionFoundIndex);
+        if (offset != -1) {
+            fieldPosition.setBeginIndex(fpos.getBeginIndex() + offset);
+            fieldPosition.setEndIndex(fpos.getEndIndex() + offset);
         }
-        return appendTo.append(builder.toString());
+        builder.appendTo(appendTo);
     }
 
     // type is one of "hm", "ms" or "hms"
-    private static DateFormat loadNumericDurationFormat(
-            ICUResourceBundle r, String type) {
+    private static String loadNumericDurationFormat(ICUResourceBundle r, String type) {
         r = r.getWithFallback(String.format("durationUnits/%s", type));
         // We replace 'h' with 'H' because 'h' does not make sense in the context of durations.
-        DateFormat result = new SimpleDateFormat(r.getString().replace("h", "H"));
-        result.setTimeZone(TimeZone.GMT_ZONE);
-        return result;
+        return r.getString().replace("h", "H");
     }
 
     // Returns hours in [0]; minutes in [1]; seconds in [2] out of measures array. If
@@ -1258,125 +870,93 @@ public class MeasureFormat extends UFormat {
 
     // Formats numeric time duration as 5:00:47 or 3:54. In the process, it replaces any null
     // values in hms with 0.
-    private StringBuilder formatNumeric(Number[] hms, StringBuilder appendable) {
+    private void formatNumeric(Number[] hms, Appendable appendable) {
+        String pattern;
 
-        // find the start and end of non-nil values in hms array. We have to know if we
-        // have hour-minute; minute-second; or hour-minute-second.
-        int startIndex = -1;
-        int endIndex = -1;
-        for (int i = 0; i < hms.length; i++) {
-            if (hms[i] != null) {
-                endIndex = i;
-                if (startIndex == -1) {
-                    startIndex = endIndex;
-                }
-            } else {
-                // Replace nil value with 0.
-                hms[i] = Integer.valueOf(0);
-            }
-        }
-        // convert hours, minutes, seconds into milliseconds.
-        long millis = (long) (((Math.floor(hms[0].doubleValue()) * 60.0
-                + Math.floor(hms[1].doubleValue())) * 60.0
-                + Math.floor(hms[2].doubleValue())) * 1000.0);
-        Date d = new Date(millis);
-        // if hour-minute-second
-        if (startIndex == 0 && endIndex == 2) {
-            return formatNumeric(
-                    d, 
-                    numericFormatters.getHourMinuteSecond(),
-                    DateFormat.Field.SECOND,
-                    hms[endIndex],
-                    appendable);
-        }
-        // if minute-second
-        if (startIndex == 1 && endIndex == 2) {
-            return formatNumeric(
-                    d, 
-                    numericFormatters.getMinuteSecond(),
-                    DateFormat.Field.SECOND,
-                    hms[endIndex],
-                    appendable);
-        }
-        // if hour-minute
-        if (startIndex == 0 && endIndex == 1) {
-            return formatNumeric(
-                    d, 
-                    numericFormatters.getHourMinute(),
-                    DateFormat.Field.MINUTE,
-                    hms[endIndex],
-                    appendable);
-        }
-        throw new IllegalStateException();
-    }
-
-    // Formats a duration as 5:00:37 or 23:59.
-    // duration is a particular duration after epoch.
-    // formatter is a hour-minute-second, hour-minute, or minute-second formatter.
-    // smallestField denotes what the smallest field is in duration: either
-    // hour, minute, or second.
-    // smallestAmount is the value of that smallest field. for 5:00:37.3,
-    // smallestAmount is 37.3. This smallest field is formatted with this object's
-    // NumberFormat instead of formatter.
-    // appendTo is where the formatted string is appended.
-    private StringBuilder formatNumeric(
-            Date duration,
-            DateFormat formatter,
-            DateFormat.Field smallestField,
-            Number smallestAmount,
-            StringBuilder appendTo) {
-        // Format the smallest amount ahead of time.
-        String smallestAmountFormatted;
-
-        // Format the smallest amount using this object's number format, but keep track
-        // of the integer portion of this formatted amount. We have to replace just the
-        // integer part with the corresponding value from formatting the date. Otherwise
-        // when formatting 0 minutes 9 seconds, we may get "00:9" instead of "00:09"
-        FieldPosition intFieldPosition = new FieldPosition(NumberFormat.INTEGER_FIELD);
-        smallestAmountFormatted = numberFormat.format(
-                smallestAmount, new StringBuffer(), intFieldPosition).toString();
-        // Give up if there is no integer field.
-        if (intFieldPosition.getBeginIndex() == 0 && intFieldPosition.getEndIndex() == 0) {
+        // All possible combinations: "h", "m", "s", "hm", "hs", "ms", "hms"
+        if (hms[0] != null && hms[2] != null) { // "hms" & "hs" (we add minutes if "hs")
+            pattern = numericFormatters.getHourMinuteSecond();
+            if (hms[1] == null)
+                hms[1] = 0;
+            hms[1] = Math.floor(hms[1].doubleValue());
+            hms[0] = Math.floor(hms[0].doubleValue());
+        } else if (hms[0] != null && hms[1] != null) { // "hm"
+            pattern = numericFormatters.getHourMinute();
+            hms[0] = Math.floor(hms[0].doubleValue());
+        } else if (hms[1] != null && hms[2] != null) { // "ms"
+            pattern = numericFormatters.getMinuteSecond();
+            hms[1] = Math.floor(hms[1].doubleValue());
+        } else { // h m s, handled outside formatNumeric. No value is also an error.
             throw new IllegalStateException();
         }
-        // Format our duration as a date, but keep track of where the smallest field is
-        // so that we can use it to replace the integer portion of the smallest value.
-        FieldPosition smallestFieldPosition = new FieldPosition(smallestField);
-        String draft = formatter.format(
-                duration, new StringBuffer(), smallestFieldPosition).toString();
 
-        // If we find the smallest field
-        if (smallestFieldPosition.getBeginIndex() != 0
-                || smallestFieldPosition.getEndIndex() != 0) {
-            // add everything up to the start of the smallest field in duration.
-            appendTo.append(draft, 0, smallestFieldPosition.getBeginIndex());
+        // We can create it on demand, but all of the patterns (right now) have mm and ss.
+        // So unless it is hours only we will need a 0-padded 2 digits formatter.
+        LocalizedNumberFormatter numberFormatter2 = numberFormatter.integerWidth(IntegerWidth.zeroFillTo(2));
+        FormattedStringBuilder fsb = new FormattedStringBuilder();
 
-            // add everything in the smallest field up to the integer portion
-            appendTo.append(smallestAmountFormatted, 0, intFieldPosition.getBeginIndex());
+        boolean protect = false;
+        for (int i = 0; i < pattern.length(); i++) {
+            char c = pattern.charAt(i);
 
-            // Add the smallest field in formatted duration in lieu of the integer portion
-            // of smallest field
-            appendTo.append(
-                    draft,
-                    smallestFieldPosition.getBeginIndex(),
-                    smallestFieldPosition.getEndIndex());
+            // Also set the proper field in this switch
+            // We don't use DateFormat.Field because this is not a date / time, is a duration.
+            Number value = 0;
+            switch (c) {
+                case 'H': value = hms[0]; break;
+                case 'm': value = hms[1]; break;
+                case 's': value = hms[2]; break;
+            }
 
-            // Add the rest of the smallest field
-            appendTo.append(
-                    smallestAmountFormatted,
-                    intFieldPosition.getEndIndex(),
-                    smallestAmountFormatted.length());
-            appendTo.append(draft, smallestFieldPosition.getEndIndex(), draft.length());
-        } else {
-            // As fallback, just use the formatted duration.
-            appendTo.append(draft);
+            // There is not enough info to add Field(s) for the unit because all we have are plain
+            // text patterns. For example in "21:51" there is no text for something like "hour",
+            // while in something like "21h51" there is ("h"). But we can't really tell...
+            switch (c) {
+                case 'H':
+                case 'm':
+                case 's':
+                    if (protect) {
+                        fsb.appendChar16(c, null);
+                    } else {
+                        if ((i + 1 < pattern.length()) && pattern.charAt(i + 1) == c) { // doubled
+                            fsb.append(numberFormatter2.format(value), null); // TODO: Use proper Field
+                            i++;
+                        } else {
+                            fsb.append(numberFormatter.format(value), null); // TODO: Use proper Field
+                        }
+                    }
+                    break;
+                case '\'':
+                    // '' is escaped apostrophe
+                    if ((i + 1 < pattern.length()) && pattern.charAt(i + 1) == c) {
+                        fsb.appendChar16(c, null);
+                        i++;
+                    } else {
+                        protect = !protect;
+                    }
+                    break;
+                default:
+                    fsb.appendChar16(c, null);
+            }
         }
-        return appendTo;
+
+        try {
+            appendable.append(fsb);
+        } catch (IOException e) {
+            throw new ICUUncheckedIOException(e);
+        }
+    }
+
+    Object toTimeUnitProxy() {
+        return new MeasureProxy(getLocale(), formatWidth, getNumberFormatInternal(), TIME_UNIT_FORMAT);
+    }
+
+    Object toCurrencyProxy() {
+        return new MeasureProxy(getLocale(), formatWidth, getNumberFormatInternal(), CURRENCY_FORMAT);
     }
 
     private Object writeReplace() throws ObjectStreamException {
-        return new MeasureProxy(
-                getLocale(), formatWidth, numberFormat.get(), MEASURE_FORMAT);
+        return new MeasureProxy(getLocale(), formatWidth, getNumberFormatInternal(), MEASURE_FORMAT);
     }
 
     static class MeasureProxy implements Externalizable {
@@ -1388,22 +968,19 @@ public class MeasureFormat extends UFormat {
         private int subClass;
         private HashMap<Object, Object> keyValues;
 
-        public MeasureProxy(
-                ULocale locale,
-                FormatWidth width,
-                NumberFormat numberFormat,
-                int subClass) {
+        public MeasureProxy(ULocale locale, FormatWidth width, NumberFormat numberFormat, int subClass) {
             this.locale = locale;
             this.formatWidth = width;
             this.numberFormat = numberFormat;
             this.subClass = subClass;
-            this.keyValues = new HashMap<Object, Object>();
+            this.keyValues = new HashMap<>();
         }
 
         // Must have public constructor, to enable Externalizable
         public MeasureProxy() {
         }
 
+        @Override
         public void writeExternal(ObjectOutput out) throws IOException {
             out.writeByte(0); // version
             out.writeUTF(locale.toLanguageTag());
@@ -1413,6 +990,7 @@ public class MeasureFormat extends UFormat {
             out.writeObject(keyValues);
         }
 
+        @Override
         @SuppressWarnings("unchecked")
         public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
             in.readByte(); // version.
@@ -1453,7 +1031,7 @@ public class MeasureFormat extends UFormat {
             case TIME_UNIT_FORMAT:
                 return createTimeUnitFormat();
             case CURRENCY_FORMAT:
-                return new CurrencyFormat(locale);
+                return MeasureFormat.getCurrencyFormat(locale);
             default:
                 throw new InvalidObjectException("Unknown subclass: " + subClass);
             }
@@ -1468,13 +1046,15 @@ public class MeasureFormat extends UFormat {
         return values[ordinal];
     }
 
-    private static final Map<ULocale, String> localeIdToRangeFormat =
-            new ConcurrentHashMap<ULocale, String>();
+    private static final Map<ULocale, String> localeIdToRangeFormat = new ConcurrentHashMap<>();
 
     /**
      * Return a formatter (compiled SimpleFormatter pattern) for a range, such as "{0}–{1}".
-     * @param forLocale locale to get the format for
-     * @param width the format width
+     *
+     * @param forLocale
+     *            locale to get the format for
+     * @param width
+     *            the format width
      * @return range formatter, such as "{0}–{1}"
      * @internal
      * @deprecated This API is ICU internal only.
@@ -1487,10 +1067,11 @@ public class MeasureFormat extends UFormat {
         }
         String result = localeIdToRangeFormat.get(forLocale);
         if (result == null) {
-            ICUResourceBundle rb = (ICUResourceBundle)UResourceBundle.
-                    getBundleInstance(ICUData.ICU_BASE_NAME, forLocale);
+            ICUResourceBundle rb = (ICUResourceBundle) UResourceBundle
+                    .getBundleInstance(ICUData.ICU_BASE_NAME, forLocale);
             ULocale realLocale = rb.getULocale();
-            if (!forLocale.equals(realLocale)) { // if the child would inherit, then add a cache entry for it.
+            if (!forLocale.equals(realLocale)) { // if the child would inherit, then add a cache entry
+                                                 // for it.
                 result = localeIdToRangeFormat.get(forLocale);
                 if (result != null) {
                     localeIdToRangeFormat.put(forLocale, result);
@@ -1503,12 +1084,13 @@ public class MeasureFormat extends UFormat {
 
             String resultString = null;
             try {
-                resultString = rb.getStringWithFallback("NumberElements/" + ns.getName() + "/miscPatterns/range");
-            } catch ( MissingResourceException ex ) {
+                resultString = rb
+                        .getStringWithFallback("NumberElements/" + ns.getName() + "/miscPatterns/range");
+            } catch (MissingResourceException ex) {
                 resultString = rb.getStringWithFallback("NumberElements/latn/patterns/range");
             }
-            result = SimpleFormatterImpl.compileToStringMinMaxArguments(
-                    resultString, new StringBuilder(), 2, 2);
+            result = SimpleFormatterImpl
+                    .compileToStringMinMaxArguments(resultString, new StringBuilder(), 2, 2);
             localeIdToRangeFormat.put(forLocale, result);
             if (!forLocale.equals(realLocale)) {
                 localeIdToRangeFormat.put(realLocale, result);

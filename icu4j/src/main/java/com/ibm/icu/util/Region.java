@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2011-2016, International Business Machines Corporation
@@ -11,6 +11,7 @@ package com.ibm.icu.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -186,8 +187,7 @@ public class Region implements Comparable<Region> {
 
         String[] continentsArr = worldContainment.getStringArray();
         List<String> continents = Arrays.asList(continentsArr);
-        String[] groupingArr = groupingContainment.getStringArray();
-        List<String> groupings = Arrays.asList(groupingArr);
+        Enumeration<String> groupings = groupingContainment.getKeys();
         List<String> regionCodes = new ArrayList<String>();
 
         List<String> allRegions = new ArrayList<String>();
@@ -215,7 +215,7 @@ public class Region implements Comparable<Region> {
 
         regions = new ArrayList<Region>(regionCodes.size());
 
-        // First process the region codes and create the master array of regions.
+        // First process the region codes and create the primary array of regions.
         for ( String id : regionCodes) {
             Region r = new Region();
             r.id = id;
@@ -244,7 +244,7 @@ public class Region implements Comparable<Region> {
                 Region r;
                 if ( regionIDMap.containsKey(aliasFrom) ) {  // This is a deprecated region
                     r = regionIDMap.get(aliasFrom);
-                } else { // Deprecated region code not in the master codes list - so need to create a deprecated region for it.
+                } else { // Deprecated region code not in the primary codes list - so need to create a deprecated region for it.
                     r = new Region();
                     r.id = aliasFrom;
                     regionIDMap.put(aliasFrom, r);
@@ -304,7 +304,8 @@ public class Region implements Comparable<Region> {
             }
         }
 
-        for ( String grouping : groupings ) {
+        while ( groupings.hasMoreElements() ) {
+            String grouping = groupings.nextElement();
             if (regionIDMap.containsKey(grouping)) {
                 r = regionIDMap.get(grouping);
                 r.type = RegionType.GROUPING;
@@ -323,9 +324,10 @@ public class Region implements Comparable<Region> {
         for ( int i = 0 ; i < territoryContainment.getSize(); i++ ) {
             UResourceBundle mapping = territoryContainment.get(i);
             String parent = mapping.getKey();
-            if (parent.equals("containedGroupings") || parent.equals("deprecated")) {
+            if (parent.equals("containedGroupings") || parent.equals("deprecated") || parent.equals("grouping")) {
                 continue; // handle new pseudo-parent types added in ICU data per cldrbug 7808; for now just skip.
                 // #11232 is to do something useful with these.
+                // Also skip "grouping" which has multi-level structure below from CLDR 34.
             }
             Region parentRegion = regionIDMap.get(parent);
             for ( int j = 0 ; j < mapping.getSize(); j++ ) {
@@ -342,6 +344,23 @@ public class Region implements Comparable<Region> {
                     if ( parentRegion.getType() != RegionType.GROUPING) {
                         childRegion.containingRegion = parentRegion;
                     }
+                }
+            }
+        }     
+
+        // Fill in the grouping containment resource as well
+        for ( int i = 0 ; i < groupingContainment.getSize(); i++ ) {
+            UResourceBundle mapping = groupingContainment.get(i);
+            String parent = mapping.getKey();
+            Region parentRegion = regionIDMap.get(parent);
+            for ( int j = 0 ; j < mapping.getSize(); j++ ) {
+                String child = mapping.getString(j);
+                Region childRegion = regionIDMap.get(child);
+                if ( parentRegion != null && childRegion != null ) {                    
+                    // Add the child region to the set of regions contained by the parent
+                    parentRegion.containedRegions.add(childRegion);
+                    // Do NOT change the parent of the child region, since groupings are
+                    // never the primary parent of a region.
                 }
             }
         }     

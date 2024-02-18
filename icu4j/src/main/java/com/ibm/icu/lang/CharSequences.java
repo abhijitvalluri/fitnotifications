@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  ********************************************************************************
  * Copyright (C) 2010-2014, Google, International Business Machines Corporation *
@@ -123,7 +123,7 @@ public class CharSequences {
      * Same results as turning the code point into a string (with the [ugly] new StringBuilder().appendCodePoint(codepoint).toString())
      * and comparing, but much faster (no object creation). 
      * Actually, there is one difference; a null compares as less.
-     * Note that this (=String) order is UTF-16 order -- *not* code point order.
+     * Note that this (=String) order is UTF-16 order -- <i>not</i> code point order.
      * 
      * @internal
      * @deprecated This API is ICU internal only.
@@ -167,7 +167,7 @@ public class CharSequences {
      * Utility to compare a string to a code point.
      * Same results as turning the code point into a string and comparing, but much faster (no object creation). 
      * Actually, there is one difference; a null compares as less.
-     * Note that this (=String) order is UTF-16 order -- *not* code point order.
+     * Note that this (=String) order is UTF-16 order -- <i>not</i> code point order.
      * 
      * @internal
      * @deprecated This API is ICU internal only.

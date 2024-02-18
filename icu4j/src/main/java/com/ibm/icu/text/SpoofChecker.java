@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  ***************************************************************************
  * Copyright (C) 2008-2016 International Business Machines Corporation
@@ -46,8 +46,8 @@ import com.ibm.icu.util.ULocale;
  * <a href="http://unicode.org/reports/tr39">Unicode Technical Standard #39</a>, has two main functions:
  *
  * <ol>
- * <li>Checking whether two strings are visually <em>confusable</em> with each other, such as "desordenado" and
- * "ԁеѕогԁепаԁо".</li>
+ * <li>Checking whether two strings are visually <em>confusable</em> with each other, such as "desparejado" and
+ * "ԁеѕрагејаԁо".</li>
  * <li>Checking whether an individual string is likely to be an attempt at confusing the reader (<em>spoof
  * detection</em>), such as "pаypаl" spelled with Cyrillic 'а' characters.</li>
  * </ol>
@@ -65,7 +65,7 @@ import com.ibm.icu.util.ULocale;
  * <pre>
  * <code>
  * SpoofChecker sc = new SpoofChecker.Builder().setChecks(SpoofChecker.CONFUSABLE).build();
- * int result = sc.areConfusable("desordenado", "ԁеѕогԁепаԁо");
+ * int result = sc.areConfusable("desparejado", "ԁеѕрагејаԁо");
  * System.out.println(result != 0);  // true
  * </code>
  * </pre>
@@ -81,6 +81,22 @@ import com.ibm.icu.util.ULocale;
  * application startup), and the more efficient {@link SpoofChecker#areConfusable} method can be used at runtime.
  *
  * <p>
+ * If the paragraph direction used to display the strings is known, it should be passed to {@link SpoofChecker#areConfusable}:
+ *
+ * <pre>
+ * <code>
+ * // These strings look identical when rendered in a left-to-right context.
+ * // They look distinct in a right-to-left context.
+ * String s1 = "A1\u05D0";  // A1א
+ * String s2 = "A\u05D01";  // Aא1
+ *
+ * SpoofChecker sc = new SpoofChecker.Builder().setChecks(SpoofChecker.CONFUSABLE).build();
+ * int result = sc.areConfusable(Bidi.DIRECTION_LEFT_TO_RIGHT, s1, s2);
+ * System.out.println(result != 0);  // true
+ * </code>
+ * </pre>
+ *
+ * <p>
  * UTS 39 defines two strings to be <em>confusable</em> if they map to the same skeleton. A <em>skeleton</em> is a
  * sequence of families of confusable characters, where each family has a single exemplar character.
  * {@link SpoofChecker#getSkeleton} computes the skeleton for a particular string, so the following snippet is
@@ -89,7 +105,7 @@ import com.ibm.icu.util.ULocale;
  * <pre>
  * <code>
  * SpoofChecker sc = new SpoofChecker.Builder().setChecks(SpoofChecker.CONFUSABLE).build();
- * boolean result = sc.getSkeleton("desordenado").equals(sc.getSkeleton("ԁеѕогԁепаԁо"));
+ * boolean result = sc.getSkeleton("desparejado").equals(sc.getSkeleton("ԁеѕрагејаԁо"));
  * System.out.println(result);  // true
  * </code>
  * </pre>
@@ -198,6 +214,53 @@ import com.ibm.icu.util.ULocale;
  * COMMON or INHERITED, such as numbers and punctuation, are ignored when computing whether a string has multiple
  * scripts.
  *
+ * <h2>Advanced bidirectional usage</h2>
+ * If the paragraph direction with which the identifiers will be displayed is not known, there are
+ * multiple options for confusable detection depending on the circumstances.
+ *
+ * <p>
+ * In some circumstances, the only concern is confusion between identifiers displayed with the same
+ * paragraph direction.
+ *
+ * <p>
+ * An example is the case where identifiers are usernames prefixed with the @ symbol.
+ * That symbol will appear to the left in a left-to-right context, and to the right in a
+ * right-to-left context, so that an identifier displayed in a left-to-right context can never be
+ * confused with an identifier displayed in a right-to-left context:
+ * <ul>
+ * <li>
+ * The usernames "A1א" (A one aleph) and "Aא1" (A aleph 1)
+ * would be considered confusable, since they both appear as @A1א in a left-to-right context, and the
+ * usernames "אA_1" (aleph A underscore one) and "א1_A" (aleph one underscore A) would be considered
+ * confusable, since they both appear as A_1א@ in a right-to-left context.
+ * </li>
+ * <li>
+ * The username "Mark_" would not be considered confusable with the username "_Mark",
+ * even though the latter would appear as Mark_@ in a right-to-left context, and the
+ * former as @Mark_ in a left-to-right context.
+ * </li>
+ * </ul>
+ * <p>
+ * In that case, the caller should check for both LTR-confusability and RTL-confusability:
+ *
+ * <pre>
+ * <code>
+ * boolean confusableInEitherDirection =
+ *     sc.areConfusable(Bidi.DIRECTION_LEFT_TO_RIGHT, id1, id2) ||
+ *     sc.areConfusable(Bidi.DIRECTION_RIGHT_TO_LEFT, id1, id2);
+ * </code>
+ * </pre>
+ *
+ * If the bidiSkeleton is used, the LTR and RTL skeleta should be kept separately and compared, LTR
+ * with LTR and RTL with RTL.
+ *
+ * <p>
+ * In cases where confusability between the visual appearances of an identifier displayed in a
+ * left-to-right context with another identifier displayed in a right-to-left context is a concern,
+ * the LTR skeleton of one can be compared with the RTL skeleton of the other.  However, this
+ * very broad definition of confusability may have unexpected results; for instance, it treats the
+ * ASCII identifiers "Mark_" and "_Mark" as confusable.
+ *
  * <h2>Additional Information</h2>
  *
  * <p>
@@ -270,13 +333,13 @@ public class SpoofChecker {
     /**
      * Security Profile constant from UTS 39 for use in {@link SpoofChecker.Builder#setAllowedChars}.
      *
-     * @draft ICU 58
-     * @provisional This API might change or be removed in a future release.
+     * @stable ICU 58
      */
     public static final UnicodeSet INCLUSION = new UnicodeSet(
-            "['\\-.\\:\\u00B7\\u0375\\u058A\\u05F3\\u05F4\\u06FD\\u06FE\\u0F0B\\u200C\\u200D\\u2010\\u"
-                    + "2019\\u2027\\u30A0\\u30FB]").freeze();
-    // Note: data from http://unicode.org/Public/security/9.0.0/IdentifierStatus.txt
+            "['\\-.\\:\\u00B7\\u0375\\u058A\\u05F3\\u05F4\\u06FD\\u06FE\\u0F0B\\u2010"
+            + "\\u2019\\u2027\\u30A0\\u30FB]"
+            ).freeze();
+    // Note: data from IdentifierStatus.txt & IdentifierType.txt
     // There is tooling to generate this constant in the unicodetools project:
     //      org.unicode.text.tools.RecommendedSetGenerator
     // It will print the Java and C++ code to the console for easy copy-paste into this file.
@@ -284,66 +347,82 @@ public class SpoofChecker {
     /**
      * Security Profile constant from UTS 39 for use in {@link SpoofChecker.Builder#setAllowedChars}.
      *
-     * @draft ICU 58
-     * @provisional This API might change or be removed in a future release.
+     * @stable ICU 58
      */
     public static final UnicodeSet RECOMMENDED = new UnicodeSet(
-            "[0-9A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u0131\\u0134-\\u013E\\u0141-\\u014"
-                    + "8\\u014A-\\u017E\\u018F\\u01A0\\u01A1\\u01AF\\u01B0\\u01CD-\\u01DC\\u01DE-\\u01E3\\u01E"
-                    + "6-\\u01F0\\u01F4\\u01F5\\u01F8-\\u021B\\u021E\\u021F\\u0226-\\u0233\\u0259\\u02BB\\u02B"
-                    + "C\\u02EC\\u0300-\\u0304\\u0306-\\u030C\\u030F-\\u0311\\u0313\\u0314\\u031B\\u0323-\\u03"
-                    + "28\\u032D\\u032E\\u0330\\u0331\\u0335\\u0338\\u0339\\u0342\\u0345\\u037B-\\u037D\\u0386"
-                    + "\\u0388-\\u038A\\u038C\\u038E-\\u03A1\\u03A3-\\u03CE\\u03FC-\\u045F\\u048A-\\u0529\\u05"
-                    + "2E\\u052F\\u0531-\\u0556\\u0559\\u0561-\\u0586\\u05B4\\u05D0-\\u05EA\\u05F0-\\u05F2\\u0"
-                    + "620-\\u063F\\u0641-\\u0655\\u0660-\\u0669\\u0670-\\u0672\\u0674\\u0679-\\u068D\\u068F-"
-                    + "\\u06D3\\u06D5\\u06E5\\u06E6\\u06EE-\\u06FC\\u06FF\\u0750-\\u07B1\\u08A0-\\u08AC\\u08B2"
-                    + "\\u08B6-\\u08BD\\u0901-\\u094D\\u094F\\u0950\\u0956\\u0957\\u0960-\\u0963\\u0966-\\u096"
-                    + "F\\u0971-\\u0977\\u0979-\\u097F\\u0981-\\u0983\\u0985-\\u098C\\u098F\\u0990\\u0993-\\u0"
-                    + "9A8\\u09AA-\\u09B0\\u09B2\\u09B6-\\u09B9\\u09BC-\\u09C4\\u09C7\\u09C8\\u09CB-\\u09CE\\u"
-                    + "09D7\\u09E0-\\u09E3\\u09E6-\\u09F1\\u0A01-\\u0A03\\u0A05-\\u0A0A\\u0A0F\\u0A10\\u0A13-"
-                    + "\\u0A28\\u0A2A-\\u0A30\\u0A32\\u0A35\\u0A38\\u0A39\\u0A3C\\u0A3E-\\u0A42\\u0A47\\u0A48\\"
-                    + "u0A4B-\\u0A4D\\u0A5C\\u0A66-\\u0A74\\u0A81-\\u0A83\\u0A85-\\u0A8D\\u0A8F-\\u0A91\\u0A9"
-                    + "3-\\u0AA8\\u0AAA-\\u0AB0\\u0AB2\\u0AB3\\u0AB5-\\u0AB9\\u0ABC-\\u0AC5\\u0AC7-\\u0AC9\\u0"
-                    + "ACB-\\u0ACD\\u0AD0\\u0AE0-\\u0AE3\\u0AE6-\\u0AEF\\u0B01-\\u0B03\\u0B05-\\u0B0C\\u0B0F\\"
-                    + "u0B10\\u0B13-\\u0B28\\u0B2A-\\u0B30\\u0B32\\u0B33\\u0B35-\\u0B39\\u0B3C-\\u0B43\\u0B47"
-                    + "\\u0B48\\u0B4B-\\u0B4D\\u0B56\\u0B57\\u0B5F-\\u0B61\\u0B66-\\u0B6F\\u0B71\\u0B82\\u0B83"
-                    + "\\u0B85-\\u0B8A\\u0B8E-\\u0B90\\u0B92-\\u0B95\\u0B99\\u0B9A\\u0B9C\\u0B9E\\u0B9F\\u0BA3"
-                    + "\\u0BA4\\u0BA8-\\u0BAA\\u0BAE-\\u0BB9\\u0BBE-\\u0BC2\\u0BC6-\\u0BC8\\u0BCA-\\u0BCD\\u0B"
-                    + "D0\\u0BD7\\u0BE6-\\u0BEF\\u0C01-\\u0C03\\u0C05-\\u0C0C\\u0C0E-\\u0C10\\u0C12-\\u0C28\\u"
-                    + "0C2A-\\u0C33\\u0C35-\\u0C39\\u0C3D-\\u0C44\\u0C46-\\u0C48\\u0C4A-\\u0C4D\\u0C55\\u0C56"
-                    + "\\u0C60\\u0C61\\u0C66-\\u0C6F\\u0C80\\u0C82\\u0C83\\u0C85-\\u0C8C\\u0C8E-\\u0C90\\u0C92"
-                    + "-\\u0CA8\\u0CAA-\\u0CB3\\u0CB5-\\u0CB9\\u0CBC-\\u0CC4\\u0CC6-\\u0CC8\\u0CCA-\\u0CCD\\u0"
-                    + "CD5\\u0CD6\\u0CE0-\\u0CE3\\u0CE6-\\u0CEF\\u0CF1\\u0CF2\\u0D02\\u0D03\\u0D05-\\u0D0C\\u0"
-                    + "D0E-\\u0D10\\u0D12-\\u0D3A\\u0D3D-\\u0D43\\u0D46-\\u0D48\\u0D4A-\\u0D4E\\u0D54-\\u0D57"
-                    + "\\u0D60\\u0D61\\u0D66-\\u0D6F\\u0D7A-\\u0D7F\\u0D82\\u0D83\\u0D85-\\u0D8E\\u0D91-\\u0D9"
-                    + "6\\u0D9A-\\u0DA5\\u0DA7-\\u0DB1\\u0DB3-\\u0DBB\\u0DBD\\u0DC0-\\u0DC6\\u0DCA\\u0DCF-\\u0"
-                    + "DD4\\u0DD6\\u0DD8-\\u0DDE\\u0DF2\\u0E01-\\u0E32\\u0E34-\\u0E3A\\u0E40-\\u0E4E\\u0E50-\\"
-                    + "u0E59\\u0E81\\u0E82\\u0E84\\u0E87\\u0E88\\u0E8A\\u0E8D\\u0E94-\\u0E97\\u0E99-\\u0E9F\\u"
-                    + "0EA1-\\u0EA3\\u0EA5\\u0EA7\\u0EAA\\u0EAB\\u0EAD-\\u0EB2\\u0EB4-\\u0EB9\\u0EBB-\\u0EBD\\"
-                    + "u0EC0-\\u0EC4\\u0EC6\\u0EC8-\\u0ECD\\u0ED0-\\u0ED9\\u0EDE\\u0EDF\\u0F00\\u0F20-\\u0F29"
-                    + "\\u0F35\\u0F37\\u0F3E-\\u0F42\\u0F44-\\u0F47\\u0F49-\\u0F4C\\u0F4E-\\u0F51\\u0F53-\\u0F"
-                    + "56\\u0F58-\\u0F5B\\u0F5D-\\u0F68\\u0F6A-\\u0F6C\\u0F71\\u0F72\\u0F74\\u0F7A-\\u0F80\\u0"
-                    + "F82-\\u0F84\\u0F86-\\u0F92\\u0F94-\\u0F97\\u0F99-\\u0F9C\\u0F9E-\\u0FA1\\u0FA3-\\u0FA6"
-                    + "\\u0FA8-\\u0FAB\\u0FAD-\\u0FB8\\u0FBA-\\u0FBC\\u0FC6\\u1000-\\u1049\\u1050-\\u109D\\u10"
-                    + "C7\\u10CD\\u10D0-\\u10F0\\u10F7-\\u10FA\\u10FD-\\u10FF\\u1200-\\u1248\\u124A-\\u124D\\u"
-                    + "1250-\\u1256\\u1258\\u125A-\\u125D\\u1260-\\u1288\\u128A-\\u128D\\u1290-\\u12B0\\u12B2"
-                    + "-\\u12B5\\u12B8-\\u12BE\\u12C0\\u12C2-\\u12C5\\u12C8-\\u12D6\\u12D8-\\u1310\\u1312-\\u1"
-                    + "315\\u1318-\\u135A\\u135D-\\u135F\\u1380-\\u138F\\u1780-\\u17A2\\u17A5-\\u17A7\\u17A9-"
-                    + "\\u17B3\\u17B6-\\u17CA\\u17D2\\u17D7\\u17DC\\u17E0-\\u17E9\\u1C80-\\u1C88\\u1E00-\\u1E9"
-                    + "9\\u1E9E\\u1EA0-\\u1EF9\\u1F00-\\u1F15\\u1F18-\\u1F1D\\u1F20-\\u1F45\\u1F48-\\u1F4D\\u1"
-                    + "F50-\\u1F57\\u1F59\\u1F5B\\u1F5D\\u1F5F-\\u1F70\\u1F72\\u1F74\\u1F76\\u1F78\\u1F7A\\u1F"
-                    + "7C\\u1F80-\\u1FB4\\u1FB6-\\u1FBA\\u1FBC\\u1FC2-\\u1FC4\\u1FC6-\\u1FC8\\u1FCA\\u1FCC\\u1"
-                    + "FD0-\\u1FD2\\u1FD6-\\u1FDA\\u1FE0-\\u1FE2\\u1FE4-\\u1FEA\\u1FEC\\u1FF2-\\u1FF4\\u1FF6-"
-                    + "\\u1FF8\\u1FFA\\u1FFC\\u2D27\\u2D2D\\u2D80-\\u2D96\\u2DA0-\\u2DA6\\u2DA8-\\u2DAE\\u2DB0"
-                    + "-\\u2DB6\\u2DB8-\\u2DBE\\u2DC0-\\u2DC6\\u2DC8-\\u2DCE\\u2DD0-\\u2DD6\\u2DD8-\\u2DDE\\u3"
-                    + "005-\\u3007\\u3041-\\u3096\\u3099\\u309A\\u309D\\u309E\\u30A1-\\u30FA\\u30FC-\\u30FE\\u"
-                    + "3105-\\u312D\\u31A0-\\u31BA\\u3400-\\u4DB5\\u4E00-\\u9FD5\\uA660\\uA661\\uA674-\\uA67B"
-                    + "\\uA67F\\uA69F\\uA717-\\uA71F\\uA788\\uA78D\\uA78E\\uA790-\\uA793\\uA7A0-\\uA7AA\\uA7AE"
-                    + "\\uA7FA\\uA9E7-\\uA9FE\\uAA60-\\uAA76\\uAA7A-\\uAA7F\\uAB01-\\uAB06\\uAB09-\\uAB0E\\uAB"
-                    + "11-\\uAB16\\uAB20-\\uAB26\\uAB28-\\uAB2E\\uAC00-\\uD7A3\\uFA0E\\uFA0F\\uFA11\\uFA13\\uF"
-                    + "A14\\uFA1F\\uFA21\\uFA23\\uFA24\\uFA27-\\uFA29\\U00020000-\\U0002A6D6\\U0002A700-\\U0"
-                    + "002B734\\U0002B740-\\U0002B81D\\U0002B820-\\U0002CEA1]").freeze();
-    // Note: data from http://unicode.org/Public/security/9.0.0/IdentifierStatus.txt
+            "[0-9A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u0131\\u0134-\\u013E"
+            + "\\u0141-\\u0148\\u014A-\\u017E\\u018F\\u01A0\\u01A1\\u01AF\\u01B0\\u01CD-"
+            + "\\u01DC\\u01DE-\\u01E3\\u01E6-\\u01F0\\u01F4\\u01F5\\u01F8-\\u021B\\u021E"
+            + "\\u021F\\u0226-\\u0233\\u0259\\u02BB\\u02BC\\u02EC\\u0300-\\u0304\\u0306-"
+            + "\\u030C\\u030F-\\u0311\\u0313\\u0314\\u031B\\u0323-\\u0328\\u032D\\u032E"
+            + "\\u0330\\u0331\\u0335\\u0338\\u0339\\u0342\\u0345\\u037B-\\u037D\\u0386"
+            + "\\u0388-\\u038A\\u038C\\u038E-\\u03A1\\u03A3-\\u03CE\\u03FC-\\u045F\\u048A-"
+            + "\\u04FF\\u0510-\\u0529\\u052E\\u052F\\u0531-\\u0556\\u0559\\u0561-\\u0586"
+            + "\\u05B4\\u05D0-\\u05EA\\u05EF-\\u05F2\\u0620-\\u063F\\u0641-\\u0655\\u0660-"
+            + "\\u0669\\u0670-\\u0672\\u0674\\u0679-\\u068D\\u068F-\\u06A0\\u06A2-\\u06D3"
+            + "\\u06D5\\u06E5\\u06E6\\u06EE-\\u06FC\\u06FF\\u0750-\\u07B1\\u0870-\\u0887"
+            + "\\u0889-\\u088E\\u08A0-\\u08AC\\u08B2\\u08B5-\\u08C9\\u0901-\\u094D\\u094F"
+            + "\\u0950\\u0956\\u0957\\u0960-\\u0963\\u0966-\\u096F\\u0971-\\u0977\\u0979-"
+            + "\\u097F\\u0981-\\u0983\\u0985-\\u098C\\u098F\\u0990\\u0993-\\u09A8\\u09AA-"
+            + "\\u09B0\\u09B2\\u09B6-\\u09B9\\u09BC-\\u09C4\\u09C7\\u09C8\\u09CB-\\u09CE"
+            + "\\u09D7\\u09E0-\\u09E3\\u09E6-\\u09F1\\u09FE\\u0A01-\\u0A03\\u0A05-\\u0A0A"
+            + "\\u0A0F\\u0A10\\u0A13-\\u0A28\\u0A2A-\\u0A30\\u0A32\\u0A35\\u0A38\\u0A39"
+            + "\\u0A3C\\u0A3E-\\u0A42\\u0A47\\u0A48\\u0A4B-\\u0A4D\\u0A5C\\u0A66-\\u0A74"
+            + "\\u0A81-\\u0A83\\u0A85-\\u0A8D\\u0A8F-\\u0A91\\u0A93-\\u0AA8\\u0AAA-\\u0AB0"
+            + "\\u0AB2\\u0AB3\\u0AB5-\\u0AB9\\u0ABC-\\u0AC5\\u0AC7-\\u0AC9\\u0ACB-\\u0ACD"
+            + "\\u0AD0\\u0AE0-\\u0AE3\\u0AE6-\\u0AEF\\u0AFA-\\u0AFF\\u0B01-\\u0B03\\u0B05-"
+            + "\\u0B0C\\u0B0F\\u0B10\\u0B13-\\u0B28\\u0B2A-\\u0B30\\u0B32\\u0B33\\u0B35-"
+            + "\\u0B39\\u0B3C-\\u0B43\\u0B47\\u0B48\\u0B4B-\\u0B4D\\u0B55-\\u0B57\\u0B5F-"
+            + "\\u0B61\\u0B66-\\u0B6F\\u0B71\\u0B82\\u0B83\\u0B85-\\u0B8A\\u0B8E-\\u0B90"
+            + "\\u0B92-\\u0B95\\u0B99\\u0B9A\\u0B9C\\u0B9E\\u0B9F\\u0BA3\\u0BA4\\u0BA8-"
+            + "\\u0BAA\\u0BAE-\\u0BB9\\u0BBE-\\u0BC2\\u0BC6-\\u0BC8\\u0BCA-\\u0BCD\\u0BD0"
+            + "\\u0BD7\\u0BE6-\\u0BEF\\u0C01-\\u0C0C\\u0C0E-\\u0C10\\u0C12-\\u0C28\\u0C2A-"
+            + "\\u0C33\\u0C35-\\u0C39\\u0C3C-\\u0C44\\u0C46-\\u0C48\\u0C4A-\\u0C4D\\u0C55"
+            + "\\u0C56\\u0C5D\\u0C60\\u0C61\\u0C66-\\u0C6F\\u0C80\\u0C82\\u0C83\\u0C85-"
+            + "\\u0C8C\\u0C8E-\\u0C90\\u0C92-\\u0CA8\\u0CAA-\\u0CB3\\u0CB5-\\u0CB9\\u0CBC-"
+            + "\\u0CC4\\u0CC6-\\u0CC8\\u0CCA-\\u0CCD\\u0CD5\\u0CD6\\u0CDD\\u0CE0-\\u0CE3"
+            + "\\u0CE6-\\u0CEF\\u0CF1-\\u0CF3\\u0D00\\u0D02\\u0D03\\u0D05-\\u0D0C\\u0D0E-"
+            + "\\u0D10\\u0D12-\\u0D3A\\u0D3D-\\u0D43\\u0D46-\\u0D48\\u0D4A-\\u0D4E\\u0D54-"
+            + "\\u0D57\\u0D60\\u0D61\\u0D66-\\u0D6F\\u0D7A-\\u0D7F\\u0D82\\u0D83\\u0D85-"
+            + "\\u0D8E\\u0D91-\\u0D96\\u0D9A-\\u0DA5\\u0DA7-\\u0DB1\\u0DB3-\\u0DBB\\u0DBD"
+            + "\\u0DC0-\\u0DC6\\u0DCA\\u0DCF-\\u0DD4\\u0DD6\\u0DD8-\\u0DDE\\u0DF2\\u0E01-"
+            + "\\u0E32\\u0E34-\\u0E3A\\u0E40-\\u0E4E\\u0E50-\\u0E59\\u0E81\\u0E82\\u0E84"
+            + "\\u0E86-\\u0E8A\\u0E8C-\\u0EA3\\u0EA5\\u0EA7-\\u0EB2\\u0EB4-\\u0EBD\\u0EC0-"
+            + "\\u0EC4\\u0EC6\\u0EC8-\\u0ECE\\u0ED0-\\u0ED9\\u0EDE\\u0EDF\\u0F00\\u0F20-"
+            + "\\u0F29\\u0F35\\u0F37\\u0F3E-\\u0F42\\u0F44-\\u0F47\\u0F49-\\u0F4C\\u0F4E-"
+            + "\\u0F51\\u0F53-\\u0F56\\u0F58-\\u0F5B\\u0F5D-\\u0F68\\u0F6A-\\u0F6C\\u0F71"
+            + "\\u0F72\\u0F74\\u0F7A-\\u0F80\\u0F82-\\u0F84\\u0F86-\\u0F92\\u0F94-\\u0F97"
+            + "\\u0F99-\\u0F9C\\u0F9E-\\u0FA1\\u0FA3-\\u0FA6\\u0FA8-\\u0FAB\\u0FAD-\\u0FB8"
+            + "\\u0FBA-\\u0FBC\\u0FC6\\u1000-\\u1049\\u1050-\\u109D\\u10C7\\u10CD\\u10D0-"
+            + "\\u10F0\\u10F7-\\u10FA\\u10FD-\\u10FF\\u1200-\\u1248\\u124A-\\u124D\\u1250-"
+            + "\\u1256\\u1258\\u125A-\\u125D\\u1260-\\u1288\\u128A-\\u128D\\u1290-\\u12B0"
+            + "\\u12B2-\\u12B5\\u12B8-\\u12BE\\u12C0\\u12C2-\\u12C5\\u12C8-\\u12D6\\u12D8-"
+            + "\\u1310\\u1312-\\u1315\\u1318-\\u135A\\u135D-\\u135F\\u1380-\\u138F\\u1780-"
+            + "\\u17A2\\u17A5-\\u17A7\\u17A9-\\u17B3\\u17B6-\\u17CD\\u17D0\\u17D2\\u17D7"
+            + "\\u17DC\\u17E0-\\u17E9\\u1C90-\\u1CBA\\u1CBD-\\u1CBF\\u1E00-\\u1E99\\u1E9E"
+            + "\\u1EA0-\\u1EF9\\u1F00-\\u1F15\\u1F18-\\u1F1D\\u1F20-\\u1F45\\u1F48-\\u1F4D"
+            + "\\u1F50-\\u1F57\\u1F59\\u1F5B\\u1F5D\\u1F5F-\\u1F70\\u1F72\\u1F74\\u1F76"
+            + "\\u1F78\\u1F7A\\u1F7C\\u1F80-\\u1FB4\\u1FB6-\\u1FBA\\u1FBC\\u1FC2-\\u1FC4"
+            + "\\u1FC6-\\u1FC8\\u1FCA\\u1FCC\\u1FD0-\\u1FD2\\u1FD6-\\u1FDA\\u1FE0-\\u1FE2"
+            + "\\u1FE4-\\u1FEA\\u1FEC\\u1FF2-\\u1FF4\\u1FF6-\\u1FF8\\u1FFA\\u1FFC\\u2D27"
+            + "\\u2D2D\\u2D80-\\u2D96\\u2DA0-\\u2DA6\\u2DA8-\\u2DAE\\u2DB0-\\u2DB6\\u2DB8-"
+            + "\\u2DBE\\u2DC0-\\u2DC6\\u2DC8-\\u2DCE\\u2DD0-\\u2DD6\\u2DD8-\\u2DDE\\u3005-"
+            + "\\u3007\\u3041-\\u3096\\u3099\\u309A\\u309D\\u309E\\u30A1-\\u30FA\\u30FC-"
+            + "\\u30FE\\u3105-\\u312D\\u312F\\u31A0-\\u31BF\\u3400-\\u4DBF\\u4E00-\\u9FFF"
+            + "\\uA67F\\uA717-\\uA71F\\uA788\\uA78D\\uA792\\uA793\\uA7AA\\uA7C0-\\uA7CA"
+            + "\\uA7D0\\uA7D1\\uA7D3\\uA7D5-\\uA7D9\\uA9E7-\\uA9FE\\uAA60-\\uAA76\\uAA7A-"
+            + "\\uAA7F\\uAB01-\\uAB06\\uAB09-\\uAB0E\\uAB11-\\uAB16\\uAB20-\\uAB26\\uAB28-"
+            + "\\uAB2E\\uAB66\\uAB67\\uAC00-\\uD7A3\\uFA0E\\uFA0F\\uFA11\\uFA13\\uFA14"
+            + "\\uFA1F\\uFA21\\uFA23\\uFA24\\uFA27-\\uFA29\\U00011301\\U00011303"
+            + "\\U0001133B\\U0001133C\\U00016FF0\\U00016FF1\\U0001B11F-\\U0001B122"
+            + "\\U0001B132\\U0001B150-\\U0001B152\\U0001B155\\U0001B164-\\U0001B167"
+            + "\\U0001DF00-\\U0001DF1E\\U0001DF25-\\U0001DF2A\\U0001E08F\\U0001E7E0-"
+            + "\\U0001E7E6\\U0001E7E8-\\U0001E7EB\\U0001E7ED\\U0001E7EE\\U0001E7F0-"
+            + "\\U0001E7FE\\U00020000-\\U0002A6DF\\U0002A700-\\U0002B739\\U0002B740-"
+            + "\\U0002B81D\\U0002B820-\\U0002CEA1\\U0002CEB0-\\U0002EBE0\\U0002EBF0-"
+            + "\\U0002EE5D\\U00030000-\\U0003134A\\U00031350-\\U000323AF]"
+            ).freeze();
+    // Note: data from IdentifierStatus.txt & IdentifierType.txt
     // There is tooling to generate this constant in the unicodetools project:
     //      org.unicode.text.tools.RecommendedSetGenerator
     // It will print the Java and C++ code to the console for easy copy-paste into this file.
@@ -386,8 +465,7 @@ public class SpoofChecker {
      * checks to some subset of SINGLE_SCRIPT_CONFUSABLE, MIXED_SCRIPT_CONFUSABLE, or WHOLE_SCRIPT_CONFUSABLE to make
      * {@link SpoofChecker#areConfusable} return only those types of confusables.
      *
-     * @draft ICU 58
-     * @provisional This API might change or be removed in a future release.
+     * @stable ICU 58
      */
     public static final int CONFUSABLE = SINGLE_SCRIPT_CONFUSABLE | MIXED_SCRIPT_CONFUSABLE | WHOLE_SCRIPT_CONFUSABLE;
 
@@ -405,8 +483,7 @@ public class SpoofChecker {
      * {@link SpoofChecker.Builder#setRestrictionLevel}. The default restriction level is
      * {@link RestrictionLevel#HIGHLY_RESTRICTIVE}.
      *
-     * @draft ICU 58
-     * @provisional This API might change or be removed in a future release.
+     * @stable ICU 58
      */
     public static final int RESTRICTION_LEVEL = 16;
 
@@ -441,10 +518,30 @@ public class SpoofChecker {
      * Check that an identifier does not mix numbers from different numbering systems. For more information, see UTS 39
      * section 5.3.
      *
-     * @draft ICU 58
-     * @provisional This API might change or be removed in a future release.
+     * @stable ICU 58
      */
     public static final int MIXED_NUMBERS = 128;
+
+    /**
+     * Check that an identifier does not have a combining character following a character in which that
+     * combining character would be hidden; for example 'i' followed by a U+0307 combining dot.
+     * <p>
+     * More specifically, the following characters are forbidden from preceding a U+0307:
+     * <ul>
+     * <li>Those with the Soft_Dotted Unicode property (which includes 'i' and 'j')</li>
+     * <li>Latin lowercase letter 'l'</li>
+     * <li>Dotless 'i' and 'j' ('ı' and 'ȷ', U+0131 and U+0237)</li>
+     * <li>Any character whose confusable prototype ends with such a character
+     * (Soft_Dotted, 'l', 'ı', or 'ȷ')</li>
+     * </ul>
+     * In addition, combining characters are allowed between the above characters and U+0307 except those
+     * with combining class 0 or combining class "Above" (230, same class as U+0307).
+     * <p>
+     * This list and the number of combing characters considered by this check may grow over time.
+     *
+     * @stable ICU 62
+     */
+    public static final int HIDDEN_OVERLAY = 256;
 
     // Update CheckResult.toString() when a new check is added.
 
@@ -475,7 +572,7 @@ public class SpoofChecker {
         SpoofData fSpoofData;
         final UnicodeSet fAllowedCharsSet = new UnicodeSet(0, 0x10ffff); // The UnicodeSet of allowed characters.
         // for this Spoof Checker. Defaults to all chars.
-        final Set<ULocale> fAllowedLocales = new LinkedHashSet<ULocale>(); // The list of allowed locales.
+        final Set<ULocale> fAllowedLocales = new LinkedHashSet<>(); // The list of allowed locales.
         private RestrictionLevel fRestrictionLevel;
 
         /**
@@ -536,7 +633,7 @@ public class SpoofChecker {
             result.fSpoofData = this.fSpoofData;
             result.fAllowedCharsSet = (UnicodeSet) (this.fAllowedCharsSet.clone());
             result.fAllowedCharsSet.freeze();
-            result.fAllowedLocales = new HashSet<ULocale>(this.fAllowedLocales);
+            result.fAllowedLocales = new HashSet<>(this.fAllowedLocales);
             result.fRestrictionLevel = this.fRestrictionLevel;
             return result;
         }
@@ -552,8 +649,7 @@ public class SpoofChecker {
          * @throws ParseException
          *             To report syntax errors in the input.
          *
-         * @draft ICU 58
-         * @provisional This API might change or be removed in a future release.
+         * @stable ICU 58
          */
         public Builder setData(Reader confusables) throws ParseException, IOException {
 
@@ -589,8 +685,10 @@ public class SpoofChecker {
          * Specify the bitmask of checks that will be performed by {@link SpoofChecker#failsChecks}. Calling this method
          * overwrites any checks that may have already been enabled. By default, all checks are enabled.
          *
-         * To enable specific checks and disable all others, the "whitelisted" checks should be ORed together. For
-         * example, to fail strings containing characters outside of the set specified by {@link #setAllowedChars} and
+         * To enable specific checks and disable all others,
+         * OR together only the bit constants for the desired checks.
+         * For example, to fail strings containing characters outside of
+         * the set specified by {@link #setAllowedChars} and
          * also strings that contain digits from mixed numbering systems:
          *
          * <pre>
@@ -599,8 +697,9 @@ public class SpoofChecker {
          * }
          * </pre>
          *
-         * To disable specific checks and enable all others, the "blacklisted" checks should be ANDed away from
-         * ALL_CHECKS. For example, if you are not planning to use the {@link SpoofChecker#areConfusable} functionality,
+         * To disable specific checks and enable all others,
+         * start with ALL_CHECKS and "AND away" the not-desired checks.
+         * For example, if you are not planning to use the {@link SpoofChecker#areConfusable} functionality,
          * it is good practice to disable the CONFUSABLE check:
          *
          * <pre>
@@ -704,7 +803,7 @@ public class SpoofChecker {
          * @stable ICU 54
          */
         public Builder setAllowedJavaLocales(Set<Locale> locales) {
-            HashSet<ULocale> ulocales = new HashSet<ULocale>(locales.size());
+            HashSet<ULocale> ulocales = new HashSet<>(locales.size());
             for (Locale locale : locales) {
                 ulocales.add(ULocale.forLocale(locale));
             }
@@ -730,7 +829,7 @@ public class SpoofChecker {
 
         /**
          * Limit the acceptable characters to those specified by a Unicode Set. Any previously specified character limit
-         * is is replaced by the new settings. This includes limits on characters that were set with the
+         * is replaced by the new settings. This includes limits on characters that were set with the
          * setAllowedLocales() function. Note that the RESTRICTED set is useful.
          *
          * The {@link #CHAR_LIMIT} test is automatically enabled for this SpoofChecker by this function.
@@ -758,8 +857,7 @@ public class SpoofChecker {
          * @param restrictionLevel
          *            The loosest restriction level allowed.
          * @return self
-         * @provisional This API might change or be removed in a future release.
-         * @draft ICU 58
+         * @stable ICU 58
          */
         public Builder setRestrictionLevel(RestrictionLevel restrictionLevel) {
             fRestrictionLevel = restrictionLevel;
@@ -769,7 +867,7 @@ public class SpoofChecker {
 
         /*
          * *****************************************************************************
-         * Internal classes for compililing confusable data into its binary (runtime) form.
+         * Internal classes for compiling confusable data into its binary (runtime) form.
          * *****************************************************************************
          */
         // ---------------------------------------------------------------------
@@ -818,10 +916,10 @@ public class SpoofChecker {
             private int fLineNum;
 
             ConfusabledataBuilder() {
-                fTable = new Hashtable<Integer, SPUString>();
+                fTable = new Hashtable<>();
                 fKeySet = new UnicodeSet();
-                fKeyVec = new ArrayList<Integer>();
-                fValueVec = new ArrayList<Integer>();
+                fKeyVec = new ArrayList<>();
+                fValueVec = new ArrayList<>();
                 stringPool = new SPUStringPool();
             }
 
@@ -1063,8 +1161,8 @@ public class SpoofChecker {
             // combination of a uhash and a Vector.
             private static class SPUStringPool {
                 public SPUStringPool() {
-                    fVec = new Vector<SPUString>();
-                    fHash = new Hashtable<String, SPUString>();
+                    fVec = new Vector<>();
+                    fHash = new Hashtable<>();
                 }
 
                 public int size() {
@@ -1149,7 +1247,7 @@ public class SpoofChecker {
      * @stable ICU 54
      */
     public Set<Locale> getAllowedJavaLocales() {
-        HashSet<Locale> locales = new HashSet<Locale>(fAllowedLocales.size());
+        HashSet<Locale> locales = new HashSet<>(fAllowedLocales.size());
         for (ULocale uloc : fAllowedLocales) {
             locales.add(uloc.toLocale());
         }
@@ -1197,16 +1295,14 @@ public class SpoofChecker {
          * The numerics found in the string, if MIXED_NUMBERS was set; otherwise null.  The set will contain the zero
          * digit from each decimal number system found in the input string.
          *
-         * @draft ICU 58
-         * @provisional This API might change or be removed in a future release.
+         * @stable ICU 58
          */
         public UnicodeSet numerics;
 
         /**
          * The restriction level that the text meets, if RESTRICTION_LEVEL is set; otherwise null.
          *
-         * @draft ICU 58
-         * @provisional This API might change or be removed in a future release.
+         * @stable ICU 58
          */
         public RestrictionLevel restrictionLevel;
 
@@ -1308,6 +1404,13 @@ public class SpoofChecker {
             }
         }
 
+        if (0 != (this.fChecks & HIDDEN_OVERLAY)) {
+            int index = findHiddenOverlay(text);
+            if (index != -1) {
+                result |= HIDDEN_OVERLAY;
+            }
+        }
+
         if (0 != (this.fChecks & CHAR_LIMIT)) {
             int i;
             int c;
@@ -1382,7 +1485,7 @@ public class SpoofChecker {
     }
 
     /**
-     * Check the whether two specified strings are visually confusable. The types of confusability to be tested - single
+     * Check whether two specified strings are visually confusable. The types of confusability to be tested - single
      * script, mixed script, or whole script - are determined by the check options set for the SpoofChecker.
      *
      * The tests to be performed are controlled by the flags SINGLE_SCRIPT_CONFUSABLE MIXED_SCRIPT_CONFUSABLE
@@ -1402,7 +1505,7 @@ public class SpoofChecker {
      */
     public int areConfusable(String s1, String s2) {
         //
-        // See section 4 of UAX 39 for the algorithm for checking whether two strings are confusable,
+        // See section 4 of UTS #39 for the algorithm for checking whether two strings are confusable,
         // and for definitions of the types (single, whole, mixed-script) of confusables.
 
         // We only care about a few of the check flags. Ignore the others.
@@ -1440,9 +1543,101 @@ public class SpoofChecker {
         }
 
         // Turn off flags that the user doesn't want
+        return result & fChecks;
+    }
+
+    /**
+     * Check whether two specified strings are visually when displayed in a paragraph with the given direction.
+     * The types of confusability to be tested—single script, mixed script, or whole script—are determined by the check options set for the SpoofChecker.
+     *
+     * The tests to be performed are controlled by the flags SINGLE_SCRIPT_CONFUSABLE MIXED_SCRIPT_CONFUSABLE
+     * WHOLE_SCRIPT_CONFUSABLE At least one of these tests must be selected.
+     *
+     * ANY_CASE is a modifier for the tests. Select it if the identifiers may be of mixed case. If identifiers are case
+     * folded for comparison and display to the user, do not select the ANY_CASE option.
+     *
+     *
+     * @param direction The paragraph direction with which the identifiers are displayed.
+     *                  Must be either {@link Bidi#DIRECTION_LEFT_TO_RIGHT} or {@link Bidi#DIRECTION_RIGHT_TO_LEFT}.
+     * @param s1
+     *            The first of the two strings to be compared for confusability.
+     * @param s2
+     *            The second of the two strings to be compared for confusability.
+     * @return Non-zero if s1 and s1 are confusable. If not 0, the value will indicate the type(s) of confusability
+     *         found, as defined by spoof check test constants.
+     * @draft ICU 74
+     */
+    public int areConfusable(int direction, CharSequence s1, CharSequence s2) {
+        //
+        // See section 4 of UTS #39 for the algorithm for checking whether two strings are confusable,
+        // and for definitions of the types (single, whole, mixed-script) of confusables.
+
+        // We only care about a few of the check flags. Ignore the others.
+        // If no tests relevant to this function have been specified, signal an error.
+        // TODO: is this really the right thing to do? It's probably an error on
+        // the caller's part, but logically we would just return 0 (no error).
+        if ((this.fChecks & CONFUSABLE) == 0) {
+            throw new IllegalArgumentException("No confusable checks are enabled.");
+        }
+
+        // Compute the skeletons and check for confusability.
+        String s1Skeleton = getBidiSkeleton(direction, s1);
+        String s2Skeleton = getBidiSkeleton(direction, s2);
+        if (!s1Skeleton.equals(s2Skeleton)) {
+            return 0;
+        }
+
+        // If we get here, the strings are confusable. Now we just need to set the flags for the appropriate classes
+        // of confusables according to UTS 39 section 4.
+        // Start by computing the resolved script sets of s1 and s2.
+        ScriptSet s1RSS = new ScriptSet();
+        getResolvedScriptSet(s1, s1RSS);
+        ScriptSet s2RSS = new ScriptSet();
+        getResolvedScriptSet(s2, s2RSS);
+
+        // Turn on all applicable flags
+        int result = 0;
+        if (s1RSS.intersects(s2RSS)) {
+            result |= SINGLE_SCRIPT_CONFUSABLE;
+        } else {
+            result |= MIXED_SCRIPT_CONFUSABLE;
+            if (!s1RSS.isEmpty() && !s2RSS.isEmpty()) {
+                result |= WHOLE_SCRIPT_CONFUSABLE;
+            }
+        }
+
+        // Turn off flags that the user doesn't want
         result &= fChecks;
 
         return result;
+    }
+
+    /**
+     * Get the "bidiSkeleton" for an identifier string and a direction.
+     * Skeletons are a transformation of the input string;
+     * Two identifiers are LTR-confusable if their LTR bidiSkeletons are identical;
+     * they are RTL-confusable if their RTL bidiSkeletons are identical.
+     * See Unicode Technical Standard #39 for additional information:
+     * https://www.unicode.org/reports/tr39/#Confusable_Detection.
+     *
+     * Using skeletons directly makes it possible to quickly check whether an identifier is confusable with any of some
+     * large set of existing identifiers, by creating an efficiently searchable collection of the skeletons.
+     *
+     * Skeletons are computed using the algorithm and data described in UTS #39.
+     *
+     * @param direction The paragraph direction with which the string is displayed.
+     *                  Must be either {@link Bidi#DIRECTION_LEFT_TO_RIGHT} or {@link Bidi#DIRECTION_RIGHT_TO_LEFT}.
+     * @param str The input string whose bidiSkeleton will be generated.
+     * @return The output skeleton string.
+     *
+     * @draft ICU 74
+     */
+    public String getBidiSkeleton(int direction, CharSequence str) {
+        if (direction != Bidi.DIRECTION_LEFT_TO_RIGHT && direction != Bidi.DIRECTION_RIGHT_TO_LEFT) {
+            throw new IllegalArgumentException("direction should be DIRECTION_LEFT_TO_RIGHT or DIRECTION_RIGHT_TO_LEFT");
+        }
+        Bidi bidi = new Bidi(str.toString(), direction);
+        return getSkeleton(bidi.writeReordered(Bidi.KEEP_BASE_COMBINING | Bidi.DO_MIRRORING));
     }
 
     /**
@@ -1458,8 +1653,7 @@ public class SpoofChecker {
      *            The input string whose skeleton will be generated.
      * @return The output skeleton string.
      *
-     * @draft ICU 58
-     * @provisional This API might change or be removed in a future release.
+     * @stable ICU 58
      */
     public String getSkeleton(CharSequence str) {
         // Apply the skeleton mapping to the NFD normalized input string
@@ -1470,7 +1664,9 @@ public class SpoofChecker {
         for (int inputIndex = 0; inputIndex < normalizedLen;) {
             int c = Character.codePointAt(nfdId, inputIndex);
             inputIndex += Character.charCount(c);
-            this.fSpoofData.confusableLookup(c, skelSB);
+            if (!UCharacter.hasBinaryProperty(c, UProperty.DEFAULT_IGNORABLE_CODE_POINT)) {
+                this.fSpoofData.confusableLookup(c, skelSB);
+            }
         }
         String skelStr = skelSB.toString();
         skelStr = nfdNormalizer.normalize(skelStr);
@@ -1501,8 +1697,7 @@ public class SpoofChecker {
      * @param other
      *            the SpoofChecker being compared with.
      * @return true if the two SpoofCheckers are equal.
-     * @draft ICU 58
-     * @provisional This API might change or be removed in a future release.
+     * @stable ICU 4.6
      */
     @Override
     public boolean equals(Object other) {
@@ -1531,8 +1726,8 @@ public class SpoofChecker {
     }
 
     /**
-     * @draft ICU 58
-     * @provisional This API might change or be removed in a future release.
+     * Overrides {@link Object#hashCode()}.
+     * @stable ICU 4.6
      */
     @Override
     public int hashCode() {
@@ -1667,6 +1862,44 @@ public class SpoofChecker {
         return RestrictionLevel.MINIMALLY_RESTRICTIVE;
     }
 
+    int findHiddenOverlay(String input) {
+        boolean sawLeadCharacter = false;
+        StringBuilder sb = new StringBuilder();
+        for (int i=0; i<input.length();) {
+            int cp = input.codePointAt(i);
+            if (sawLeadCharacter && cp == 0x0307) {
+                return i;
+            }
+            int combiningClass = UCharacter.getCombiningClass(cp);
+            // Skip over characters except for those with combining class 0 (non-combining characters) or with
+            // combining class 230 (same class as U+0307)
+            assert UCharacter.getCombiningClass(0x0307) == 230;
+            if (combiningClass == 0 || combiningClass == 230) {
+                sawLeadCharacter = isIllegalCombiningDotLeadCharacter(cp, sb);
+            }
+            i += UCharacter.charCount(cp);
+        }
+        return -1;
+    }
+
+    boolean isIllegalCombiningDotLeadCharacterNoLookup(int cp) {
+        return cp == 'i' || cp == 'j' || cp == 'ı' || cp == 'ȷ' || cp == 'l' ||
+               UCharacter.hasBinaryProperty(cp, UProperty.SOFT_DOTTED);
+    }
+
+    boolean isIllegalCombiningDotLeadCharacter(int cp, StringBuilder sb) {
+        if (isIllegalCombiningDotLeadCharacterNoLookup(cp)) {
+            return true;
+        }
+        sb.setLength(0);
+        fSpoofData.confusableLookup(cp, sb);
+        int finalCp = UCharacter.codePointBefore(sb, sb.length());
+        if (finalCp != cp && isIllegalCombiningDotLeadCharacterNoLookup(finalCp)) {
+            return true;
+        }
+        return false;
+    }
+
     // Data Members
     private int fChecks; // Bit vector of checks to perform.
     private SpoofData fSpoofData;
@@ -1700,7 +1933,7 @@ public class SpoofChecker {
     //
     // String Table:
     //     The strings table contains all of the value strings (those of length two or greater)
-    //     concatentated together into one long char (UTF-16) array.
+    //     concatenated together into one long char (UTF-16) array.
     //
     //     There is no nul character or other mark between adjacent strings.
     //

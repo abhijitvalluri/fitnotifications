@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2014-2016, International Business Machines Corporation and
@@ -10,6 +10,7 @@ package com.ibm.icu.impl;
 
 import java.text.CharacterIterator;
 import java.util.HashSet;
+import java.util.Locale;
 
 import com.ibm.icu.impl.ICUResourceBundle.OpenType;
 import com.ibm.icu.text.BreakIterator;
@@ -18,6 +19,7 @@ import com.ibm.icu.text.UCharacterIterator;
 import com.ibm.icu.util.BytesTrie;
 import com.ibm.icu.util.CharsTrie;
 import com.ibm.icu.util.CharsTrieBuilder;
+import com.ibm.icu.util.ICUCloneNotSupportedException;
 import com.ibm.icu.util.StringTrieBuilder;
 import com.ibm.icu.util.ULocale;
 
@@ -57,7 +59,7 @@ public class SimpleFilteredSentenceBreakIterator extends BreakIterator {
     /**
      * Is there an exception at this point?
      *
-     * @param n
+     * @param n the location of the possible break
      * @return
      */
     private final boolean breakExceptionAt(int n) {
@@ -78,20 +80,17 @@ public class SimpleFilteredSentenceBreakIterator extends BreakIterator {
             uch = text.nextCodePoint();
         }
 
-        BytesTrie.Result r = BytesTrie.Result.INTERMEDIATE_VALUE;
-
-        while ((uch = text.previousCodePoint()) != UCharacterIterator.DONE && // more to consume backwards and..
-                ((r = backwardsTrie.nextForCodePoint(uch)).hasNext())) {// more in the trie
+        while ((uch = text.previousCodePoint()) >= 0) { // more to consume backwards
+            BytesTrie.Result r = backwardsTrie.nextForCodePoint(uch);
             if (r.hasValue()) { // remember the best match so far
                 bestPosn = text.getIndex();
                 bestValue = backwardsTrie.getValue();
             }
+            if (!r.hasNext()) {
+                break;
+            }
         }
-
-        if (r.matches()) { // exact match?
-            bestValue = backwardsTrie.getValue();
-            bestPosn = text.getIndex();
-        }
+        backwardsTrie.reset(); // for equals() & hashCode()
 
         if (bestPosn >= 0) {
             if (bestValue == Builder.MATCH) { // exact match!
@@ -107,6 +106,7 @@ public class SimpleFilteredSentenceBreakIterator extends BreakIterator {
                 while ((uch = text.nextCodePoint()) != BreakIterator.DONE
                         && ((rfwd = forwardsPartialTrie.nextForCodePoint(uch)).hasNext())) {
                 }
+                forwardsPartialTrie.reset(); // for equals() & hashCode()
                 if (rfwd.matches()) {
                     // Exception here
                     return true;
@@ -183,18 +183,39 @@ public class SimpleFilteredSentenceBreakIterator extends BreakIterator {
         if (getClass() != obj.getClass())
             return false;
         SimpleFilteredSentenceBreakIterator other = (SimpleFilteredSentenceBreakIterator) obj;
-        return delegate.equals(other.delegate) && text.equals(other.text) && backwardsTrie.equals(other.backwardsTrie)
+        // TODO(ICU-21575): CharsTrie.equals() is not defined.
+        // Should compare the underlying data, and can then stop resetting after iteration.
+        return delegate.equals(other.delegate) && text.equals(other.text)
+                && backwardsTrie.equals(other.backwardsTrie)
                 && forwardsPartialTrie.equals(other.forwardsPartialTrie);
     }
 
     @Override
     public int hashCode() {
-        return (forwardsPartialTrie.hashCode() * 39) + (backwardsTrie.hashCode() * 11) + delegate.hashCode();
+        // TODO(ICU-21575): CharsTrie.hashCode() is not defined.
+        return (forwardsPartialTrie.hashCode() * 39) + (backwardsTrie.hashCode() * 11)
+                + delegate.hashCode();
     }
 
     @Override
     public Object clone() {
         SimpleFilteredSentenceBreakIterator other = (SimpleFilteredSentenceBreakIterator) super.clone();
+        try {
+            if (delegate != null) {
+                other.delegate = (BreakIterator) delegate.clone();
+            }
+            if (text != null) {
+                other.text = (UCharacterIterator) text.clone();
+            }
+            if (backwardsTrie != null) {
+                other.backwardsTrie = backwardsTrie.clone();
+            }
+            if (forwardsPartialTrie != null) {
+                other.forwardsPartialTrie = forwardsPartialTrie.clone();
+            }
+        } catch (CloneNotSupportedException e) {
+            throw new ICUCloneNotSupportedException(e);
+        }
         return other;
     }
 
@@ -270,13 +291,16 @@ public class SimpleFilteredSentenceBreakIterator extends BreakIterator {
         /**
          * filter set to store all exceptions
          */
-        private HashSet<String> filterSet = new HashSet<String>();
+        private HashSet<CharSequence> filterSet = new HashSet<>();
 
         static final int PARTIAL = (1 << 0); // < partial - need to run through forward trie
         static final int MATCH = (1 << 1); // < exact match - skip this one.
         static final int SuppressInReverse = (1 << 0);
         static final int AddToForward = (1 << 1);
 
+        public Builder(Locale loc) {
+            this(ULocale.forLocale(loc));
+        }
         /**
          * Create SimpleFilteredBreakIteratorBuilder using given locale
          * @param loc the locale to get filtered iterators
@@ -300,28 +324,20 @@ public class SimpleFilteredSentenceBreakIterator extends BreakIterator {
          * Create SimpleFilteredBreakIteratorBuilder with no exception
          */
         public Builder() {
-            filterSet = new HashSet<String>();
         }
 
         @Override
-        public boolean suppressBreakAfter(String str) {
-            if (filterSet == null) {
-                filterSet = new HashSet<String>();
-            }
+        public boolean suppressBreakAfter(CharSequence str) {
             return filterSet.add(str);
         }
 
         @Override
-        public boolean unsuppressBreakAfter(String str) {
-            if (filterSet == null) {
-                return false;
-            } else {
-                return filterSet.remove(str);
-            }
+        public boolean unsuppressBreakAfter(CharSequence str) {
+            return filterSet.remove(str);
         }
 
         @Override
-        public BreakIterator build(BreakIterator adoptBreakIterator) {
+        public BreakIterator wrapIteratorWithFilter(BreakIterator adoptBreakIterator) {
             if( filterSet.isEmpty() ) {
                 // Short circuit - nothing to except.
                 return adoptBreakIterator;
@@ -334,29 +350,30 @@ public class SimpleFilteredSentenceBreakIterator extends BreakIterator {
             int fwdCount = 0;
 
             int subCount = filterSet.size();
-            String[] ustrs = new String[subCount];
+            CharSequence[] ustrs = new CharSequence[subCount];
             int[] partials = new int[subCount];
 
             CharsTrie backwardsTrie = null; // i.e. ".srM" for Mrs.
             CharsTrie forwardsPartialTrie = null; // Has ".a" for "a.M."
 
             int i = 0;
-            for (String s : filterSet) {
+            for (CharSequence s : filterSet) {
                 ustrs[i] = s; // copy by value?
                 partials[i] = 0; // default: no partial
                 i++;
             }
 
             for (i = 0; i < subCount; i++) {
-                int nn = ustrs[i].indexOf('.'); // TODO: non-'.' abbreviations
-                if (nn > -1 && (nn + 1) != ustrs[i].length()) {
+                String thisStr = ustrs[i].toString(); // TODO: don't cast to String?
+                int nn = thisStr.indexOf('.'); // TODO: non-'.' abbreviations
+                if (nn > -1 && (nn + 1) != thisStr.length()) {
                     // is partial.
                     // is it unique?
                     int sameAs = -1;
                     for (int j = 0; j < subCount; j++) {
                         if (j == i)
                             continue;
-                        if (ustrs[i].regionMatches(0, ustrs[j], 0, nn + 1)) {
+                        if (thisStr.regionMatches(0, ustrs[j].toString() /* TODO */, 0, nn + 1)) {
                             if (partials[j] == 0) { // hasn't been processed yet
                                 partials[j] = SuppressInReverse | AddToForward;
                             } else if ((partials[j] & SuppressInReverse) != 0) {
@@ -366,7 +383,7 @@ public class SimpleFilteredSentenceBreakIterator extends BreakIterator {
                     }
 
                     if ((sameAs == -1) && (partials[i] == 0)) {
-                        StringBuilder prefix = new StringBuilder(ustrs[i].substring(0, nn + 1));
+                        StringBuilder prefix = new StringBuilder(thisStr.substring(0, nn + 1));
                         // first one - add the prefix to the reverse table.
                         prefix.reverse();
                         builder.add(prefix, PARTIAL);
@@ -377,8 +394,9 @@ public class SimpleFilteredSentenceBreakIterator extends BreakIterator {
             }
 
             for (i = 0; i < subCount; i++) {
+                final String thisStr = ustrs[i].toString(); // TODO
                 if (partials[i] == 0) {
-                    StringBuilder reversed = new StringBuilder(ustrs[i]).reverse();
+                    StringBuilder reversed = new StringBuilder(thisStr).reverse();
                     builder.add(reversed, MATCH);
                     revCount++;
                 } else {
@@ -387,7 +405,7 @@ public class SimpleFilteredSentenceBreakIterator extends BreakIterator {
                     // forward,
                     // instead of "Ph.D." since we already know the "Ph." part is a match.
                     // would need the trie to be able to hold 0-length strings, though.
-                    builder2.add(ustrs[i], MATCH); // forward
+                    builder2.add(thisStr, MATCH); // forward
                     fwdCount++;
                 }
             }

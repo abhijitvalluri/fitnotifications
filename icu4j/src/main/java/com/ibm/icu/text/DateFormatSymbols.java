@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 1996-2016, International Business Machines Corporation and
@@ -332,7 +332,6 @@ public class DateFormatSymbols implements Serializable, Cloneable {
      * @return An array of <code>ULocale</code>s for which localized
      * <code>DateFormatSymbols</code> instances are available.
      * @draft ICU 3.8 (retain)
-     * @provisional This API might change or be removed in a future release.
      */
     public static ULocale[] getAvailableULocales() {
         return ICUResourceBundle.getAvailableULocales();
@@ -517,6 +516,13 @@ public class DateFormatSymbols implements Serializable, Cloneable {
     String shortQuarters[] = null;
 
     /**
+     * Narrow quarter names. For example: "1", "2", "3", "4". An array
+     * of 4 strings indexed by the month divided by 3.
+     * @serial
+     */
+    String narrowQuarters[] = null;
+
+    /**
      * Full quarter names. For example: "1st Quarter", "2nd Quarter", "3rd Quarter",
      * "4th Quarter". An array of 4 strings, indexed by the month divided by 3.
      * @serial
@@ -529,6 +535,13 @@ public class DateFormatSymbols implements Serializable, Cloneable {
      * @serial
      */
     String standaloneShortQuarters[] = null;
+
+    /**
+     * Standalone narrow quarter names. For example: "1", "2", "3", "4". An array
+     * of 4 strings indexed by the month divided by 3.
+     * @serial
+     */
+    String standaloneNarrowQuarters[] = null;
 
     /**
      * Standalone full quarter names. For example: "1st Quarter", "2nd Quarter", "3rd Quarter",
@@ -695,7 +708,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
      */
     private static final Map<String, CapitalizationContextUsage> contextUsageTypeMap;
     static {
-        contextUsageTypeMap=new HashMap<String, CapitalizationContextUsage>();
+        contextUsageTypeMap=new HashMap<>();
         contextUsageTypeMap.put("month-format-except-narrow", CapitalizationContextUsage.MONTH_FORMAT);
         contextUsageTypeMap.put("month-standalone-except-narrow", CapitalizationContextUsage.MONTH_STANDALONE);
         contextUsageTypeMap.put("month-narrow",   CapitalizationContextUsage.MONTH_NARROW);
@@ -720,7 +733,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
     Map<CapitalizationContextUsage,boolean[]> capitalization = null;
 
     /**
-     * Returns era strings. For example: "AD" and "BC".
+     * Returns abbreviated era strings. For example: "AD" and "BC".
      * @return the era strings.
      * @stable ICU 2.0
      */
@@ -729,7 +742,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
     }
 
     /**
-     * Sets era strings. For example: "AD" and "BC".
+     * Sets abbreviated era strings. For example: "AD" and "BC".
      * @param newEras the new era strings.
      * @stable ICU 2.0
      */
@@ -738,7 +751,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
     }
 
     /**
-     * {@icu} Returns era name strings. For example: "Anno Domini" and "Before Christ".
+     * {@icu} Returns full era name strings. For example: "Anno Domini" and "Before Christ".
      * @return the era strings.
      * @stable ICU 3.4
      */
@@ -747,12 +760,30 @@ public class DateFormatSymbols implements Serializable, Cloneable {
     }
 
     /**
-     * {@icu} Sets era name strings. For example: "Anno Domini" and "Before Christ".
+     * {@icu} Sets full era name strings. For example: "Anno Domini" and "Before Christ".
      * @param newEraNames the new era strings.
      * @stable ICU 3.8
      */
     public void setEraNames(String[] newEraNames) {
         eraNames = duplicate(newEraNames);
+    }
+
+    /**
+     * {@icu} Returns narrow era name strings. For example: "A" and "B".
+     * @return the narrow era strings.
+     * @stable ICU 64
+     */
+    public String[] getNarrowEras() {
+        return duplicate(narrowEras);
+    }
+
+    /**
+     * {@icu} Sets narrow era name strings. For example: "A" and "B".
+     * @param newNarrowEras the new narrow era strings.
+     * @stable ICU 64
+     */
+    public void setNarrowEras(String[] newNarrowEras) {
+        narrowEras = duplicate(newNarrowEras);
     }
 
     /**
@@ -1025,7 +1056,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
      * {@icu} Returns quarter strings. For example: "1st Quarter", "2nd Quarter", etc.
      * @param context    The quarter context, FORMAT or STANDALONE.
      * @param width      The width or the returned quarter string,
-     *                   either WIDE or ABBREVIATED. There are no NARROW quarters.
+     *                   WIDE, NARROW, or ABBREVIATED.
      * @return the quarter strings.
      * @stable ICU 3.6
      */
@@ -1042,7 +1073,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
                     returnValue = shortQuarters;
                     break;
                  case NARROW :
-                     returnValue = null;
+                     returnValue = narrowQuarters;
                      break;
               }
               break;
@@ -1057,7 +1088,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
                     returnValue = standaloneShortQuarters;
                     break;
                  case NARROW:
-                     returnValue = null;
+                     returnValue = standaloneNarrowQuarters;
                      break;
               }
               break;
@@ -1073,7 +1104,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
      * @param newQuarters the new quarter strings.
      * @param context    The formatting context, FORMAT or STANDALONE.
      * @param width      The width of the quarter string,
-     *                   either WIDE or ABBREVIATED. There are no NARROW quarters.
+     *                   WIDE, NARROW, or ABBREVIATED.
      * @stable ICU 3.8
      */
     public void setQuarters(String[] newQuarters, int context, int width) {
@@ -1087,7 +1118,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
                     shortQuarters = duplicate(newQuarters);
                     break;
                  case NARROW :
-                    //narrowQuarters = duplicate(newQuarters);
+                    narrowQuarters = duplicate(newQuarters);
                     break;
                  default : // HANDLE SHORT, etc.
                     break;
@@ -1102,7 +1133,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
                     standaloneShortQuarters = duplicate(newQuarters);
                     break;
                  case NARROW :
-                    //standaloneNarrowQuarters = duplicate(newQuarters);
+                    standaloneNarrowQuarters = duplicate(newQuarters);
                     break;
                  default : // HANDLE SHORT, etc.
                     break;
@@ -1458,6 +1489,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
         DateFormatSymbols that = (DateFormatSymbols) obj;
         return (Utility.arrayEquals(eras, that.eras)
                 && Utility.arrayEquals(eraNames, that.eraNames)
+                && Utility.arrayEquals(narrowEras, that.narrowEras)
                 && Utility.arrayEquals(months, that.months)
                 && Utility.arrayEquals(shortMonths, that.shortMonths)
                 && Utility.arrayEquals(narrowMonths, that.narrowMonths)
@@ -1484,7 +1516,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
                 && arrayOfArrayEquals(zoneStrings, that.zoneStrings)
                 // getDiplayName maps deprecated country and language codes to the current ones
                 // too bad there is no way to get the current codes!
-                // I thought canolicalize() would map the codes but .. alas! it doesn't.
+                // I thought canonicalize() would map the codes but .. alas! it doesn't.
                 && requestedLocale.getDisplayName().equals(that.requestedLocale.getDisplayName())
                 && Utility.arrayEquals(localPatternChars,
                                        that.localPatternChars));
@@ -1562,8 +1594,10 @@ public class DateFormatSymbols implements Serializable, Cloneable {
         this.ampmsNarrow = dfs.ampmsNarrow;
         this.timeSeparator = dfs.timeSeparator;
         this.shortQuarters = dfs.shortQuarters;
+        this.narrowQuarters = dfs.narrowQuarters;
         this.quarters = dfs.quarters;
         this.standaloneShortQuarters = dfs.standaloneShortQuarters;
+        this.standaloneNarrowQuarters = dfs.standaloneNarrowQuarters;
         this.standaloneQuarters = dfs.standaloneQuarters;
         this.leapMonthPatterns = dfs.leapMonthPatterns;
         this.shortYearNames = dfs.shortYearNames;
@@ -1592,9 +1626,9 @@ public class DateFormatSymbols implements Serializable, Cloneable {
     private static final class CalendarDataSink extends UResource.Sink {
 
         // Data structures to store resources from the resource bundle
-        Map<String, String[]> arrays = new TreeMap<String, String[]>();
-        Map<String, Map<String, String>> maps = new TreeMap<String, Map<String, String>>();
-        List<String> aliasPathPairs = new ArrayList<String>();
+        Map<String, String[]> arrays = new TreeMap<>();
+        Map<String, Map<String, String>> maps = new TreeMap<>();
+        List<String> aliasPathPairs = new ArrayList<>();
 
         // Current and next calendar resource table which should be loaded
         String currentCalendarType = null;
@@ -1649,7 +1683,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
                     // Whenever an alias to the next calendar (except gregorian) is encountered, register the
                     // calendar type it's pointing to
                     if (resourcesToVisitNext == null) {
-                        resourcesToVisitNext = new HashSet<String>();
+                        resourcesToVisitNext = new HashSet<>();
                     }
                     resourcesToVisitNext.add(aliasRelativePath);
                     continue;
@@ -1737,7 +1771,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
                 if (value.getType() == ICUResourceBundle.STRING) {
                     // We are on a leaf, store the map elements into the stringMap
                     if (i == 0) {
-                        stringMap = new HashMap<String, String>();
+                        stringMap = new HashMap<>();
                         maps.put(path, stringMap);
                     }
                     assert stringMap != null;
@@ -1964,16 +1998,18 @@ public class DateFormatSymbols implements Serializable, Cloneable {
 
         quarters = arrays.get("quarters/format/wide");
         shortQuarters = arrays.get("quarters/format/abbreviated");
+        narrowQuarters = arrays.get("quarters/format/narrow");
 
         standaloneQuarters = arrays.get("quarters/stand-alone/wide");
         standaloneShortQuarters = arrays.get("quarters/stand-alone/abbreviated");
+        standaloneNarrowQuarters = arrays.get("quarters/stand-alone/narrow");
 
-        abbreviatedDayPeriods = loadDayPeriodStrings(maps.get("dayPeriod/format/abbreviated"));
-        wideDayPeriods = loadDayPeriodStrings(maps.get("dayPeriod/format/wide"));
-        narrowDayPeriods = loadDayPeriodStrings(maps.get("dayPeriod/format/narrow"));
-        standaloneAbbreviatedDayPeriods = loadDayPeriodStrings(maps.get("dayPeriod/stand-alone/abbreviated"));
-        standaloneWideDayPeriods = loadDayPeriodStrings(maps.get("dayPeriod/stand-alone/wide"));
-        standaloneNarrowDayPeriods = loadDayPeriodStrings(maps.get("dayPeriod/stand-alone/narrow"));
+        abbreviatedDayPeriods = loadDayPeriodStrings(maps.get("dayPeriod/format/abbreviated"), null);
+        wideDayPeriods = loadDayPeriodStrings(maps.get("dayPeriod/format/wide"), abbreviatedDayPeriods);
+        narrowDayPeriods = loadDayPeriodStrings(maps.get("dayPeriod/format/narrow"), abbreviatedDayPeriods);
+        standaloneAbbreviatedDayPeriods = loadDayPeriodStrings(maps.get("dayPeriod/stand-alone/abbreviated"), abbreviatedDayPeriods);
+        standaloneWideDayPeriods = loadDayPeriodStrings(maps.get("dayPeriod/stand-alone/wide"), standaloneAbbreviatedDayPeriods);
+        standaloneNarrowDayPeriods = loadDayPeriodStrings(maps.get("dayPeriod/stand-alone/narrow"), standaloneAbbreviatedDayPeriods);
 
         for (int i = 0; i < DT_MONTH_PATTERN_COUNT; i++) {
             String monthPatternPath = LEAP_MONTH_PATTERNS_PATHS[i];
@@ -2006,7 +2042,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
         ULocale uloc = rb.getULocale();
         setLocale(uloc, uloc);
 
-        capitalization = new HashMap<CapitalizationContextUsage,boolean[]>();
+        capitalization = new HashMap<>();
         boolean[] noTransforms = new boolean[2];
         noTransforms[0] = false;
         noTransforms[1] = false;
@@ -2093,15 +2129,24 @@ public class DateFormatSymbols implements Serializable, Cloneable {
     /**
      * Loads localized names for day periods in the requested format.
      * @param resourceMap Contains the dayPeriod resource to load
+     * @param copyFrom If non-null, any values in the result that would otherwise be null are copied
+     *                 from this array
      */
-    private String[] loadDayPeriodStrings(Map<String, String> resourceMap) {
-        String strings[] = new String[DAY_PERIOD_KEYS.length];
-        if (resourceMap != null) {
-            for (int i = 0; i < DAY_PERIOD_KEYS.length; ++i) {
-                strings[i] = resourceMap.get(DAY_PERIOD_KEYS[i]);  // Null if string doesn't exist.
+    private String[] loadDayPeriodStrings(Map<String, String> resourceMap, String[] copyFrom) {
+        if (resourceMap == null && copyFrom != null) {
+            return copyFrom;
+        } else {
+            String strings[] = new String[DAY_PERIOD_KEYS.length];
+            if (resourceMap != null) {
+                for (int i = 0; i < DAY_PERIOD_KEYS.length; ++i) {
+                    strings[i] = resourceMap.get(DAY_PERIOD_KEYS[i]);  // Null if string doesn't exist.
+                    if (strings[i] == null && copyFrom != null) {
+                        strings[i] = copyFrom[i];
+                    }
+                }
             }
+            return strings;
         }
-        return strings;
     }
 
     /*
@@ -2147,57 +2192,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
     /**
      * Returns the {@link DateFormatSymbols} object that should be used to format a
      * calendar system's dates in the given locale.
-     * <p>
-     * <b>Subclassing:</b><br>
-     * When creating a new Calendar subclass, you must create the
-     * {@link ResourceBundle ResourceBundle}
-     * containing its {@link DateFormatSymbols DateFormatSymbols} in a specific place.
-     * The resource bundle name is based on the calendar's fully-specified
-     * class name, with ".resources" inserted at the end of the package name
-     * (just before the class name) and "Symbols" appended to the end.
-     * For example, the bundle corresponding to "com.ibm.icu.util.HebrewCalendar"
-     * is "com.ibm.icu.impl.data.HebrewCalendarSymbols".
-     * <p>
-     * Within the ResourceBundle, this method searches for five keys:
-     * <ul>
-     * <li><b>DayNames</b> -
-     *      An array of strings corresponding to each possible
-     *      value of the <code>DAY_OF_WEEK</code> field.  Even though
-     *      <code>DAY_OF_WEEK</code> starts with <code>SUNDAY</code> = 1,
-     *      This array is 0-based; the name for Sunday goes in the
-     *      first position, at index 0.  If this key is not found
-     *      in the bundle, the day names are inherited from the
-     *      default <code>DateFormatSymbols</code> for the requested locale.
      *
-     * <li><b>DayAbbreviations</b> -
-     *      An array of abbreviated day names corresponding
-     *      to the values in the "DayNames" array.  If this key
-     *      is not found in the resource bundle, the "DayNames"
-     *      values are used instead.  If neither key is found,
-     *      the day abbreviations are inherited from the default
-     *      <code>DateFormatSymbols</code> for the locale.
-     *
-     * <li><b>MonthNames</b> -
-     *      An array of strings corresponding to each possible
-     *      value of the <code>MONTH</code> field.  If this key is not found
-     *      in the bundle, the month names are inherited from the
-     *      default <code>DateFormatSymbols</code> for the requested locale.
-     *
-     * <li><b>MonthAbbreviations</b> -
-     *      An array of abbreviated day names corresponding
-     *      to the values in the "MonthNames" array.  If this key
-     *      is not found in the resource bundle, the "MonthNames"
-     *      values are used instead.  If neither key is found,
-     *      the day abbreviations are inherited from the default
-     *      <code>DateFormatSymbols</code> for the locale.
-     *
-     * <li><b>Eras</b> -
-     *      An array of strings corresponding to each possible
-     *      value of the <code>ERA</code> field.  If this key is not found
-     *      in the bundle, the era names are inherited from the
-     *      default <code>DateFormatSymbols</code> for the requested locale.
-     * </ul>
-     * <p>
      * @param cal       The calendar system whose date format symbols are desired.
      * @param locale    The locale whose symbols are desired.
      *
@@ -2211,57 +2206,6 @@ public class DateFormatSymbols implements Serializable, Cloneable {
     /**
      * Returns the {@link DateFormatSymbols} object that should be used to format a
      * calendar system's dates in the given locale.
-     * <p>
-     * <b>Subclassing:</b><br>
-     * When creating a new Calendar subclass, you must create the
-     * {@link ResourceBundle ResourceBundle}
-     * containing its {@link DateFormatSymbols DateFormatSymbols} in a specific place.
-     * The resource bundle name is based on the calendar's fully-specified
-     * class name, with ".resources" inserted at the end of the package name
-     * (just before the class name) and "Symbols" appended to the end.
-     * For example, the bundle corresponding to "com.ibm.icu.util.HebrewCalendar"
-     * is "com.ibm.icu.impl.data.HebrewCalendarSymbols".
-     * <p>
-     * Within the ResourceBundle, this method searches for five keys:
-     * <ul>
-     * <li><b>DayNames</b> -
-     *      An array of strings corresponding to each possible
-     *      value of the <code>DAY_OF_WEEK</code> field.  Even though
-     *      <code>DAY_OF_WEEK</code> starts with <code>SUNDAY</code> = 1,
-     *      This array is 0-based; the name for Sunday goes in the
-     *      first position, at index 0.  If this key is not found
-     *      in the bundle, the day names are inherited from the
-     *      default <code>DateFormatSymbols</code> for the requested locale.
-     *
-     * <li><b>DayAbbreviations</b> -
-     *      An array of abbreviated day names corresponding
-     *      to the values in the "DayNames" array.  If this key
-     *      is not found in the resource bundle, the "DayNames"
-     *      values are used instead.  If neither key is found,
-     *      the day abbreviations are inherited from the default
-     *      <code>DateFormatSymbols</code> for the locale.
-     *
-     * <li><b>MonthNames</b> -
-     *      An array of strings corresponding to each possible
-     *      value of the <code>MONTH</code> field.  If this key is not found
-     *      in the bundle, the month names are inherited from the
-     *      default <code>DateFormatSymbols</code> for the requested locale.
-     *
-     * <li><b>MonthAbbreviations</b> -
-     *      An array of abbreviated day names corresponding
-     *      to the values in the "MonthNames" array.  If this key
-     *      is not found in the resource bundle, the "MonthNames"
-     *      values are used instead.  If neither key is found,
-     *      the day abbreviations are inherited from the default
-     *      <code>DateFormatSymbols</code> for the locale.
-     *
-     * <li><b>Eras</b> -
-     *      An array of strings corresponding to each possible
-     *      value of the <code>ERA</code> field.  If this key is not found
-     *      in the bundle, the era names are inherited from the
-     *      default <code>DateFormatSymbols</code> for the requested locale.
-     * </ul>
-     * <p>
      * @param cal       The calendar system whose date format symbols are desired.
      * @param locale    The ulocale whose symbols are desired.
      *
@@ -2416,7 +2360,7 @@ public class DateFormatSymbols implements Serializable, Cloneable {
      * <i>valid</i> locale).
      *
      * <p>Note: This method will be implemented in ICU 3.0; ICU 2.8
-     * contains a partial preview implementation.  The * <i>actual</i>
+     * contains a partial preview implementation.  The <i>actual</i>
      * locale is returned correctly, but the <i>valid</i> locale is
      * not, in most cases.
      * @param type type of information requested, either {@link
@@ -2428,7 +2372,6 @@ public class DateFormatSymbols implements Serializable, Cloneable {
      * @see com.ibm.icu.util.ULocale#VALID_LOCALE
      * @see com.ibm.icu.util.ULocale#ACTUAL_LOCALE
      * @draft ICU 2.8 (retain)
-     * @provisional This API might change or be removed in a future release.
      */
     public final ULocale getLocale(ULocale.Type type) {
         return type == ULocale.ACTUAL_LOCALE ?

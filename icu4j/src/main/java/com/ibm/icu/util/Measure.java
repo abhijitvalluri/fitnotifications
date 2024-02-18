@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
 **********************************************************************
 * Copyright (c) 2004-2013, International Business Machines
@@ -43,7 +43,7 @@ public class Measure {
      */
     public Measure(Number number, MeasureUnit unit) {
         if (number == null || unit == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("Number and MeasureUnit must not be null");
         }
         this.number = number;
         this.unit = unit;

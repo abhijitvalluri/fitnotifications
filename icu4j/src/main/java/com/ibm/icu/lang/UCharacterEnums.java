@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /**
  *******************************************************************************
  * Copyright (C) 2004-2016, International Business Machines Corporation and
@@ -15,7 +15,7 @@ package com.ibm.icu.lang;
  */
 public class UCharacterEnums {
 
-    /** This is just a namespace, it is not instantiatable. */
+    /** This is just a namespace, it is not instantiable. */
     ///CLOVER:OFF
     private UCharacterEnums() {}
 

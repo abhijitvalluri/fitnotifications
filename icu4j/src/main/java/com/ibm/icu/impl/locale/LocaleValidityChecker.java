@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2015-2016, International Business Machines Corporation and
@@ -75,7 +75,7 @@ public class LocaleValidityChecker {
         final Set<Character> extensionKeys = locale.getExtensionKeys();
         //        if (language.isEmpty()) {
         //            // the only case where this is valid is if there is only an 'x' extension string
-        //            if (!script.isEmpty() || !region.isEmpty() || variantString.isEmpty() 
+        //            if (!script.isEmpty() || !region.isEmpty() || variantString.isEmpty()
         //                    || extensionKeys.size() != 1 || !extensionKeys.contains('x')) {
         //                return where.set(Datatype.x, "Null language only with x-...");
         //            }
@@ -106,6 +106,8 @@ public class LocaleValidityChecker {
                 case u:
                     if (!isValidU(locale, datatype, locale.getExtension(c), where)) return false;
                     break;
+                default:
+                    break;
                 }
             } catch (Exception e) {
                 return where.set(Datatype.illegal, c+"");
@@ -135,8 +137,8 @@ public class LocaleValidityChecker {
     }
 
     /**
-     * @param locale 
-     * @param datatype 
+     * @param locale
+     * @param datatype
      * @param extension
      * @param where
      * @return
@@ -154,7 +156,7 @@ public class LocaleValidityChecker {
         // TODO: is empty -u- valid?
 
         for (String subtag : SEPARATOR.split(extensionString)) {
-            if (subtag.length() == 2 
+            if (subtag.length() == 2
                     && (tBuffer == null || subtag.charAt(1) <= '9')) {
                 // if we have accumulated a t buffer, check that first
                 if (tBuffer != null) {
@@ -182,7 +184,7 @@ public class LocaleValidityChecker {
             } else {
                 ++typeCount;
                 switch (valueType) {
-                case single: 
+                case single:
                     if (typeCount > 1) {
                         return where.set(datatype, key+"-"+subtag);
                     }
@@ -201,11 +203,13 @@ public class LocaleValidityChecker {
                         seen.clear();
                     }
                     break;
+                default:
+                    break;
                 }
                 switch (specialCase) {
-                case anything: 
+                case anything:
                     continue;
-                case codepoints: 
+                case codepoints:
                     try {
                         if (Integer.parseInt(subtag,16) > 0x10FFFF) {
                             return where.set(datatype, key+"-"+subtag);
@@ -233,6 +237,8 @@ public class LocaleValidityChecker {
                         return false;
                     }
                     continue;
+                default:
+                    break;
                 }
 
                 // en-u-sd-usca
@@ -324,14 +330,30 @@ public class LocaleValidityChecker {
     }
 
     /**
-     * @param language
-     * @param language2
+     * @param datatype
+     * @param code
+     * @param where
      * @return
      */
     private boolean isValid(Datatype datatype, String code, Where where) {
-        return code.isEmpty() ? true :
-            ValidIdentifiers.isValid(datatype, datasubtypes, code) != null ? true : 
-                where == null ? false 
-                        : where.set(datatype, code);
+        if (code.isEmpty()) {
+            return true;
+        }
+
+        // Note:
+        // BCP 47 -u- locale extension '-u-va-posix' is mapped to variant 'posix' automatically.
+        // For example, ULocale.forLanguageTag("en-u-va-posix").getVariant() returns "posix".
+        // This is only the exceptional case when -u- locale extension is mapped to a subtag type
+        // other than keyword.
+        //
+        // The locale validity data is based on IANA language subtag registry data and "posix"
+        // is not a valid variant. So we need to handle this specific case here. There are no
+        // othe exceptions.
+        if (datatype == Datatype.variant && "posix".equalsIgnoreCase(code)) {
+            return true;
+        }
+
+        return ValidIdentifiers.isValid(datatype, datasubtypes, code) != null ?
+                true : (where == null ? false : where.set(datatype, code));
     }
 }

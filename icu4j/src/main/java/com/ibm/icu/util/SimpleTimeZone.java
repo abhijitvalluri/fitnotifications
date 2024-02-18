@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
  /*
 *   Copyright (C) 1996-2016, International Business Machines
 *   Corporation and others.  All Rights Reserved.
@@ -347,7 +347,7 @@ public class SimpleTimeZone extends BasicTimeZone {
      *       month, regardless of what day of the week it is (e.g., (-2, 0) is the
      *       next-to-last day of the month).
      *   <li>If dayOfWeek is negative and dayOfWeekInMonth is positive, they specify the
-     *       first specified day of the week on or after the specfied day of the month.
+     *       first specified day of the week on or after the specified day of the month.
      *       (e.g., (15, -SUNDAY) is the first Sunday after the 15th of the month
      *       [or the 15th itself if the 15th is a Sunday].)
      *   <li>If dayOfWeek and DayOfWeekInMonth are both negative, they specify the
@@ -540,7 +540,8 @@ public class SimpleTimeZone extends BasicTimeZone {
      * Sets the amount of time in ms that the clock is advanced during DST.
      * @param millisSavedDuringDST the number of milliseconds the time is
      * advanced with respect to standard time when the daylight savings rules
-     * are in effect. A positive number, typically one hour (3600000).
+     * are in effect. Typically one hour (+3600000). The amount could be negative,
+     * but not 0.
      * @stable ICU 2.0
      */
     public void setDSTSavings(int millisSavedDuringDST) {
@@ -548,7 +549,7 @@ public class SimpleTimeZone extends BasicTimeZone {
             throw new UnsupportedOperationException("Attempt to modify a frozen SimpleTimeZone instance.");
         }
 
-        if (millisSavedDuringDST <= 0) {
+        if (millisSavedDuringDST == 0) {
             throw new IllegalArgumentException();
         }
         dst = millisSavedDuringDST;
@@ -560,7 +561,8 @@ public class SimpleTimeZone extends BasicTimeZone {
      * Returns the amount of time in ms that the clock is advanced during DST.
      * @return the number of milliseconds the time is
      * advanced with respect to standard time when the daylight savings rules
-     * are in effect. A positive number, typically one hour (3600000).
+     * are in effect. Typically one hour (3600000). The amount could be negative,
+     * but not 0.
      * @stable ICU 2.0
      */
     @Override
@@ -610,7 +612,7 @@ public class SimpleTimeZone extends BasicTimeZone {
     /**
      * Returns a string representation of this object.
      * @return  a string representation of this object
-     * @stable ICU 3.6
+     * @stable ICU 2.0
      */
     @Override
     public String toString() {
@@ -625,7 +627,7 @@ public class SimpleTimeZone extends BasicTimeZone {
     }
 
     //  Use only for decodeStartRule() and decodeEndRule() where the year is not
-    //  available. Set February to 29 days to accomodate rules with that date
+    //  available. Set February to 29 days to accommodate rules with that date
     //  and day-of-week-on-or-before-that-date mode (DOW_LE_DOM_MODE).
     //  The compareToRule() method adjusts to February 28 in non-leap years.
     //
@@ -788,13 +790,14 @@ public class SimpleTimeZone extends BasicTimeZone {
 
     /**
      * {@inheritDoc}
-     * @internal
-     * @deprecated This API is ICU internal only.
+     * @stable ICU 69
      */
     @Override
-    @Deprecated
     public void getOffsetFromLocal(long date,
-            int nonExistingTimeOpt, int duplicatedTimeOpt, int[] offsets) {
+            LocalOption nonExistingTimeOpt, LocalOption duplicatedTimeOpt, int[] offsets) {
+        int nonExistingTimeOptVal = getLocalOptionValue(nonExistingTimeOpt);
+        int duplicatedTimeOptVal = getLocalOptionValue(duplicatedTimeOpt);
+
         offsets[0] = getRawOffset();
         int fields[] = new int[6];
         Grego.timeToFields(date, fields);
@@ -806,16 +809,16 @@ public class SimpleTimeZone extends BasicTimeZone {
 
         // Now, we need some adjustment
         if (offsets[1] > 0) {
-            if ((nonExistingTimeOpt & STD_DST_MASK) == LOCAL_STD
-                || (nonExistingTimeOpt & STD_DST_MASK) != LOCAL_DST
-                && (nonExistingTimeOpt & FORMER_LATTER_MASK) != LOCAL_LATTER) {
+            if ((nonExistingTimeOptVal & STD_DST_MASK) == LOCAL_STD
+                || (nonExistingTimeOptVal & STD_DST_MASK) != LOCAL_DST
+                && (nonExistingTimeOptVal & FORMER_LATTER_MASK) != LOCAL_LATTER) {
                 date -= getDSTSavings();
                 recalc = true;
             }
         } else {
-            if ((duplicatedTimeOpt & STD_DST_MASK) == LOCAL_DST
-                || (duplicatedTimeOpt & STD_DST_MASK) != LOCAL_STD
-                && (duplicatedTimeOpt & FORMER_LATTER_MASK) == LOCAL_FORMER) {
+            if ((duplicatedTimeOptVal & STD_DST_MASK) == LOCAL_DST
+                || (duplicatedTimeOptVal & STD_DST_MASK) != LOCAL_STD
+                && (duplicatedTimeOptVal & FORMER_LATTER_MASK) == LOCAL_FORMER) {
                 date -= getDSTSavings();
                 recalc = true;
             }
@@ -1015,7 +1018,7 @@ public class SimpleTimeZone extends BasicTimeZone {
 
         decodeRules();
 
-        if (_dst <= 0) {
+        if (_dst == 0) {
             throw new IllegalArgumentException();
         }
     }
@@ -1138,7 +1141,7 @@ public class SimpleTimeZone extends BasicTimeZone {
     /**
      * Overrides equals.
      * @return true if obj is a SimpleTimeZone equivalent to this
-     * @stable ICU 3.6
+     * @stable ICU 2.0
      */
     @Override
     public boolean equals(Object obj){
@@ -1178,7 +1181,8 @@ public class SimpleTimeZone extends BasicTimeZone {
 
     /**
      * Overrides hashCode.
-     * @stable ICU 3.6
+     * @return a hash code value for this object.
+     * @stable ICU 2.0
      */
     @Override
     public int hashCode(){
@@ -1206,7 +1210,7 @@ public class SimpleTimeZone extends BasicTimeZone {
 
     /**
      * Overrides clone.
-     * @stable ICU 3.6
+     * @stable ICU 2.0
      */
     @Override
     public Object clone() {

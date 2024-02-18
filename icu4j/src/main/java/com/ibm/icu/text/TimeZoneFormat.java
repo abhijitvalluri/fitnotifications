@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2011-2016, International Business Machines Corporation and
@@ -32,6 +32,7 @@ import java.util.Set;
 
 import com.ibm.icu.impl.ICUData;
 import com.ibm.icu.impl.ICUResourceBundle;
+import com.ibm.icu.impl.PatternProps;
 import com.ibm.icu.impl.SoftCache;
 import com.ibm.icu.impl.TZDBTimeZoneNames;
 import com.ibm.icu.impl.TextTrieMap;
@@ -722,7 +723,7 @@ public class TimeZoneFormat extends UFormat implements Freezable<TimeZoneFormat>
      * Sets the default parse options.
      * <p>
      * <b>Note:</b> By default, an instance of <code>TimeZoneFormat</code>
-     * created by {#link {@link #getInstance(ULocale)} has no parse options set.
+     * created by {@link #getInstance(ULocale)} has no parse options set.
      *
      * @param options the default parse options.
      * @return this object.
@@ -1070,7 +1071,7 @@ public class TimeZoneFormat extends UFormat implements Freezable<TimeZoneFormat>
      */
     public TimeZone parse(Style style, String text, ParsePosition pos, EnumSet<ParseOption> options, Output<TimeType> timeType) {
         if (timeType == null) {
-            timeType = new Output<TimeType>(TimeType.UNKNOWN);
+            timeType = new Output<>(TimeType.UNKNOWN);
         } else {
             timeType.value = TimeType.UNKNOWN;
         }
@@ -1093,7 +1094,7 @@ public class TimeZoneFormat extends UFormat implements Freezable<TimeZoneFormat>
 
         // Try localized GMT format first if necessary
         if (fallbackLocalizedGMT || fallbackShortLocalizedGMT) {
-            Output<Boolean> hasDigitOffset = new Output<Boolean>(false);
+            Output<Boolean> hasDigitOffset = new Output<>(false);
             offset = parseOffsetLocalizedGMT(text, tmpPos, fallbackShortLocalizedGMT, hasDigitOffset);
             if (tmpPos.getErrorIndex() == -1) {
                 // Even when the input text was successfully parsed as a localized GMT format text,
@@ -1177,7 +1178,7 @@ public class TimeZoneFormat extends UFormat implements Freezable<TimeZoneFormat>
                 tmpPos.setErrorIndex(-1);
 
                 // Exclude the case of UTC Indicator "Z" here
-                Output<Boolean> hasDigitOffset = new Output<Boolean>(false);
+                Output<Boolean> hasDigitOffset = new Output<>(false);
                 offset = parseOffsetISO8601(text, tmpPos, false, hasDigitOffset);
                 if (tmpPos.getErrorIndex() == -1 && hasDigitOffset.value) {
                     pos.setIndex(tmpPos.getIndex());
@@ -1329,7 +1330,7 @@ public class TimeZoneFormat extends UFormat implements Freezable<TimeZoneFormat>
             tmpPos.setIndex(startIdx);
             tmpPos.setErrorIndex(-1);
 
-            Output<Boolean> hasDigitOffset = new Output<Boolean>(false);
+            Output<Boolean> hasDigitOffset = new Output<>(false);
             offset = parseOffsetISO8601(text, tmpPos, false, hasDigitOffset);
             if (tmpPos.getErrorIndex() == -1) {
                 if (tmpPos.getIndex() == maxPos || hasDigitOffset.value) {
@@ -1356,7 +1357,7 @@ public class TimeZoneFormat extends UFormat implements Freezable<TimeZoneFormat>
             tmpPos.setIndex(startIdx);
             tmpPos.setErrorIndex(-1);
 
-            Output<Boolean> hasDigitOffset = new Output<Boolean>(false);
+            Output<Boolean> hasDigitOffset = new Output<>(false);
             offset = parseOffsetLocalizedGMT(text, tmpPos, false, hasDigitOffset);
             if (tmpPos.getErrorIndex() == -1) {
                 if (tmpPos.getIndex() == maxPos || hasDigitOffset.value) {
@@ -1378,7 +1379,7 @@ public class TimeZoneFormat extends UFormat implements Freezable<TimeZoneFormat>
             tmpPos.setIndex(startIdx);
             tmpPos.setErrorIndex(-1);
 
-            Output<Boolean> hasDigitOffset = new Output<Boolean>(false);
+            Output<Boolean> hasDigitOffset = new Output<>(false);
             offset = parseOffsetLocalizedGMT(text, tmpPos, true, hasDigitOffset);
             if (tmpPos.getErrorIndex() == -1) {
                 if (tmpPos.getIndex() == maxPos || hasDigitOffset.value) {
@@ -1881,7 +1882,7 @@ public class TimeZoneFormat extends UFormat implements Freezable<TimeZoneFormat>
 
     /**
      * Parses the localized GMT pattern string and initialize
-     * localized gmt pattern fields including {{@link #_gmtPatternTokens}.
+     * localized gmt pattern fields including {@link #_gmtPatternTokens}.
      * This method must be also called at deserialization time.
      *
      * @param gmtPattern the localized GMT pattern string such as "GMT {0}"
@@ -2019,7 +2020,7 @@ public class TimeZoneFormat extends UFormat implements Freezable<TimeZoneFormat>
         int itemLength = 1;
         boolean invalidPattern = false;
 
-        List<Object> items = new ArrayList<Object>();
+        List<Object> items = new ArrayList<>();
         BitSet checkBits = new BitSet(letters.length());
 
         for (int i = 0; i < pattern.length(); i++) {
@@ -2397,7 +2398,26 @@ public class TimeZoneFormat extends UFormat implements Freezable<TimeZoneFormat>
             if (patternItems[i] instanceof String) {
                 String patStr = (String)patternItems[i];
                 int len = patStr.length();
-                if (!text.regionMatches(true, idx, patStr, 0, len)) {
+                int patIdx = 0;
+                if (i == 0) {
+                    // When TimeZoneFormat parse() is called from SimpleDateFormat,
+                    // leading space characters might be truncated. If the first pattern text
+                    // starts with such character (e.g. Bidi control), then we need to
+                    // skip the leading space characters.
+                    if (idx < text.length() && !PatternProps.isWhiteSpace(text.codePointAt(idx))) {
+                        while (len > 0) {
+                            int cp = patStr.codePointAt(patIdx);
+                            if (PatternProps.isWhiteSpace(cp)) {
+                                int cpLen = Character.charCount(cp);
+                                len -= cpLen;
+                                patIdx += cpLen;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (!text.regionMatches(true, idx, patStr, patIdx, len)) {
                     failed = true;
                     break;
                 }
@@ -3001,7 +3021,7 @@ public class TimeZoneFormat extends UFormat implements Freezable<TimeZoneFormat>
             synchronized (TimeZoneFormat.class) {
                 if (ZONE_ID_TRIE == null) {
                     // Build zone ID trie
-                    TextTrieMap<String> trie = new TextTrieMap<String>(true);
+                    TextTrieMap<String> trie = new TextTrieMap<>(true);
                     String[] ids = TimeZone.getAvailableIDs();
                     for (String id : ids) {
                         trie.put(id, id);
@@ -3011,11 +3031,11 @@ public class TimeZoneFormat extends UFormat implements Freezable<TimeZoneFormat>
             }
         }
 
-        int[] matchLen = new int[] {0};
-        Iterator<String> itr = ZONE_ID_TRIE.get(text, pos.getIndex(), matchLen);
+        TextTrieMap.Output trieOutput = new TextTrieMap.Output();
+        Iterator<String> itr = ZONE_ID_TRIE.get(text, pos.getIndex(), trieOutput);
         if (itr != null) {
             resolvedID = itr.next();
-            pos.setIndex(pos.getIndex() + matchLen[0]);
+            pos.setIndex(pos.getIndex() + trieOutput.matchLength);
         } else {
             // TODO
             // We many need to handle rule based custom zone ID (See ZoneMeta.parseCustomID),
@@ -3039,7 +3059,7 @@ public class TimeZoneFormat extends UFormat implements Freezable<TimeZoneFormat>
             synchronized (TimeZoneFormat.class) {
                 if (SHORT_ZONE_ID_TRIE == null) {
                     // Build short zone ID trie
-                    TextTrieMap<String> trie = new TextTrieMap<String>(true);
+                    TextTrieMap<String> trie = new TextTrieMap<>(true);
                     Set<String> canonicalIDs = TimeZone.getAvailableIDs(SystemTimeZoneType.CANONICAL, null, null);
                     for (String id : canonicalIDs) {
                         String shortID = ZoneMeta.getShortID(id);
@@ -3054,11 +3074,11 @@ public class TimeZoneFormat extends UFormat implements Freezable<TimeZoneFormat>
             }
         }
 
-        int[] matchLen = new int[] {0};
-        Iterator<String> itr = SHORT_ZONE_ID_TRIE.get(text, pos.getIndex(), matchLen);
+        TextTrieMap.Output trieOutput = new TextTrieMap.Output();
+        Iterator<String> itr = SHORT_ZONE_ID_TRIE.get(text, pos.getIndex(), trieOutput);
         if (itr != null) {
             resolvedID = itr.next();
-            pos.setIndex(pos.getIndex() + matchLen[0]);
+            pos.setIndex(pos.getIndex() + trieOutput.matchLength);
         } else {
             pos.setErrorIndex(pos.getIndex());
         }

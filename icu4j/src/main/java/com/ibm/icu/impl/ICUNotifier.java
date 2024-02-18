@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /**
  *******************************************************************************
  * Copyright (C) 2001-2009, International Business Machines Corporation and    *
@@ -68,7 +68,7 @@ public abstract class ICUNotifier {
 
     /**
      * Stop notifying this listener.  The listener must
-     * not be null.  Attemps to remove a listener that is
+     * not be null.  Attempts to remove a listener that is
      * not registered will be silently ignored.
      */
     public void removeListener(EventListener l) {
@@ -98,16 +98,14 @@ public abstract class ICUNotifier {
      * is called on each listener from the notification thread.
      */
     public void notifyChanged() {
-        if (listeners != null) {
-            synchronized (notifyLock) {
-                if (listeners != null) {
-                    if (notifyThread == null) {
-                        notifyThread = new NotifyThread(this);
-                        notifyThread.setDaemon(true);
-                        notifyThread.start();
-                    }
-                    notifyThread.queue(listeners.toArray(new EventListener[listeners.size()]));
+        synchronized (notifyLock) {
+            if (listeners != null) {
+                if (notifyThread == null) {
+                    notifyThread = new NotifyThread(this);
+                    notifyThread.setDaemon(true);
+                    notifyThread.start();
                 }
+                notifyThread.queue(listeners.toArray(new EventListener[listeners.size()]));
             }
         }
     }

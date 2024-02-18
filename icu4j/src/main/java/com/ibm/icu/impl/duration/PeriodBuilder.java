@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
 ******************************************************************************
 * Copyright (C) 2007, International Business Machines Corporation and   *
@@ -33,7 +33,7 @@ public interface PeriodBuilder {
   /**
    * Create a period of the given duration using the provided reference date.
    *
-   * @param duration the duration in milliseconds from the referenct time
+   * @param duration the duration in milliseconds from the referenced time
    * to the target time.  A negative duration indicates a time before the
    * reference time
    * @param referenceDate the reference date from which to compute the period

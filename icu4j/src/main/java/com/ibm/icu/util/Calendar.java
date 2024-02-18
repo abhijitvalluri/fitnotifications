@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *   Copyright (C) 1996-2016, International Business Machines
  *   Corporation and others.  All Rights Reserved.
@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.MissingResourceException;
 
+import com.ibm.icu.impl.CalType;
 import com.ibm.icu.impl.CalendarUtil;
 import com.ibm.icu.impl.ICUCache;
 import com.ibm.icu.impl.ICUData;
@@ -26,7 +27,9 @@ import com.ibm.icu.impl.SimpleFormatterImpl;
 import com.ibm.icu.impl.SoftCache;
 import com.ibm.icu.text.DateFormat;
 import com.ibm.icu.text.DateFormatSymbols;
+import com.ibm.icu.text.DateTimePatternGenerator;
 import com.ibm.icu.text.SimpleDateFormat;
+import com.ibm.icu.util.BasicTimeZone.LocalOption;
 import com.ibm.icu.util.ULocale.Category;
 
 /**
@@ -376,7 +379,7 @@ import com.ibm.icu.util.ULocale.Category;
  *     numbers must be restricted to a 32-bit <code>int</code>.  This
  *     restricts the overall supported range. Furthermore, restricting
  *     the supported range simplifies the computations by removing
- *     special case code that was used to accomodate arithmetic overflow
+ *     special case code that was used to accommodate arithmetic overflow
  *     at millis near <code>Long.MIN_VALUE</code> and
  *     <code>Long.MAX_VALUE</code>.</li>
  *
@@ -552,7 +555,7 @@ import com.ibm.icu.util.ULocale.Category;
  *     between days at sunset or at other times, all ICU4J calendars
  *     transition between days at <em>local zone midnight</em>.  This
  *     allows ICU4J to centralize the time computations in
- *     <code>Calendar</code> and to maintain basic correpsondences
+ *     <code>Calendar</code> and to maintain basic correspondences
  *     between calendar systems. Affected fields: {@link #AM_PM},
  *     {@link #HOUR}, {@link #HOUR_OF_DAY}, {@link #MINUTE},
  *     {@link #SECOND}, {@link #MILLISECOND},
@@ -953,12 +956,36 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
     public static final int IS_LEAP_MONTH = 22;
 
     /**
+     * {@icu} Field indicating the month. This is a calendar-specific value.
+     * Differ from MONTH, this value is continuous and unique within a
+     * year and range from 0 to 11 or 0 to 12 depending on how many months in a
+     * year, the calendar system has leap month or not, and in leap year or not.
+     * It is the ordinal position of that month in the corresponding year of
+     * the calendar. For Chinese, Dangi, and Hebrew calendar, the range is
+     * 0 to 11 in non-leap years and 0 to 12 in leap years. For Coptic and Ethiopian
+     * calendar, the range is always 0 to 12. For other calendars supported by
+     * ICU now, the range is 0 to 11. When the number of months in a year of the
+     * identified calendar is variable, a different ORDINAL_MONTH value can
+     * be used for dates that are part of the same named month in different years.
+     * For example, in the Hebrew calendar, "1 Nisan 5781" is associated with
+     * ORDINAL_MONTH value 6 while "1 Nisan 5782" is associated with
+     * ORDINAL_MONTH value 7 because 5782 is a leap year and Nisan follows
+     * the insertion of Adar I. In Chinese calendar, "Year 4664 Month 6 Day 2"
+     * is associated with ORDINAL_MONTH value 5 while "Year 4665 Month 6 Day 2"
+     * is associated with ORDINAL_MONTH value 6 because 4665 is a leap year
+     * and there is an extra "Leap Month 5" which associated with ORDINAL_MONTH
+     * value 5 before "Month 6" of year 4664.
+     * @draft ICU 74
+     */
+    public static final int ORDINAL_MONTH = 23;
+
+    /**
      * The number of fields defined by this class.  Subclasses may define
      * addition fields starting with this number.
      * @deprecated ICU 58 The numeric value may change over time, see ICU ticket #12420.
      */
     @Deprecated
-    protected static final int BASE_FIELD_COUNT = 23;
+    protected static final int BASE_FIELD_COUNT = 24;
 
     /**
      * The maximum number of fields possible.  Subclasses must not define
@@ -1301,6 +1328,11 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      */
     protected static final Date MAX_DATE = new Date(MAX_MILLIS);
 
+    /**
+     * The maximum supported hours for millisecond calculations
+     */
+    private static final int MAX_HOURS = 548;
+
     // Internal notes:
     // Calendar contains two kinds of time representations: current "time" in
     // milliseconds, and a set of time "fields" representing the current time.
@@ -1477,7 +1509,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      */
     private transient int             nextStamp = MINIMUM_USER_STAMP;
 
-    /* Max value for stamp allowable before recalcution */
+    /* Max value for stamp allowable before recalculation */
     private static int STAMP_MAX = 10000;
 
     // the internal serial version which says which version was written
@@ -1587,6 +1619,25 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         // week data
         setWeekData(getRegionForCalendar(locale));
 
+        // Check if the locale has a "fw" u extension and we honor it if present.
+        String fw = locale.getKeywordValue("fw");
+        if (fw != null) {
+            int fwOverride;
+            switch (fw) {
+                case "sun": fwOverride = SUNDAY; break;
+                case "mon": fwOverride = MONDAY; break;
+                case "tue": fwOverride = TUESDAY; break;
+                case "wed": fwOverride = WEDNESDAY; break;
+                case "thu": fwOverride = THURSDAY; break;
+                case "fri": fwOverride = FRIDAY; break;
+                case "sat": fwOverride = SATURDAY; break;
+                default: fwOverride = -1;
+            }
+            if (fwOverride != -1) {
+                setFirstDayOfWeek(fwOverride);
+            }
+        }
+
         // set valid/actual locale
         setCalendarLocale(locale);
 
@@ -1677,7 +1728,8 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
                 (1 << DAY_OF_MONTH) |
                 (1 << DAY_OF_YEAR) |
                 (1 << EXTENDED_YEAR) |
-                (1 << IS_LEAP_MONTH);
+                (1 << IS_LEAP_MONTH) |
+                (1 << ORDINAL_MONTH) ;
         for (int i=BASE_FIELD_COUNT; i<fields.length; ++i) {
             mask |= (1 << i);
         }
@@ -1758,7 +1810,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
             locale = ULocale.getDefault(Category.FORMAT);
         }
         if (tz == null) {
-            tz = TimeZone.getDefault();
+            tz = TimeZone.forULocaleOrDefault(locale);
         }
 
         Calendar cal = createInstance(locale);
@@ -1775,54 +1827,24 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         return region;
     }
 
-    private enum CalType {
-        GREGORIAN("gregorian"),
-        ISO8601("iso8601"),
-
-        BUDDHIST("buddhist"),
-        CHINESE("chinese"),
-        COPTIC("coptic"),
-        DANGI("dangi"),
-        ETHIOPIC("ethiopic"),
-        ETHIOPIC_AMETE_ALEM("ethiopic-amete-alem"),
-        HEBREW("hebrew"),
-        INDIAN("indian"),
-        ISLAMIC("islamic"),
-        ISLAMIC_CIVIL("islamic-civil"),
-        ISLAMIC_RGSA("islamic-rgsa"),
-        ISLAMIC_TBLA("islamic-tbla"),
-        ISLAMIC_UMALQURA("islamic-umalqura"),
-        JAPANESE("japanese"),
-        PERSIAN("persian"),
-        ROC("roc"),
-
-        UNKNOWN("unknown");
-
-        String id;
-
-        CalType(String id) {
-            this.id = id;
-        }
-    }
-
     private static CalType getCalendarTypeForLocale(ULocale l) {
         String s = CalendarUtil.getCalendarType(l);
         if (s != null) {
             s = s.toLowerCase(Locale.ENGLISH);
             for (CalType type : CalType.values()) {
-                if (s.equals(type.id)) {
+                if (s.equals(type.getId())) {
                     return type;
                 }
             }
         }
-        return CalType.UNKNOWN;
+        return null;
     }
 
     private static Calendar createInstance(ULocale locale) {
         Calendar cal = null;
-        TimeZone zone = TimeZone.getDefault();
+        TimeZone zone = TimeZone.forULocaleOrDefault(locale);
         CalType calType = getCalendarTypeForLocale(locale);
-        if (calType == CalType.UNKNOWN) {
+        if (calType == null) {
             // fallback to Gregorian
             calType = CalType.GREGORIAN;
         }
@@ -1834,7 +1856,12 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         case ISO8601:
             // Only differs week numbering rule from Gregorian
             cal = new GregorianCalendar(zone, locale);
-            cal.setFirstDayOfWeek(MONDAY);
+            String type = locale.getUnicodeLocaleType("fw");
+            // Only set fw to Monday for ISO8601 if there aer no fw keyword.
+            // If there is a fw keyword, the Calendar constructor already set it to the fw value.
+            if (locale.getKeywordValue("fw") == null) {
+                cal.setFirstDayOfWeek(MONDAY);
+            }
             cal.setMinimalDaysInFirstWeek(4);
             break;
 
@@ -1904,7 +1931,6 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * {@icu} Returns the list of locales for which Calendars are installed.
      * @return the list of locales for which Calendars are installed.
      * @draft ICU 3.2 (retain)
-     * @provisional This API might change or be removed in a future release.
      */
     public static ULocale[] getAvailableULocales()
     {
@@ -1933,7 +1959,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         String prefRegion = ULocale.getRegionForSupplementalData(locale, true);
 
         // Read preferred calendar values from supplementalData calendarPreferences
-        ArrayList<String> values = new ArrayList<String>();
+        ArrayList<String> values = new ArrayList<>();
 
         UResourceBundle rb = UResourceBundle.getBundleInstance(
                 ICUData.ICU_BASE_NAME,
@@ -1958,10 +1984,10 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         for (int i = 0; i < caltypes.length; i++) {
             values.add(caltypes[i]);
         }
-        // then, add other available clanedars
+        // then, add other available calendars
         for (CalType t : CalType.values()) {
-            if (!values.contains(t.id)) {
-                values.add(t.id);
+            if (!values.contains(t.getId())) {
+                values.add(t.getId());
             }
         }
         return values.toArray(new String[values.size()]);
@@ -2031,6 +2057,89 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
 
     }
 
+
+    //-------------------------------------------------------------------------
+    // Temporal Calendar API.
+    //-------------------------------------------------------------------------
+    /**
+     * {@icu} Returns true if the date is in a leap year. Recalculate the current time
+     * field values if the time value has been changed by a call to * setTime().
+     * This method is semantically const, but may alter the object in memory.
+     * A "leap year" is a year that contains more days than other years (for
+     * solar or lunar calendars) or more months than other years (for lunisolar
+     * calendars like Hebrew or Chinese), as defined in the ECMAScript Temporal
+     * proposal.
+     * @return true if the date in the fields is in a Temporal proposal
+     *               defined leap year. False otherwise.
+     * @draft ICU 74
+     */
+    public boolean inTemporalLeapYear() {
+        // Default to Gregorian based leap year rule.
+        return getActualMaximum(DAY_OF_YEAR) == 366;
+    }
+
+    private static String [] gTemporalMonthCodes = {
+        "M01", "M02", "M03", "M04", "M05", "M06", "M07", "M08", "M09", "M10", "M11", "M12"
+    };
+
+    /**
+     * Gets The Temporal monthCode value corresponding to the month for the date.
+     * The value is a string identifier that starts with the literal grapheme
+     * "M" followed by two graphemes representing the zero-padded month number
+     * of the current month in a normal (non-leap) year and suffixed by an
+     * optional literal grapheme "L" if this is a leap month in a lunisolar
+     * calendar. The 25 possible values are "M01" .. "M13" and "M01L" .. "M12L".
+     * For the Hebrew calendar, the values are "M01" .. "M12" for non-leap year, and
+     * "M01" .. "M05", "M05L", "M06" .. "M12" for leap year.
+     * For the Chinese calendar, the values are "M01" .. "M12" for non-leap year and
+     * in leap year with another monthCode in "M01L" .. "M12L".
+     * For Coptic and Ethiopian calendar, the Temporal monthCode values for any
+     * years are "M01" to "M13".
+     *
+     * @return       One of 25 possible strings in {"M01".."M13", "M01L".."M12L"}.
+     * @draft ICU 74
+     */
+    public String getTemporalMonthCode() {
+        int month = get(MONTH);
+        assert(month < 12);
+        assert(internalGet(IS_LEAP_MONTH) == 0);
+        return gTemporalMonthCodes[month];
+    }
+
+    /**
+     * Sets The Temporal monthCode which is a string identifier that starts
+     * with the literal grapheme "M" followed by two graphemes representing
+     * the zero-padded month number of the current month in a normal
+     * (non-leap) year and suffixed by an optional literal grapheme "L" if this
+     * is a leap month in a lunisolar calendar. The 25 possible values are
+     * "M01" .. "M13" and "M01L" .. "M12L". For Hebrew calendar, the values are
+     * "M01" .. "M12" for non-leap years, and "M01" .. "M05", "M05L", "M06"
+     * .. "M12" for leap year.
+     * For the Chinese calendar, the values are "M01" .. "M12" for non-leap year and
+     * in leap year with another monthCode in "M01L" .. "M12L".
+     * For Coptic and Ethiopian calendar, the Temporal monthCode values for any
+     * years are "M01" to "M13".
+     * @param temporalMonth One of 25 possible strings in {"M01".. "M12", "M13", "M01L",
+     *  "M12L"}.
+     * @draft ICU 74
+     */
+    public void setTemporalMonthCode( String temporalMonth ) {
+        if (temporalMonth.length() == 3 && temporalMonth.charAt(0) == 'M') {
+            for (int m = 0; m < gTemporalMonthCodes.length; m++) {
+                if (temporalMonth.equals(gTemporalMonthCodes[m])) {
+                    set(MONTH, m);
+                    set(IS_LEAP_MONTH, 0);
+                    return;
+                }
+            }
+        }
+        throw new IllegalArgumentException("Incorrect temporal Month code: " + temporalMonth);
+    }
+
+    //-------------------------------------------------------------------------
+    // End of Temporal Calendar API
+    //-------------------------------------------------------------------------
+
     /**
      * Returns the value for a given time field.
      * @param field the given time field.
@@ -2070,6 +2179,43 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
     }
 
     /**
+     * Use this function instead of internalGet(MONTH). The implementation
+     * check the timestamp of MONTH and ORDINAL_MONTH and use the
+     * one set later. The subclass should override it to conver the value of ORDINAL_MONTH
+     * to MONTH correctly if ORDINAL_MONTH has higher priority.
+     * @return the value for the given time field.
+     * @internal
+     * @deprecated This API is ICU internal only.
+     */
+    @Deprecated
+    protected int internalGetMonth()
+    {
+        if (resolveFields(MONTH_PRECEDENCE) == MONTH) {
+            return internalGet(MONTH);
+        }
+        return internalGet(ORDINAL_MONTH);
+    }
+
+    /**
+     * Use this function instead of internalGet(MONTH, defaultValue). The implementation
+     * check the timestamp of MONTH and ORDINAL_MONTH and use the
+     * one set later. The subclass should override it to conver the value of ORDINAL_MONTH
+     * to MONTH correctly if ORDINAL_MONTH has higher priority.
+     * @param defaultValue a default value used if the MONTH and
+     *   ORDINAL_MONTH are both unset.
+     * @return the value for the MONTH.
+     * @internal
+     * @deprecated This API is ICU internal only.
+     */
+    @Deprecated
+    protected int internalGetMonth(int defaultValue) {
+        if (resolveFields(MONTH_PRECEDENCE) == MONTH) {
+            return internalGet(MONTH, defaultValue);
+        }
+        return internalGet(ORDINAL_MONTH, defaultValue);
+    }
+
+   /**
      * Sets the time field with the given value.
      * @param field the given time field.
      * @param value the value to be set for the given time field.
@@ -2186,7 +2332,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         CalType type = CalType.GREGORIAN;
         String typeString = getType();
         for (CalType testType : CalType.values()) {
-            if (typeString.equals(testType.id)) {
+            if (typeString.equals(testType.getId())) {
                 type = testType;
                 break;
             }
@@ -2260,7 +2406,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         CalType type = CalType.GREGORIAN;
         String typeString = getType();
         for (CalType testType : CalType.values()) {
-            if (typeString.equals(testType.id)) {
+            if (typeString.equals(testType.getId())) {
                 type = testType;
                 break;
             }
@@ -2324,6 +2470,14 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         }
         fields[field] = 0;
         stamp[field] = UNSET;
+        if (field == MONTH) {
+            fields[ORDINAL_MONTH] = 0;
+            stamp[ORDINAL_MONTH] = UNSET;
+        }
+        if (field == ORDINAL_MONTH) {
+            fields[MONTH] = 0;
+            stamp[MONTH] = UNSET;
+        }
         isTimeSet = areFieldsSet = areAllFieldsSet = areFieldsVirtuallySet = false;
     }
 
@@ -2520,6 +2674,10 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         case MILLISECONDS_IN_DAY:
             // These fields all have fixed minima/maxima
             result = getMaximum(field);
+            break;
+
+        case ORDINAL_MONTH:
+            result = inTemporalLeapYear() ? getMaximum(ORDINAL_MONTH) : getLeastMaximum(ORDINAL_MONTH);
             break;
 
         default:
@@ -2809,7 +2967,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * Subclasses can override these two methods if their values differ from the defaults.
      * <p>
      * Subclasses that have fields for which the assumption of continuity breaks
-     * down must overide <code>roll</code> to handle those fields specially.
+     * down must override <code>roll</code> to handle those fields specially.
      * For example, in the Hebrew calendar the month "Adar I"
      * only occurs in leap years; in other years the calendar jumps from
      * Shevat (month #4) to Adar (month #6).  The
@@ -2884,13 +3042,14 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         }
 
         case MONTH:
+        case ORDINAL_MONTH:
             // Rolling the month involves both pinning the final value
             // and adjusting the DAY_OF_MONTH if necessary.  We only adjust the
             // DAY_OF_MONTH if, after updating the MONTH field, it is illegal.
             // E.g., <jan31>.roll(MONTH, 1) -> <feb28> or <feb29>.
         {
             int max = getActualMaximum(MONTH);
-            int mon = (internalGet(MONTH) + amount) % (max+1);
+            int mon = (internalGetMonth() + amount) % (max+1);
 
             if (mon < 0) {
                 mon += (max + 1);
@@ -3087,6 +3246,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
             // have to be updated as well.
             set(DAY_OF_YEAR, day_of_year);
             clear(MONTH);
+            clear(ORDINAL_MONTH);
             return;
         }
         case DAY_OF_YEAR:
@@ -3188,7 +3348,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * perform the add.
      * <p>
      * Subclasses that have fields for which this assumption of continuity breaks
-     * down must overide <code>add</code> to handle those fields specially.
+     * down must override <code>add</code> to handle those fields specially.
      * For example, in the Hebrew calendar the month "Adar I"
      * only occurs in leap years; in other years the calendar jumps from
      * Shevat (month #4) to Adar (month #6).  The
@@ -3262,6 +3422,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         // Fall through into standard handling
         case EXTENDED_YEAR:
         case MONTH:
+        case ORDINAL_MONTH:
         {
             boolean oldLenient = isLenient();
             setLenient(true);
@@ -3421,7 +3582,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
     }
 
     //-------------------------------------------------------------------------
-    // Interface for creating custon DateFormats for different types of Calendars
+    // Interface for creating custom DateFormats for different types of Calendars
     //-------------------------------------------------------------------------
 
     /**
@@ -3506,7 +3667,6 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @param locale the locale for which the symbols should be drawn
      * @return a <code>DateFormat</code> appropriate to this calendar
      * @draft ICU 3.2 (retain)
-     * @provisional This API might change or be removed in a future release.
      */
     protected DateFormat handleGetDateFormat(String pattern, String override, ULocale locale) {
         FormatConfiguration fmtConfig = new FormatConfiguration();
@@ -3521,22 +3681,35 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
 
     // date format pattern cache
     private static final ICUCache<String, PatternData> PATTERN_CACHE =
-            new SimpleCache<String, PatternData>();
-    // final fallback patterns
+            new SimpleCache<>();
+    // final fallback patterns (match current root)
     private static final String[] DEFAULT_PATTERNS = {
         "HH:mm:ss z",
         "HH:mm:ss z",
         "HH:mm:ss",
         "HH:mm",
-        "EEEE, yyyy MMMM dd",
-        "yyyy MMMM d",
-        "yyyy MMM d",
-        "yy/MM/dd",
+        "y MMMM d, EEEE",
+        "y MMMM d",
+        "y MMM d",
+        "y-MM-dd",
         "{1} {0}",
         "{1} {0}",
         "{1} {0}",
         "{1} {0}",
         "{1} {0}"
+    };
+    private static final String[] DEFAULT_ATTIME_PATTERNS = {
+        "{1} {0}",
+        "{1} {0}",
+        "{1} {0}",
+        "{1} {0}"
+    };
+    // final fallback patterns
+    private static final String[] TIME_SKELETONS = {
+        "jmmsszzzz",    // Full
+        "jmmssz",       // Long
+        "jmmss",        // Medium
+        "jmm"           // Short
     };
 
     static private DateFormat formatHelper(Calendar cal, ULocale loc, int dateStyle,
@@ -3555,7 +3728,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         String pattern = null;
         if ((timeStyle >= 0) && (dateStyle >= 0)) {
             pattern = SimpleFormatterImpl.formatRawPattern(
-                    patternData.getDateTimePattern(dateStyle), 2, 2,
+                    patternData.getDateAtTimePattern(dateStyle), 2, 2,
                     patternData.patterns[timeStyle],
                     patternData.patterns[dateStyle + 4]);
             // Might need to merge the overrides from the date and time into a single
@@ -3591,9 +3764,11 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         // TODO make this even more object oriented
         private String[] patterns;
         private String[] overrides;
-        public PatternData(String[] patterns, String[] overrides) {
+        private String[] atTimePatterns;
+        public PatternData(String[] patterns, String[] overrides, String[] atTimePatterns) {
             this.patterns = patterns;
             this.overrides = overrides;
+            this.atTimePatterns = atTimePatterns;
         }
         private String getDateTimePattern(int dateStyle) {
             int glueIndex = 8;
@@ -3603,19 +3778,35 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
             final String dateTimePattern = patterns[glueIndex];
             return dateTimePattern;
         }
+        private String getDateAtTimePattern(int dateStyle) {
+            if (atTimePatterns != null && atTimePatterns.length >= 4) {
+                final String dateTimePattern = atTimePatterns[dateStyle];
+                return dateTimePattern;
+            } else {
+                return getDateTimePattern(dateStyle);
+            }
+        }
         private static PatternData make(Calendar cal, ULocale loc) {
             // First, try to get a pattern from PATTERN_CACHE
             String calType = cal.getType();
             String key = loc.getBaseName() + "+" + calType;
-            PatternData patternData = PATTERN_CACHE.get(key);
+            PatternData patternData = null;
+            boolean hasHourCycleKeywords = loc.getKeywordValue("rg") != null
+                    || loc.getKeywordValue("hours") != null;
+            if (!hasHourCycleKeywords) {
+                // don't look in the cache if the locale specifies the rg or hc ("hours") keywords
+                patternData = PATTERN_CACHE.get(key);
+            }
             if (patternData == null) {
                 // Cache missed.  Get one from bundle
                 try {
                     patternData = getPatternData(loc, calType);
                 } catch (MissingResourceException e) {
-                    patternData = new PatternData(DEFAULT_PATTERNS, null);
+                    patternData = new PatternData(DEFAULT_PATTERNS, null, DEFAULT_ATTIME_PATTERNS);
                 }
-                PATTERN_CACHE.put(key, patternData);
+                if (!hasHourCycleKeywords) {
+                    PATTERN_CACHE.put(key, patternData);
+                }
             }
             return patternData;
         }
@@ -3639,7 +3830,47 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         int patternsSize = dtPatternsRb.getSize();
         String[] dateTimePatterns = new String[patternsSize];
         String[] dateTimePatternsOverrides = new String[patternsSize];
-        for (int i = 0; i < patternsSize; i++) {
+        int i = 0; // index for dateTimePatterns, dateTimePatternsOverrides
+
+        boolean useDTPG = false;
+        if (locale.getKeywordValue("rg") != null || locale.getKeywordValue("hours") != null) {
+            useDTPG = true;
+        } else {
+            String baseLocID = locale.getBaseName();
+            if (!baseLocID.isEmpty() && !baseLocID.equals("und")) {
+                ULocale baseLoc = new ULocale(baseLocID);
+                // The following is different from ICU4C, where we can get the valid locale
+                // for the SimpleDateFormat object. Here we do not have a SimpleDateFormat and
+                // valid locale for the Calendar is a bit meaningless.
+                ULocale validLoc = ULocale.addLikelySubtags(dtPatternsRb.getULocale());
+                if (validLoc != baseLoc) {
+                    String baseReg = baseLoc.getCountry();
+                    if ((!baseReg.isEmpty() && !baseReg.equals(validLoc.getCountry()))
+                            || !baseLoc.getLanguage().equals(validLoc.getLanguage())) {
+                        useDTPG = true;
+                    }
+                }
+            }
+        }
+        if (useDTPG) {
+            // use DTPG if the standard time formats may have the wrong time cycle,
+            // because the valid locale differs in important ways (region, language)
+            // from the base locale.
+            // We could *also* check whether they do actually have a mismatch with
+            // the time cycle preferences for the region, but that is a lot more
+            // work for little or no additional benefit, since just going ahead
+            // and always synthesizing the time format as per the following should
+            // create a locale-appropriate pattern with cycle that matches the
+            // region preferences anyway.
+            // In this case we get the first 4 entries of dateTimePatterns using
+            // DateTimePatternGenerator, not resource data.
+            DateTimePatternGenerator dtpg = DateTimePatternGenerator.getInstanceNoStdPat(locale);
+            for (; i < TIME_SKELETONS.length; i++) {
+                dateTimePatterns[i] = dtpg.getBestPattern(TIME_SKELETONS[i]);
+            }
+        }
+
+        for (; i < patternsSize; i++) { // get all or remaining dateTimePatterns entries
             ICUResourceBundle concatenationPatternRb = (ICUResourceBundle) dtPatternsRb.get(i);
             switch (concatenationPatternRb.getType()) {
                 case UResourceBundle.STRING:
@@ -3651,7 +3882,26 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
                     break;
             }
         }
-        return new PatternData(dateTimePatterns, dateTimePatternsOverrides);
+
+        dtPatternsRb = rb.findWithFallback("calendar/" + calType + "/DateTimePatterns%atTime");
+        if (dtPatternsRb == null) {
+            dtPatternsRb = rb.findWithFallback("calendar/gregorian/DateTimePatterns%atTime");
+        }
+        String[] atTimePatterns = null;
+        if (dtPatternsRb != null) {
+            patternsSize = dtPatternsRb.getSize();
+            atTimePatterns = new String[patternsSize];
+            if (patternsSize >= 4) {
+                for (i = 0; i < 4; i++) {
+                    ICUResourceBundle concatenationPatternRb = (ICUResourceBundle) dtPatternsRb.get(i);
+                    if (concatenationPatternRb.getType() == UResourceBundle.STRING) {
+                        atTimePatterns[i] = concatenationPatternRb.getString();
+                    }
+                }
+            }
+       }
+
+        return new PatternData(dateTimePatterns, dateTimePatternsOverrides, atTimePatterns);
     }
 
     /**
@@ -3662,6 +3912,16 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
     public static String getDateTimePattern(Calendar cal, ULocale uLocale, int dateStyle) {
         PatternData patternData = PatternData.make(cal, uLocale);
         return patternData.getDateTimePattern(dateStyle);
+    }
+
+    /**
+     * @internal
+     * @deprecated This API is ICU internal only.
+     */
+    @Deprecated
+    public static String getDateAtTimePattern(Calendar cal, ULocale uLocale, int dateStyle) {
+        PatternData patternData = PatternData.make(cal, uLocale);
+        return patternData.getDateAtTimePattern(dateStyle);
     }
 
     private static String mergeOverrideStrings( String datePattern, String timePattern,
@@ -3995,7 +4255,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         int min = 0;
         long startMs = getTimeInMillis();
         long targetMs = when.getTime();
-        // Always add from the start millis.  This accomodates
+        // Always add from the start millis.  This accommodates
         // operations like adding years from February 29, 2000 up to
         // February 29, 2004.  If 1, 1, 1, 1 is added to the year
         // field, the DOM gets pinned to 28 and stays there, giving an
@@ -4143,7 +4403,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
     /**
      * {@icu}Sets the behavior for handling wall time repeating multiple times
      * at negative time zone offset transitions. For example, 1:30 AM on
-     * November 6, 2011 in US Eastern time (Ameirca/New_York) occurs twice;
+     * November 6, 2011 in US Eastern time (America/New_York) occurs twice;
      * 1:30 AM EDT, then 1:30 AM EST one hour later. When <code>WALLTIME_FIRST</code>
      * is used, the wall time 1:30AM in this example will be interpreted as 1:30 AM EDT
      * (first occurrence). When <code>WALLTIME_LAST</code> is used, it will be
@@ -4322,14 +4582,15 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         {           0,            0,            59,            59  }, // MINUTE
         {           0,            0,            59,            59  }, // SECOND
         {           0,            0,           999,           999  }, // MILLISECOND
-        {-12*ONE_HOUR, -12*ONE_HOUR,   12*ONE_HOUR,   12*ONE_HOUR  }, // ZONE_OFFSET
-        {           0,            0,    1*ONE_HOUR,    1*ONE_HOUR  }, // DST_OFFSET
+        {-24*ONE_HOUR, -16*ONE_HOUR,   12*ONE_HOUR,   30*ONE_HOUR  }, // ZONE_OFFSET
+        {           0,            0,    2*ONE_HOUR,    2*ONE_HOUR  }, // DST_OFFSET
         {/*                                                      */}, // YEAR_WOY
         {           1,            1,             7,             7  }, // DOW_LOCAL
         {/*                                                      */}, // EXTENDED_YEAR
         { -0x7F000000,  -0x7F000000,    0x7F000000,    0x7F000000  }, // JULIAN_DAY
         {           0,            0, 24*ONE_HOUR-1, 24*ONE_HOUR-1  }, // MILLISECONDS_IN_DAY
         {           0,            0,             1,             1  }, // IS_LEAP_MONTH
+        {           0,            0,            12,            12  }, // ORDINAL_MONTH
     };
 
     /**
@@ -4690,7 +4951,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
     }
 
     /**
-     * Simple, immutable struct-like class for access to the CLDR weekend data.
+     * Simple, immutable struct-like class for access to the CLDR week data.
      *
      * @stable ICU 54
      */
@@ -4807,7 +5068,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
     }
 
     /**
-     * {@icu} Return simple, immutable struct-like class for access to the CLDR weekend data.
+     * {@icu} Return simple, immutable struct-like class for access to the CLDR week data.
      * @param region The input region. The results are undefined if the region code is not valid.
      * @return the WeekData for the input region. It is never null.
      *
@@ -4818,7 +5079,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
     }
 
     /**
-     * {@icu} Return simple, immutable struct-like class for access to the weekend data in this calendar.
+     * {@icu} Return simple, immutable struct-like class for access to the week data in this calendar.
      * @return the WeekData for this calendar.
      *
      * @stable ICU 54
@@ -4889,7 +5150,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
     private static final WeekDataCache WEEK_DATA_CACHE = new WeekDataCache();
 
     /*
-     * Set this calendar to contain week and weekend data for the given region.
+     * Set this calendar to contain week and week data for the given region.
      */
     private void setWeekData(String region) {
         if (region == null) {
@@ -5004,7 +5265,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         // fields computed by handleComputeFields().
         computeWeekFields();
 
-        // Compute time-related fields.  These are indepent of the date and
+        // Compute time-related fields.  These are independent of the date and
         // of the subclass algorithm.  They depend only on the local zone
         // wall milliseconds in day.
         int millisInDay = (int) (localMillis - (days * ONE_DAY));
@@ -5216,6 +5477,13 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         },
     };
 
+    static final int[][][] MONTH_PRECEDENCE = {
+        {
+            { MONTH },
+            { ORDINAL_MONTH },
+        },
+    };
+
     /**
      * Given a precedence table, return the newest field combination in
      * the table, or -1 if none is found.
@@ -5348,7 +5616,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         switch (field) {
         case DAY_OF_MONTH:
             y = handleGetExtendedYear();
-            validateField(field, 1, handleGetMonthLength(y, internalGet(MONTH)));
+            validateField(field, 1, handleGetMonthLength(y, internalGetMonth()));
             break;
         case DAY_OF_YEAR:
             y = handleGetExtendedYear();
@@ -5398,7 +5666,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
 
         long millis = julianDayToMillis(julianDay);
 
-        int millisInDay;
+        long millisInDay;
 
         // We only use MILLISECONDS_IN_DAY if it has been set by the user.
         // This makes it possible for the caller to set the calendar to a
@@ -5409,7 +5677,18 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
                 newestStamp(AM_PM, MILLISECOND, UNSET) <= stamp[MILLISECONDS_IN_DAY]) {
             millisInDay = internalGet(MILLISECONDS_IN_DAY);
         } else {
-            millisInDay = computeMillisInDay();
+            int hour = Math.abs(internalGet(HOUR_OF_DAY));
+            hour = Math.max(hour, Math.abs(internalGet(HOUR)));
+            // if hour field value is greater than 596, then the
+            // milliseconds value exceeds integer range, hence
+            // using a conservative estimate of 548, we invoke
+            // the long return version of the compute millis method if
+            // the hour value exceeds 548
+            if (hour > MAX_HOURS) {
+                millisInDay = computeMillisInDayLong();
+            } else {
+                millisInDay = computeMillisInDay();
+            }
         }
 
         if (stamp[ZONE_OFFSET] >= MINIMUM_USER_STAMP ||
@@ -5482,7 +5761,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
     }
 
     /**
-     * Find the previous zone transtion near the given time.
+     * Find the previous zone transition near the given time.
      *
      * @param base The base time, inclusive.
      * @return The time of the previous transition, or null if not found.
@@ -5539,7 +5818,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
     };
 
     /**
-     * Implementing binary search for zone transtion detection, used by {@link #getPreviousZoneTransitionTime(TimeZone, long, long)}
+     * Implementing binary search for zone transition detection, used by {@link #getPreviousZoneTransitionTime(TimeZone, long, long)}
      * @param tz The time zone.
      * @param upperOffset The zone offset at <code>upper</code>
      * @param upper The upper bound, inclusive.
@@ -5597,8 +5876,9 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * value from 0 to 23:59:59.999 inclusive, unless fields are out of
      * range, in which case it can be an arbitrary value.  This value
      * reflects local zone wall time.
-     * @stable ICU 2.0
+     * @deprecated ICU 60
      */
+    @Deprecated
     protected int computeMillisInDay() {
         // Do the time portion of the conversion.
 
@@ -5638,19 +5918,67 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
     }
 
     /**
+     * Compute the milliseconds in the day from the fields.  The standard
+     * value range is from 0 to 23:59:59.999 inclusive. This value
+     * reflects local zone wall time.
+     * @internal
+     * @deprecated This API is ICU internal only.
+     */
+    @Deprecated
+    protected long computeMillisInDayLong() {
+        // Do the time portion of the conversion.
+
+        long millisInDay = 0;
+
+        // Find the best set of fields specifying the time of day.  There
+        // are only two possibilities here; the HOUR_OF_DAY or the
+        // AM_PM and the HOUR.
+        int hourOfDayStamp = stamp[HOUR_OF_DAY];
+        int hourStamp = Math.max(stamp[HOUR], stamp[AM_PM]);
+        int bestStamp = (hourStamp > hourOfDayStamp) ? hourStamp : hourOfDayStamp;
+
+        // Hours
+        if (bestStamp != UNSET) {
+            if (bestStamp == hourOfDayStamp) {
+                // Don't normalize here; let overflow bump into the next period.
+                // This is consistent with how we handle other fields.
+                millisInDay += internalGet(HOUR_OF_DAY);
+            } else {
+                // Don't normalize here; let overflow bump into the next period.
+                // This is consistent with how we handle other fields.
+                millisInDay += internalGet(HOUR);
+                millisInDay += 12 * internalGet(AM_PM); // Default works for unset AM_PM
+            }
+        }
+
+        // We use the fact that unset == 0; we start with millisInDay
+        // == HOUR_OF_DAY.
+        millisInDay *= 60;
+        millisInDay += internalGet(MINUTE); // now have minutes
+        millisInDay *= 60;
+        millisInDay += internalGet(SECOND); // now have seconds
+        millisInDay *= 1000;
+        millisInDay += internalGet(MILLISECOND); // now have millis
+
+        return millisInDay;
+    }
+
+
+    /**
      * This method can assume EXTENDED_YEAR has been set.
      * @param millis milliseconds of the date fields (local midnight millis)
      * @param millisInDay milliseconds of the time fields; may be out
      * or range.
      * @return total zone offset (raw + DST) for the given moment
-     * @stable ICU 2.0
+     * @deprecated ICU 60
      */
+    @Deprecated
     protected int computeZoneOffset(long millis, int millisInDay) {
         int[] offsets = new int[2];
         long wall = millis + millisInDay;
         if (zone instanceof BasicTimeZone) {
-            int duplicatedTimeOpt = (repeatedWallTime == WALLTIME_FIRST) ? BasicTimeZone.LOCAL_FORMER : BasicTimeZone.LOCAL_LATTER;
-            int nonExistingTimeOpt = (skippedWallTime == WALLTIME_FIRST) ? BasicTimeZone.LOCAL_LATTER : BasicTimeZone.LOCAL_FORMER;
+            LocalOption nonExistingTimeOpt = (skippedWallTime == WALLTIME_FIRST) ? LocalOption.LATTER : LocalOption.FORMER;
+            LocalOption duplicatedTimeOpt = (repeatedWallTime == WALLTIME_FIRST) ? LocalOption.FORMER : LocalOption.LATTER;
             ((BasicTimeZone)zone).getOffsetFromLocal(wall, nonExistingTimeOpt, duplicatedTimeOpt, offsets);
         } else {
             // By default, TimeZone#getOffset behaves WALLTIME_LAST for both.
@@ -5681,7 +6009,60 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
                 // recalculate offsets from the resolved time (non-wall).
                 // When the given wall time falls into skipped wall time,
                 // the offsets will be based on the zone offsets AFTER
-                // the transition (which means, earliest possibe interpretation).
+                // the transition (which means, earliest possible interpretation).
+                long tgmt = wall - (offsets[0] + offsets[1]);
+                zone.getOffset(tgmt, false, offsets);
+            }
+        }
+        return offsets[0] + offsets[1];
+    }
+
+    /**
+     * This method can assume EXTENDED_YEAR has been set.
+     * @param millis milliseconds of the date fields (local midnight millis)
+     * @param millisInDay milliseconds of the time fields
+     * @return total zone offset (raw + DST) for the given moment
+     * @internal
+     * @deprecated This API is ICU internal only.
+     */
+    @Deprecated
+    protected int computeZoneOffset(long millis, long millisInDay) {
+        int[] offsets = new int[2];
+        long wall = millis + millisInDay;
+        if (zone instanceof BasicTimeZone) {
+            LocalOption nonExistingTimeOpt = (skippedWallTime == WALLTIME_FIRST) ? LocalOption.LATTER : LocalOption.FORMER;
+            LocalOption duplicatedTimeOpt = (repeatedWallTime == WALLTIME_FIRST) ? LocalOption.FORMER : LocalOption.LATTER;
+            ((BasicTimeZone)zone).getOffsetFromLocal(wall, nonExistingTimeOpt, duplicatedTimeOpt, offsets);
+        } else {
+            // By default, TimeZone#getOffset behaves WALLTIME_LAST for both.
+            zone.getOffset(wall, true, offsets);
+
+            boolean sawRecentNegativeShift = false;
+            if (repeatedWallTime == WALLTIME_FIRST) {
+                // Check if the given wall time falls into repeated time range
+                long tgmt = wall - (offsets[0] + offsets[1]);
+
+                // Any negative zone transition within last 6 hours?
+                // Note: The maximum historic negative zone transition is -3 hours in the tz database.
+                // 6 hour window would be sufficient for this purpose.
+                int offsetBefore6 = zone.getOffset(tgmt - 6*60*60*1000);
+                int offsetDelta = (offsets[0] + offsets[1]) - offsetBefore6;
+
+                assert offsetDelta > -6*60*60*1000 : offsetDelta;
+                if (offsetDelta < 0) {
+                    sawRecentNegativeShift = true;
+                    // Negative shift within last 6 hours. When WALLTIME_FIRST is used and the given wall time falls
+                    // into the repeated time range, use offsets before the transition.
+                    // Note: If it does not fall into the repeated time range, offsets remain unchanged below.
+                    zone.getOffset(wall + offsetDelta, true, offsets);
+                }
+            }
+            if (!sawRecentNegativeShift && skippedWallTime == WALLTIME_FIRST) {
+                // When skipped wall time option is WALLTIME_FIRST,
+                // recalculate offsets from the resolved time (non-wall).
+                // When the given wall time falls into skipped wall time,
+                // the offsets will be based on the zone offsets AFTER
+                // the transition (which means, earliest possible interpretation).
                 long tgmt = wall - (offsets[0] + offsets[1]);
                 zone.getOffset(tgmt, false, offsets);
             }
@@ -5706,6 +6087,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         if (stamp[JULIAN_DAY] >= MINIMUM_USER_STAMP) {
             int bestStamp = newestStamp(ERA, DAY_OF_WEEK_IN_MONTH, UNSET);
             bestStamp = newestStamp(YEAR_WOY, EXTENDED_YEAR, bestStamp);
+            bestStamp = newestStamp(ORDINAL_MONTH, ORDINAL_MONTH, bestStamp);
             if (bestStamp <= stamp[JULIAN_DAY]) {
                 return internalGet(JULIAN_DAY);
             }
@@ -5804,7 +6186,6 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @param extendedYear the extendedYear, as returned by handleGetExtendedYear
      * @return the default month
      * @draft ICU 3.6 (retain)
-     * @provisional This API might change or be removed in a future release.
      * @see #MONTH
      */
     protected int getDefaultMonthInYear(int extendedYear) {
@@ -5819,7 +6200,6 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @param month the month, as returned by getDefaultMonthInYear
      * @return the default day of the month
      * @draft ICU 3.6 (retain)
-     * @provisional This API might change or be removed in a future release.
      * @see #DAY_OF_MONTH
      */
     protected int getDefaultDayInMonth(int extendedYear, int month) {
@@ -5841,19 +6221,19 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
 
         int year;
 
-        if (bestField == WEEK_OF_YEAR) {
+        if (bestField == WEEK_OF_YEAR && newerField(YEAR_WOY, YEAR) == YEAR_WOY) {
             // Nota Bene!  It is critical that YEAR_WOY be used as the year here, if it is
             // set.  Otherwise, when WOY is the best field, the year may be wrong at the
             // extreme limits of the year.  If YEAR_WOY is not set then it will fall back.
             // TODO: Should resolveField(YEAR_PRECEDENCE) be brought to bear?
-            year = internalGet(YEAR_WOY, handleGetExtendedYear());
+            year = internalGet(YEAR_WOY);
         } else {
             year = handleGetExtendedYear();
         }
 
         internalSet(EXTENDED_YEAR, year);
 
-        int month = useMonth ? internalGet(MONTH, getDefaultMonthInYear(year)) : 0;
+        int month = useMonth ? internalGetMonth(getDefaultMonthInYear(year)) : 0;
 
         // Get the Julian day of the day BEFORE the start of this year.
         // If useMonth is true, get the day before the start of the month.
@@ -5931,7 +6311,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
                 // past the first of the given day-of-week in this month.
                 // Note that we handle -2, -3, etc. correctly, even though
                 // values < -1 are technically disallowed.
-                int m = internalGet(MONTH, JANUARY);
+                int m = internalGetMonth(JANUARY);
                 int monthLength = handleGetMonthLength(year, m);
                 date += ((monthLength - date) / 7 + dim + 1) * 7;
             }
@@ -6022,7 +6402,9 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @stable ICU 2.0
      */
     protected void handleComputeFields(int julianDay) {
-        internalSet(MONTH, getGregorianMonth());
+        int gmonth = getGregorianMonth();
+        internalSet(MONTH, gmonth);
+        internalSet(ORDINAL_MONTH, gmonth);
         internalSet(DAY_OF_MONTH, getGregorianDayOfMonth());
         internalSet(DAY_OF_YEAR, getGregorianDayOfYear());
         int eyear = getGregorianYear();
@@ -6258,7 +6640,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
         "DAY_OF_WEEK_IN_MONTH", "AM_PM", "HOUR", "HOUR_OF_DAY",
         "MINUTE", "SECOND", "MILLISECOND", "ZONE_OFFSET",
         "DST_OFFSET", "YEAR_WOY", "DOW_LOCAL", "EXTENDED_YEAR",
-        "JULIAN_DAY", "MILLISECONDS_IN_DAY",
+        "JULIAN_DAY", "MILLISECONDS_IN_DAY", "IS_LEAP_MONTH", "ORDINAL_MONTH"
     };
 
     /**
@@ -6358,7 +6740,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * <i>valid</i> locale).
      *
      * <p>Note: This method will be implemented in ICU 3.0; ICU 2.8
-     * contains a partial preview implementation.  The * <i>actual</i>
+     * contains a partial preview implementation.  The <i>actual</i>
      * locale is returned correctly, but the <i>valid</i> locale is
      * not, in most cases.
      * @param type type of information requested, either {@link
@@ -6370,7 +6752,6 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
      * @see com.ibm.icu.util.ULocale#VALID_LOCALE
      * @see com.ibm.icu.util.ULocale#ACTUAL_LOCALE
      * @draft ICU 2.8 (retain)
-     * @provisional This API might change or be removed in a future release.
      */
     public final ULocale getLocale(ULocale.Type type) {
         return type == ULocale.ACTUAL_LOCALE ?

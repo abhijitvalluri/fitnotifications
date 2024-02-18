@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
  /*
   *******************************************************************************
   * Copyright (C) 2005-2016, International Business Machines Corporation and
@@ -280,11 +280,11 @@ public class OlsonTimeZone extends BasicTimeZone {
      */
     @Override
     public void getOffsetFromLocal(long date,
-            int nonExistingTimeOpt, int duplicatedTimeOpt, int[] offsets) {
+            LocalOption nonExistingTimeOpt, LocalOption duplicatedTimeOpt, int[] offsets) {
         if (finalZone != null && date >= finalStartMillis) {
             finalZone.getOffsetFromLocal(date, nonExistingTimeOpt, duplicatedTimeOpt, offsets);
         } else {
-            getHistoricalOffset(date, true, nonExistingTimeOpt, duplicatedTimeOpt, offsets);
+            getHistoricalOffset(date, true, getLocalOptionValue(nonExistingTimeOpt), getLocalOptionValue(duplicatedTimeOpt), offsets);
         }
     }
 
@@ -305,9 +305,9 @@ public class OlsonTimeZone extends BasicTimeZone {
     public boolean useDaylightTime() {
         // If DST was observed in 1942 (for example) but has never been
         // observed from 1943 to the present, most clients will expect
-        // this method to return FALSE.  This method determines whether
+        // this method to return false.  This method determines whether
         // DST is in use in the current year (at any point in the year)
-        // and returns TRUE if so.
+        // and returns true if so.
         long current = System.currentTimeMillis();
 
         if (finalZone != null && current >= finalStartMillis) {
@@ -320,7 +320,7 @@ public class OlsonTimeZone extends BasicTimeZone {
         long start = Grego.fieldsToDay(fields[0], 0, 1) * SECONDS_PER_DAY;
         long limit = Grego.fieldsToDay(fields[0] + 1, 0, 1) * SECONDS_PER_DAY;
 
-        // Return TRUE if DST is observed at any time during the current
+        // Return true if DST is observed at any time during the current
         // year.
         for (int i = 0; i < transitionCount; ++i) {
             if (transitionTimes64[i] >= limit) {
@@ -349,7 +349,7 @@ public class OlsonTimeZone extends BasicTimeZone {
             }
         }
 
-        // Return TRUE if DST is observed at any future time
+        // Return true if DST is observed at any future time
         long currentSec = Grego.floorDivide(current, Grego.MILLIS_PER_SECOND);
         int trsIdx = transitionCount - 1;
         if (dstOffsetAt(trsIdx) != 0) {
@@ -475,16 +475,16 @@ public class OlsonTimeZone extends BasicTimeZone {
     /**
      * Construct from a resource bundle
      * @param top the top-level zoneinfo resource bundle.  This is used
-     * to lookup the rule that `res' may refer to, if there is one.
+     * to lookup the rule that {@code res} may refer to, if there is one.
      * @param res the resource bundle of the zone to be constructed
      * @param id time zone ID
      */
     public OlsonTimeZone(UResourceBundle top, UResourceBundle res, String id){
         super(id);
-        construct(top, res);
+        construct(top, res, id);
     }
 
-    private void construct(UResourceBundle top, UResourceBundle res){
+    private void construct(UResourceBundle top, UResourceBundle res, String id){
 
         if ((top == null || res == null)) {
             throw new IllegalArgumentException();
@@ -594,7 +594,7 @@ public class OlsonTimeZone extends BasicTimeZone {
             if (ruleData == null || ruleData.length != 11) {
                 throw new IllegalArgumentException("Invalid Format");
             }
-            finalZone = new SimpleTimeZone(ruleRaw, "",
+            finalZone = new SimpleTimeZone(ruleRaw, id,
                     ruleData[0], ruleData[1], ruleData[2],
                     ruleData[3] * Grego.MILLIS_PER_SECOND,
                     ruleData[4],
@@ -638,10 +638,7 @@ public class OlsonTimeZone extends BasicTimeZone {
         UResourceBundle top = UResourceBundle.getBundleInstance(ICUData.ICU_BASE_NAME,
                 ZONEINFORES, ICUResourceBundle.ICU_DATA_CLASS_LOADER);
         UResourceBundle res = ZoneMeta.openOlsonResource(top, id);
-        construct(top, res);
-        if (finalZone != null){
-            finalZone.setID(id);
-        }
+        construct(top, res, id);
     }
 
     /* (non-Javadoc)
@@ -1243,10 +1240,7 @@ public class OlsonTimeZone extends BasicTimeZone {
                     UResourceBundle top = UResourceBundle.getBundleInstance(ICUData.ICU_BASE_NAME,
                             ZONEINFORES, ICUResourceBundle.ICU_DATA_CLASS_LOADER);
                     UResourceBundle res = ZoneMeta.openOlsonResource(top, tzid);
-                    construct(top, res);
-                    if (finalZone != null){
-                        finalZone.setID(tzid);
-                    }
+                    construct(top, res, tzid);
                     initialized = true;
                 } catch (Exception ignored) {
                     // throw away
@@ -1289,8 +1283,6 @@ public class OlsonTimeZone extends BasicTimeZone {
     public TimeZone cloneAsThawed() {
         OlsonTimeZone tz = (OlsonTimeZone)super.cloneAsThawed();
         if (finalZone != null) {
-            // TODO Do we really need this?
-            finalZone.setID(getID());
             tz.finalZone = (SimpleTimeZone) finalZone.clone();
         }
 

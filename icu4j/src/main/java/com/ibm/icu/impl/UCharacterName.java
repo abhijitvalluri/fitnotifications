@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 1996-2014, International Business Machines Corporation and
@@ -22,8 +22,8 @@ import com.ibm.icu.text.UnicodeSet;
 /**
 * Internal class to manage character names.
 * Since data for names are stored
-* in an array of char, by default indexes used in this class is refering to
-* a 2 byte count, unless otherwise stated. Cases where the index is refering
+* in an array of char, by default indexes used in this class is referring to
+* a 2 byte count, unless otherwise stated. Cases where the index is referring
 * to a byte count, the index is halved and depending on whether the index is
 * even or odd, the MSB or LSB of the result char at the halved index is
 * returned. For indexes to an array of int, the index is multiplied by 2,
@@ -1350,6 +1350,12 @@ public final class UCharacterName
                     int startIndex = name.lastIndexOf('-');
                     if (startIndex >= 0) { // We've got a category.
                         startIndex ++;
+
+                        // There should be 1 to 8 hex digits.
+                        int hexLength = endIndex - startIndex;
+                        if (hexLength < 1 || 8 < hexLength) {
+                            return -1;
+                        }
                         int result = -1;
                         try {
                             result = Integer.parseInt(
@@ -1359,13 +1365,17 @@ public final class UCharacterName
                         catch (NumberFormatException e) {
                             return -1;
                         }
+                        if (result < 0 || 0x10ffff < result) {
+                            return -1;
+                        }
                         // Now validate the category name. We could use a
                         // binary search, or a trie, if we really wanted to.
+                        int charType = getType(result);
                         String type = name.substring(1, startIndex - 1);
                         int length = TYPE_NAMES_.length;
                         for (int i = 0; i < length; ++ i) {
                             if (type.compareTo(TYPE_NAMES_[i]) == 0) {
-                                if (getType(result) == i) {
+                                if (charType == i) {
                                     return result;
                                 }
                                 break;

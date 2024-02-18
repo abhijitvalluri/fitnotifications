@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2000-2016, International Business Machines Corporation and
@@ -27,7 +27,7 @@ import com.ibm.icu.util.ICUCloneNotSupportedException;
  * <p><code>normalize</code> transforms Unicode text into an equivalent composed or
  * decomposed form, allowing for easier sorting and searching of text.
  * <code>normalize</code> supports the standard normalization forms described in
- * <a href="http://www.unicode.org/unicode/reports/tr15/" target="unicode">
+ * <a href="https://www.unicode.org/reports/tr15/" target="unicode">
  * Unicode Standard Annex #15 &mdash; Unicode Normalization Forms</a>.
  *
  * <p>Characters with accents or other adornments can be encoded in
@@ -366,7 +366,7 @@ public final class Normalizer implements Cloneable {
      * <p>
      * If all optional features (<i>e.g.</i> {@link #IGNORE_HANGUL}) are turned
      * off, this operation produces output that is in
-     * <a href=http://www.unicode.org/unicode/reports/tr15/>Unicode Canonical
+     * <a href=https://www.unicode.org/reports/tr15/>Unicode Canonical
      * Form</a>
      * <b>C</b>.
      * <p>
@@ -385,7 +385,7 @@ public final class Normalizer implements Cloneable {
      * <p>
      * If all optional features (<i>e.g.</i> {@link #IGNORE_HANGUL}) are turned
      * off, this operation produces output that is in
-     * <a href=http://www.unicode.org/unicode/reports/tr15/>Unicode Canonical
+     * <a href=https://www.unicode.org/reports/tr15/>Unicode Canonical
      * Form</a>
      * <b>KC</b>.
      * <p>
@@ -404,7 +404,7 @@ public final class Normalizer implements Cloneable {
      * <p>
      * If all optional features (<i>e.g.</i> {@link #IGNORE_HANGUL}) are turned
      * off, this operation produces output that is in
-     * <a href=http://www.unicode.org/unicode/reports/tr15/>Unicode Canonical
+     * <a href=https://www.unicode.org/reports/tr15/>Unicode Canonical
      * Form</a>
      * <b>D</b>.
      * <p>
@@ -423,7 +423,7 @@ public final class Normalizer implements Cloneable {
      * <p>
      * If all optional features (<i>e.g.</i> {@link #IGNORE_HANGUL}) are turned
      * off, this operation produces output that is in
-     * <a href=http://www.unicode.org/unicode/reports/tr15/>Unicode Canonical
+     * <a href=https://www.unicode.org/reports/tr15/>Unicode Canonical
      * Form</a>
      * <b>KD</b>.
      * <p>
@@ -443,10 +443,10 @@ public final class Normalizer implements Cloneable {
      * Hangul, applications that process only Hangul text may wish to turn
      * this option on when decomposing text.
      * <p>
-     * The Unicode standard treates Hangul to Jamo conversion as a
+     * The Unicode standard treats Hangul to Jamo conversion as a
      * canonical decomposition, so this option must be turned <b>off</b> if you
      * wish to transform strings into one of the standard
-     * <a href="http://www.unicode.org/unicode/reports/tr15/" target="unicode">
+     * <a href="https://www.unicode.org/reports/tr15/" target="unicode">
      * Unicode Normalization Forms</a>.
      * <p>
      * @see #setOption
@@ -1703,7 +1703,7 @@ public final class Normalizer implements Cloneable {
      *  <li>{@link #NFC}    - Unicode canonical decompositiion
      *                        followed by canonical composition.
      *  <li>{@link #NFKC}   - Unicode compatibility decompositiion
-     *                        follwed by canonical composition.
+     *                        followed by canonical composition.
      *  <li>{@link #NFD}    - Unicode canonical decomposition
      *  <li>{@link #NFKD}   - Unicode compatibility decomposition.
      *  <li>{@link #NONE}   - Do nothing but return characters
@@ -2237,7 +2237,7 @@ public final class Normalizer implements Cloneable {
 
             /* get complete code points for c1, c2 for lookups if either is a surrogate */
             cp1=c1;
-            if(UTF16.isSurrogate((char)c1)) {
+            if(UTF16.isSurrogate(c1)) {
                 char c;
 
                 if(Normalizer2Impl.UTF16Plus.isSurrogateLead(c1)) {
@@ -2253,7 +2253,7 @@ public final class Normalizer implements Cloneable {
             }
 
             cp2=c2;
-            if(UTF16.isSurrogate((char)c2)) {
+            if(UTF16.isSurrogate(c2)) {
                 char c;
 
                 if(Normalizer2Impl.UTF16Plus.isSurrogateLead(c2)) {
@@ -2277,7 +2277,7 @@ public final class Normalizer implements Cloneable {
                 (length=csp.toFullFolding(cp1, fold1, options))>=0
             ) {
                 /* cp1 case-folds to the code point "length" or to p[length] */
-                if(UTF16.isSurrogate((char)c1)) {
+                if(UTF16.isSurrogate(c1)) {
                     if(Normalizer2Impl.UTF16Plus.isSurrogateLead(c1)) {
                         /* advance beyond source surrogate pair if it case-folds */
                         ++s1;
@@ -2325,7 +2325,7 @@ public final class Normalizer implements Cloneable {
                 (length=csp.toFullFolding(cp2, fold2, options))>=0
             ) {
                 /* cp2 case-folds to the code point "length" or to p[length] */
-                if(UTF16.isSurrogate((char)c2)) {
+                if(UTF16.isSurrogate(c2)) {
                     if(Normalizer2Impl.UTF16Plus.isSurrogateLead(c2)) {
                         /* advance beyond source surrogate pair if it case-folds */
                         ++s2;
@@ -2373,7 +2373,7 @@ public final class Normalizer implements Cloneable {
                 (decomp1=nfcImpl.getDecomposition(cp1))!=null
             ) {
                 /* cp1 decomposes into p[length] */
-                if(UTF16.isSurrogate((char)c1)) {
+                if(UTF16.isSurrogate(c1)) {
                     if(Normalizer2Impl.UTF16Plus.isSurrogateLead(c1)) {
                         /* advance beyond source surrogate pair if it decomposes */
                         ++s1;
@@ -2417,7 +2417,7 @@ public final class Normalizer implements Cloneable {
                 (decomp2=nfcImpl.getDecomposition(cp2))!=null
             ) {
                 /* cp2 decomposes into p[length] */
-                if(UTF16.isSurrogate((char)c2)) {
+                if(UTF16.isSurrogate(c2)) {
                     if(Normalizer2Impl.UTF16Plus.isSurrogateLead(c2)) {
                         /* advance beyond source surrogate pair if it decomposes */
                         ++s2;

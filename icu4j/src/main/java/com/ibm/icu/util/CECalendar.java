@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2005-2011, International Business Machines Corporation and    *
@@ -45,6 +45,8 @@ abstract class CECalendar extends Calendar {
         { -5000000, -5000000, 5000000, 5000000 }, // EXTENDED_YEAR
         {/*                                  */}, // JULIAN_DAY
         {/*                                  */}, // MILLISECONDS_IN_DAY
+        {/*                                  */}, // IS_LEAP_YEAR
+        {        0,        0,      12,      12 }, // ORDINAL_MONTH
     };
 
     //-------------------------------------------------------------------------
@@ -76,7 +78,7 @@ abstract class CECalendar extends Calendar {
      * @param aLocale The locale for the new calendar.
      */
     protected CECalendar(Locale aLocale) {
-        this(TimeZone.getDefault(), aLocale);
+        this(TimeZone.forLocaleOrDefault(aLocale), aLocale);
     }
 
     /**
@@ -86,7 +88,7 @@ abstract class CECalendar extends Calendar {
      * @param locale The locale for the new calendar.
      */
     protected CECalendar(ULocale locale) {
-        this(TimeZone.getDefault(), locale);
+        this(TimeZone.forULocaleOrDefault(locale), locale);
     }
 
     /**
@@ -263,7 +265,7 @@ abstract class CECalendar extends Calendar {
 
         c4 = floorDivide(julianDay - jdEpochOffset, 1461, r4);
 
-        // exteded year
+        // extended year
         fields[0] = 4 * c4 + (r4[0]/365 - r4[0]/1460); // 4 * <number of 4year cycle> + <years within the last cycle>
 
         int doy = (r4[0] == 1460) ? 365 : (r4[0] % 365); // days in present year
@@ -273,4 +275,45 @@ abstract class CECalendar extends Calendar {
         // day
         fields[2] = (doy % 30) + 1; // 1-based days in a month
     }
+
+
+    //-------------------------------------------------------------------------
+    // Temporal Calendar API.
+    //-------------------------------------------------------------------------
+    /**
+     * Gets The Temporal monthCode value corresponding to the month for the date.
+     * The value is a string identifier that starts with the literal grapheme
+     * "M" followed by two graphemes representing the zero-padded month number
+     * of the current month in a normal (non-leap) year. For the short thirteen
+     * month in each year in the CECalendar, the value is "M13".
+     *
+     * @return       One of 13 possible strings in {"M01".. "M12", "M13"}.
+     * @draft ICU 74
+     */
+    public String getTemporalMonthCode() {
+        if (get(MONTH) == 12) return "M13";
+        return super.getTemporalMonthCode();
+    }
+
+    /**
+     * Sets The Temporal monthCode which is a string identifier that starts
+     * with the literal grapheme "M" followed by two graphemes representing
+     * the zero-padded month number of the current month in a normal
+     * (non-leap) year. For CECalendar calendar, the values are "M01" .. "M13"
+     * while the "M13" is represent the short thirteen month in each year.
+     * @param temporalMonth One of 13 possible strings in {"M01".. "M12", "M13"}.
+     * @draft ICU 74
+     */
+    public void setTemporalMonthCode( String temporalMonth ) {
+        if (temporalMonth.equals("M13")) {
+            set(MONTH, 12);
+            set(IS_LEAP_MONTH, 0);
+            return;
+        }
+        super.setTemporalMonthCode(temporalMonth);
+    }
+
+    //-------------------------------------------------------------------------
+    // End of Temporal Calendar API
+    //-------------------------------------------------------------------------
 }

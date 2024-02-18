@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2004-2016, International Business Machines Corporation and
@@ -14,6 +14,8 @@ import java.lang.ref.SoftReference;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.IntBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import com.ibm.icu.util.ICUException;
 import com.ibm.icu.util.ICUUncheckedIOException;
@@ -443,13 +445,12 @@ public final class ICUResourceBundleReader {
     }
 
     private static String makeKeyStringFromBytes(byte[] keyBytes, int keyOffset) {
-        StringBuilder sb = new StringBuilder();
-        byte b;
-        while((b = keyBytes[keyOffset]) != 0) {
-            ++keyOffset;
-            sb.append((char)b);
+        int end = keyOffset;
+        while(keyBytes[end] != 0) {
+            ++end;
         }
-        return sb.toString();
+        int len = end - keyOffset;
+        return new String(keyBytes, keyOffset, len, StandardCharsets.ISO_8859_1);
     }
     private String getKey16String(int keyOffset) {
         if(keyOffset < localKeyLimit) {
@@ -1064,6 +1065,17 @@ public final class ICUResourceBundleReader {
             }
             return false;
         }
+        @Override
+        public boolean findValue(CharSequence key, UResource.Value value) {
+            ReaderValue readerValue = (ReaderValue)value;
+            int i = findTableItem(readerValue.reader, key);
+            if (i >= 0) {
+                readerValue.res = getContainerResource(readerValue.reader, i);
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
     private static final class Table1632 extends Table {
         @Override
@@ -1167,7 +1179,7 @@ public final class ICUResourceBundleReader {
                 return value;
             }
             values[index] = CacheValue.futureInstancesWillBeStrong() ?
-                    item : new SoftReference<Object>(item);
+                    item : new SoftReference<>(item);
             return item;
         }
 
@@ -1216,7 +1228,7 @@ public final class ICUResourceBundleReader {
                         return level.putIfAbsent(key, item, size);
                     }
                     keys[index] = key;
-                    values[index] = storeDirectly(size) ? item : new SoftReference<Object>(item);
+                    values[index] = storeDirectly(size) ? item : new SoftReference<>(item);
                     return item;
                 }
                 // Collision: Add a child level, move the old item there,
@@ -1285,29 +1297,7 @@ public final class ICUResourceBundleReader {
         }
 
         private int findSimple(int key) {
-            // With Java 6, return Arrays.binarySearch(keys, 0, length, key).
-            int start = 0;
-            int limit = length;
-            while((limit - start) > 8) {
-                int mid = (start + limit) / 2;
-                if(key < keys[mid]) {
-                    limit = mid;
-                } else {
-                    start = mid;
-                }
-            }
-            // For a small number of items, linear search should be a little faster.
-            while(start < limit) {
-                int k = keys[start];
-                if(key < k) {
-                    return ~start;
-                }
-                if(key == k) {
-                    return start;
-                }
-                ++start;
-            }
-            return ~start;
+            return Arrays.binarySearch(keys, 0, length, key);
         }
 
         @SuppressWarnings("unchecked")
@@ -1348,7 +1338,7 @@ public final class ICUResourceBundleReader {
                     }
                     ++length;
                     keys[index] = res;
-                    values[index] = storeDirectly(size) ? item : new SoftReference<Object>(item);
+                    values[index] = storeDirectly(size) ? item : new SoftReference<>(item);
                     return item;
                 } else /* not found && length == SIMPLE_LENGTH */ {
                     // Grow to become trie-like.

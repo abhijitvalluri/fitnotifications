@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2016, International Business Machines Corporation and
@@ -239,10 +239,10 @@ public final class DayPeriodRules {
      * Get a DayPeriodRules object given a locale.
      * If data hasn't been loaded, it will be loaded for all locales at once.
      * @param locale locale for which the DayPeriodRules object is requested.
-     * @return a DayPeriodRules object for `locale`.
+     * @return a DayPeriodRules object for {@code locale}.
      */
     public static DayPeriodRules getInstance(ULocale locale) {
-        String localeCode = locale.getName();
+        String localeCode = locale.getBaseName();
         if (localeCode.isEmpty()) { localeCode = "root"; }
 
         Integer ruleSetNum = null;

@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2008-2014, International Business Machines Corporation and    *
@@ -38,7 +38,7 @@ public class JavaTimeZone extends TimeZone {
     private static Method mObservesDaylightTime;
 
     static {
-        AVAILABLESET = new TreeSet<String>();
+        AVAILABLESET = new TreeSet<>();
         String[] availableIds = java.util.TimeZone.getAvailableIDs();
         for (int i = 0; i < availableIds.length; i++) {
             AVAILABLESET.add(availableIds[i]);
@@ -47,7 +47,7 @@ public class JavaTimeZone extends TimeZone {
         try {
             mObservesDaylightTime = java.util.TimeZone.class.getMethod("observesDaylightTime", (Class[]) null);
         } catch (NoSuchMethodException e) {
-            // Java 6 or older
+            // Android API level 21..23
         } catch (SecurityException e) {
             // not visible
         }
@@ -199,7 +199,8 @@ public class JavaTimeZone extends TimeZone {
     @Override
     public boolean observesDaylightTime() {
         if (mObservesDaylightTime != null) {
-            // Java 7+
+            // Java 7+, Android API level 24+
+            // https://developer.android.com/reference/java/util/TimeZone
             try {
                 return (Boolean)mObservesDaylightTime.invoke(javatz, (Object[]) null);
             } catch (IllegalAccessException e) {

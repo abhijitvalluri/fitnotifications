@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2009-2014, International Business Machines Corporation and    *
@@ -148,7 +148,7 @@ public class CurrencyPluralInfo implements Cloneable, Serializable {
     }
 
     /**
-     * Set plural rules.  These are initially set in the constructor based on the locale, 
+     * Set plural rules.  These are initially set in the constructor based on the locale,
      * and usually do not need to be changed.
      *
      * @param ruleDescription new plural rule description
@@ -161,6 +161,10 @@ public class CurrencyPluralInfo implements Cloneable, Serializable {
     /**
      * Set currency plural patterns.  These are initially set in the constructor based on the
      * locale, and usually do not need to be changed.
+     *
+     * The decimal digits part of the pattern cannot be specified via this method.  All plural
+     * forms will use the same decimal pattern as set in the constructor of DecimalFormat.  For
+     * example, you can't set "0.0" for plural "few" but "0.00" for plural "many".
      *
      * @param pluralCount the plural count for which the currency pattern will
      *                    be overridden.
@@ -188,6 +192,7 @@ public class CurrencyPluralInfo implements Cloneable, Serializable {
      *
      * @stable ICU 4.2
      */
+    @Override
     public Object clone() {
         try {
             CurrencyPluralInfo other = (CurrencyPluralInfo) super.clone();
@@ -197,7 +202,7 @@ public class CurrencyPluralInfo implements Cloneable, Serializable {
             //other.pluralRules = pluralRules;
             // clone content
             //other.pluralCountToCurrencyUnitPattern = pluralCountToCurrencyUnitPattern;
-            other.pluralCountToCurrencyUnitPattern = new HashMap<String, String>();
+            other.pluralCountToCurrencyUnitPattern = new HashMap<>();
             for (String pluralCount : pluralCountToCurrencyUnitPattern.keySet()) {
                 String currencyPattern = pluralCountToCurrencyUnitPattern.get(pluralCount);
                 other.pluralCountToCurrencyUnitPattern.put(pluralCount, currencyPattern);
@@ -213,6 +218,7 @@ public class CurrencyPluralInfo implements Cloneable, Serializable {
      *
      * @stable ICU 4.2
      */
+    @Override
     public boolean equals(Object a) {
         if (a instanceof CurrencyPluralInfo) {
             CurrencyPluralInfo other = (CurrencyPluralInfo)a;
@@ -221,17 +227,17 @@ public class CurrencyPluralInfo implements Cloneable, Serializable {
         }
         return false;
     }
-    
+
     /**
-     * Mock implementation of hashCode(). This implementation always returns a constant
-     * value. When Java assertion is enabled, this method triggers an assertion failure.
-     * @internal
-     * @deprecated This API is ICU internal only.
+     * Override hashCode
+     *
+     * @stable ICU 4.2
      */
-    @Deprecated
+    @Override
     public int hashCode() {
-        assert false : "hashCode not designed";
-        return 42;
+      return pluralCountToCurrencyUnitPattern.hashCode()
+          ^ pluralRules.hashCode()
+          ^ ulocale.hashCode();
     }
 
     /**
@@ -252,7 +258,7 @@ public class CurrencyPluralInfo implements Cloneable, Serializable {
      * @deprecated This API is ICU internal only.
      */
     @Deprecated
-    String select(PluralRules.FixedDecimal numberInfo) {
+    public String select(PluralRules.FixedDecimal numberInfo) {
         return pluralRules.select(numberInfo);
     }
 
@@ -260,8 +266,11 @@ public class CurrencyPluralInfo implements Cloneable, Serializable {
      * Currency plural pattern iterator.
      *
      * @return a iterator on the currency plural pattern key set.
+     * @internal
+     * @deprecated This API is ICU internal only.
      */
-    Iterator<String> pluralPatternIterator() {
+    @Deprecated
+    public Iterator<String> pluralPatternIterator() {
         return pluralCountToCurrencyUnitPattern.keySet().iterator();
     }
 
@@ -272,8 +281,8 @@ public class CurrencyPluralInfo implements Cloneable, Serializable {
     }
 
     private void setupCurrencyPluralPattern(ULocale uloc) {
-        pluralCountToCurrencyUnitPattern = new HashMap<String, String>();
-        
+        pluralCountToCurrencyUnitPattern = new HashMap<>();
+
         String numberStylePattern = NumberFormat.getPattern(uloc, NumberFormat.NUMBERSTYLE);
         // Split the number style pattern into pos and neg if applicable
         int separatorIndex = numberStylePattern.indexOf(";");
@@ -286,7 +295,7 @@ public class CurrencyPluralInfo implements Cloneable, Serializable {
         for (Map.Entry<String, String> e : map.entrySet()) {
             String pluralCount = e.getKey();
             String pattern = e.getValue();
-            
+
             // replace {0} with numberStylePattern
             // and {1} with triple currency sign
             String patternWithNumber = pattern.replace("{0}", numberStylePattern);

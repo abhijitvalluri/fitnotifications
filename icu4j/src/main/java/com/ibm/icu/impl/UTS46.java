@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
 *******************************************************************************
 * Copyright (C) 2010-2014, International Business Machines
@@ -10,6 +10,7 @@ package com.ibm.icu.impl;
 
 import java.util.EnumSet;
 
+import com.ibm.icu.impl.Normalizer2Impl.UTF16Plus;
 import com.ibm.icu.lang.UCharacter;
 import com.ibm.icu.lang.UCharacterCategory;
 import com.ibm.icu.lang.UCharacterDirection;
@@ -223,19 +224,31 @@ public final class UTS46 extends IDNA {
                 promoteAndResetLabelErrors(info);
                 destLength+=newLength-labelLength;
                 labelLimit=labelStart+=newLength+1;
-            } else if(0xdf<=c && c<=0x200d && (c==0xdf || c==0x3c2 || c>=0x200c)) {
+                continue;
+            } else if(c<0xdf) {
+                // pass
+            } else if(c<=0x200d && (c==0xdf || c==0x3c2 || c>=0x200c)) {
                 setTransitionalDifferent(info);
                 if(doMapDevChars) {
                     destLength=mapDevChars(dest, labelStart, labelLimit);
-                    // Do not increment labelLimit in case c was removed.
                     // All deviation characters have been mapped, no need to check for them again.
                     doMapDevChars=false;
-                } else {
-                    ++labelLimit;
+                    // Do not increment labelLimit in case c was removed.
+                    continue;
                 }
-            } else {
-                ++labelLimit;
+            } else if(Character.isSurrogate(c)) {
+                if(UTF16Plus.isSurrogateLead(c) ?
+                        (labelLimit+1)==destLength ||
+                            !Character.isLowSurrogate(dest.charAt(labelLimit+1)) :
+                        labelLimit==labelStart ||
+                            !Character.isHighSurrogate(dest.charAt(labelLimit-1))) {
+                    // Map an unpaired surrogate to U+FFFD before normalization so that when
+                    // that removes characters we do not turn two unpaired ones into a pair.
+                    addLabelError(info, Error.DISALLOWED);
+                    dest.setCharAt(labelLimit, '\ufffd');
+                }
             }
+            ++labelLimit;
         }
         // Permit an empty label at the end (0<labelStart==labelLimit==destLength is ok)
         // but not an empty label elsewhere nor a completely empty domain name.
@@ -287,14 +300,6 @@ public final class UTS46 extends IDNA {
         }
         return length;
     }
-    // Some non-ASCII characters are equivalent to sequences with
-    // non-LDH ASCII characters. To find them:
-    // grep disallowed_STD3_valid IdnaMappingTable.txt (or uts46.txt)
-    private static boolean
-    isNonASCIIDisallowedSTD3Valid(int c) {
-        return c==0x2260 || c==0x226E || c==0x226F;
-    }
-
 
     // Replace the label in dest with the label string, if the label was modified.
     // If label==dest then the label was modified in-place and labelLength
@@ -328,6 +333,16 @@ public final class UTS46 extends IDNA {
             dest.charAt(labelStart+2)=='-' && dest.charAt(labelStart+3)=='-'
         ) {
             // Label starts with "xn--", try to un-Punycode it.
+            // In IDNA2008, labels like "xn--" (decodes to an empty string) and
+            // "xn--ASCII-" (decodes to just "ASCII") fail the round-trip validation from
+            // comparing the ToUnicode input with the back-to-ToASCII output.
+            // They are alternate encodings of the respective ASCII labels.
+            // Ignore "xn---" here: It will fail Punycode.decode() which logically comes before
+            // the round-trip verification.
+            if(labelLength==4 || (labelLength>5 && dest.charAt(labelStart+labelLength-1)=='-')) {
+                addLabelError(info, Error.INVALID_ACE_LABEL);
+                return markBadACELabel(dest, labelStart, labelLength, toASCII, info);
+            }
             wasPunycode=true;
             try {
                 fromPunycode=Punycode.decode(dest.subSequence(labelStart+4, labelStart+labelLength), null);
@@ -398,10 +413,7 @@ public final class UTS46 extends IDNA {
                 }
             } else {
                 oredChars|=c;
-                if(disallowNonLDHDot && isNonASCIIDisallowedSTD3Valid(c)) {
-                    addLabelError(info, Error.DISALLOWED);
-                    labelString.setCharAt(i, '\ufffd');
-                } else if(c==0xfffd) {
+                if(c==0xfffd) {
                     addLabelError(info, Error.DISALLOWED);
                 }
             }
@@ -483,9 +495,9 @@ public final class UTS46 extends IDNA {
         boolean disallowNonLDHDot=(options&USE_STD3_RULES)!=0;
         boolean isASCII=true;
         boolean onlyLDH=true;
-        int i=labelStart+4;  // After the initial "xn--".
         int limit=labelStart+labelLength;
-        do {
+        // Start after the initial "xn--".
+        for(int i=labelStart+4; i<limit; ++i) {
             char c=dest.charAt(i);
             if(c<=0x7f) {
                 if(c=='.') {
@@ -502,7 +514,7 @@ public final class UTS46 extends IDNA {
             } else {
                 isASCII=onlyLDH=false;
             }
-        } while(++i<limit);
+        }
         if(onlyLDH) {
             dest.insert(labelStart+labelLength, '\ufffd');
             ++labelLength;
@@ -586,8 +598,8 @@ public final class UTS46 extends IDNA {
         ) {
             setNotOkBiDi(info);
         }
-        // Get the directionalities of the intervening characters.
-        int mask=0;
+        // Add the directionalities of the intervening characters.
+        int mask=firstMask|lastMask;
         while(i<labelLimit) {
             c=Character.codePointAt(label, i);
             i+=Character.charCount(c);
@@ -617,7 +629,7 @@ public final class UTS46 extends IDNA {
         // label. [...]
         // The following rule, consisting of six conditions, applies to labels
         // in BIDI domain names.
-        if(((firstMask|mask|lastMask)&R_AL_AN_MASK)!=0) {
+        if((mask&R_AL_AN_MASK)!=0) {
             setBiDi(info);
         }
     }

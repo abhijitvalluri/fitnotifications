@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
 **********************************************************************
 * Copyright (c) 2004-2010, International Business Machines
@@ -23,7 +23,7 @@ package com.ibm.icu.util;
  * @stable ICU 3.0
  */
 public class CurrencyAmount extends Measure {
-    
+
     /**
      * Constructs a new object given a number and a currency.
      * @param number the number
@@ -42,8 +42,28 @@ public class CurrencyAmount extends Measure {
      */
     public CurrencyAmount(double number, Currency currency) {
         super(new Double(number), currency);
-    }    
-    
+    }
+
+    /**
+     * Constructs a new object given a number and a Java currency.
+     * @param number the number
+     * @param currency the currency
+     * @stable ICU 60
+     */
+    public CurrencyAmount(Number number, java.util.Currency currency) {
+        this(number, Currency.fromJavaCurrency(currency));
+    }
+
+    /**
+     * Constructs a new object given a double value and a Java currency.
+     * @param number a double value
+     * @param currency the currency
+     * @stable ICU 60
+     */
+    public CurrencyAmount(double number, java.util.Currency currency) {
+        this(number, Currency.fromJavaCurrency(currency));
+    }
+
     /**
      * Returns the currency of this object.
      * @return this object's Currency

@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
 *******************************************************************************
 *   Copyright (C) 2007-2016, International Business Machines
@@ -45,6 +45,9 @@ public final class DateNumberFormat extends NumberFormat {
     private int minIntDigits;
 
     public DateNumberFormat(ULocale loc, String digitString, String nsName) {
+        if (digitString.length() > 10) {
+            throw new UnsupportedOperationException("DateNumberFormat does not support digits out of BMP.");
+        }
         initialize(loc,digitString,nsName);
     }
 
@@ -137,7 +140,7 @@ public final class DateNumberFormat extends NumberFormat {
     @Override
     public StringBuffer format(double number, StringBuffer toAppendTo,
             FieldPosition pos) {
-        throw new UnsupportedOperationException("StringBuffer format(double, StringBuffer, FieldPostion) is not implemented");
+        throw new UnsupportedOperationException("StringBuffer format(double, StringBuffer, FieldPosition) is not implemented");
     }
 
     @Override
@@ -183,19 +186,19 @@ public final class DateNumberFormat extends NumberFormat {
     @Override
     public StringBuffer format(BigInteger number, StringBuffer toAppendTo,
             FieldPosition pos) {
-        throw new UnsupportedOperationException("StringBuffer format(BigInteger, StringBuffer, FieldPostion) is not implemented");
+        throw new UnsupportedOperationException("StringBuffer format(BigInteger, StringBuffer, FieldPosition) is not implemented");
     }
 
     @Override
     public StringBuffer format(java.math.BigDecimal number, StringBuffer toAppendTo,
             FieldPosition pos) {
-        throw new UnsupportedOperationException("StringBuffer format(BigDecimal, StringBuffer, FieldPostion) is not implemented");
+        throw new UnsupportedOperationException("StringBuffer format(BigDecimal, StringBuffer, FieldPosition) is not implemented");
     }
 
     @Override
     public StringBuffer format(BigDecimal number,
             StringBuffer toAppendTo, FieldPosition pos) {
-        throw new UnsupportedOperationException("StringBuffer format(BigDecimal, StringBuffer, FieldPostion) is not implemented");
+        throw new UnsupportedOperationException("StringBuffer format(BigDecimal, StringBuffer, FieldPosition) is not implemented");
     }
 
     /*

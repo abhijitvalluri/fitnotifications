@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /**
 *******************************************************************************
 * Copyright (C) 1996-2016, International Business Machines Corporation and
@@ -48,7 +48,7 @@ import com.ibm.icu.impl.coll.Collation;
  *
  * <p>More information about the composition of the bit sequence can
  * be found in the
- * <a href="http://www.icu-project.org/userguide/Collate_ServiceArchitecture.html">
+ * <a href="https://unicode-org.github.io/icu/userguide/collation/architecture">
  * user guide</a>.</p>
  *
  * <p>The following example shows how <code>CollationKey</code>s can be used
@@ -383,7 +383,7 @@ public final class CollationKey implements Comparable<CollationKey>
      * also match "Smithsonian" and similar.
      * <p>
      * For more on usage, see example in test procedure
-     * <a href="http://source.icu-project.org/repos/icu/icu4j/trunk/src/com/ibm/icu/dev/test/collator/CollationAPITest.java">
+     * <a href="https://github.com/unicode-org/icu/blob/main/icu4j/main/collate/src/test/java/com/ibm/icu/dev/test/collator/CollationAPITest.java">
      * src/com/ibm/icu/dev/test/collator/CollationAPITest/TestBounds.
      * </a>
      * <p>
@@ -491,7 +491,7 @@ public final class CollationKey implements Comparable<CollationKey>
      * Using strings with U+FFFE may yield shorter sort keys.
      *
      * <p>For details about Sort Key Features see
-     * http://userguide.icu-project.org/collation/api#TOC-Sort-Key-Features
+     * https://unicode-org.github.io/icu/userguide/collation/api#sort-key-features
      *
      * <p>It is possible to merge multiple sort keys by consecutively merging
      * another one with the intermediate result.

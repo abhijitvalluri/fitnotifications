@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2007-2016, International Business Machines Corporation and
@@ -15,9 +15,12 @@ import java.text.FieldPosition;
 import java.text.ParsePosition;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
-import com.ibm.icu.impl.Utility;
+import com.ibm.icu.number.FormattedNumber;
+import com.ibm.icu.number.LocalizedNumberFormatter;
 import com.ibm.icu.text.PluralRules.FixedDecimal;
+import com.ibm.icu.text.PluralRules.IFixedDecimal;
 import com.ibm.icu.text.PluralRules.PluralType;
 import com.ibm.icu.util.ULocale;
 import com.ibm.icu.util.ULocale.Category;
@@ -57,7 +60,7 @@ import com.ibm.icu.util.ULocale.Category;
  *     use the predefined keywords. The whole plural formatting of messages can
  *     be done using localized patterns from resource bundles. For predefined plural
  *     rules, see the CLDR <i>Language Plural Rules</i> page at
- *    http://unicode.org/repos/cldr-tmp/trunk/diff/supplemental/language_plural_rules.html
+ *     https://unicode-org.github.io/cldr-staging/charts/latest/supplemental/language_plural_rules.html
  * </ul>
  *
  * <h4>Usage of <code>PluralFormat</code></h4>
@@ -554,8 +557,7 @@ public class PluralFormat extends UFormat {
     private final class PluralSelectorAdapter implements PluralSelector {
         @Override
         public String select(Object context, double number) {
-            FixedDecimal dec = (FixedDecimal) context;
-            assert dec.source == (dec.isNegative ? -number : number);
+            IFixedDecimal dec = (IFixedDecimal) context;
             return pluralRules.select(dec);
         }
     }
@@ -613,17 +615,28 @@ public class PluralFormat extends UFormat {
         // Select it based on the formatted number-offset.
         double numberMinusOffset = number - offset;
         String numberString;
-        if (offset == 0) {
-            numberString = numberFormat.format(numberObject);  // could be BigDecimal etc.
-        } else {
-            numberString = numberFormat.format(numberMinusOffset);
-        }
-        FixedDecimal dec;
+        IFixedDecimal dec;
         if(numberFormat instanceof DecimalFormat) {
-            dec = ((DecimalFormat) numberFormat).getFixedDecimal(numberMinusOffset);
+            // Call NumberFormatter to get both the DecimalQuantity and the string.
+            LocalizedNumberFormatter f = ((DecimalFormat) numberFormat).toNumberFormatter();
+            FormattedNumber result;
+            if (offset == 0) {
+                // could be BigDecimal etc.
+                result  = f.format(numberObject);
+            } else {
+                result  = f.format(numberMinusOffset);
+            }
+            numberString = result.toString();
+            dec = result.getFixedDecimal();
         } else {
+            if (offset == 0) {
+                numberString = numberFormat.format(numberObject);
+            } else {
+                numberString = numberFormat.format(numberMinusOffset);
+            }
             dec = new FixedDecimal(numberMinusOffset);
         }
+
         int partIndex = findSubMessage(msgPattern, 0, pluralRulesWrapper, dec, number);
         // Replace syntactic # signs in the top level of this sub-message
         // (not in nested arguments) with the formatted number-offset.
@@ -747,9 +760,15 @@ public class PluralFormat extends UFormat {
 
             String currArg = pattern.substring(partStart.getLimit(), partLimit.getIndex());
             if (scanner != null) {
-                // If lenient parsing is turned ON, we've got some time consuming parsing ahead of us.
-                int[] scannerMatchResult = scanner.findText(source, currArg, startingAt);
-                currMatchIndex = scannerMatchResult[0];
+                // Check if non-lenient rule finds the text before call lenient parsing
+                int tempPos = source.indexOf(currArg, startingAt);
+                if (tempPos >= 0) {
+                    currMatchIndex = tempPos;
+                } else {
+                    // If lenient parsing is turned ON, we've got some time consuming parsing ahead of us.
+                    int[] scannerMatchResult = scanner.findText(source, currArg, startingAt);
+                    currMatchIndex = scannerMatchResult[0];
+                }
             }
             else {
                 currMatchIndex = source.indexOf(currArg, startingAt);
@@ -821,10 +840,10 @@ public class PluralFormat extends UFormat {
         }
         PluralFormat pf = (PluralFormat)rhs;
         return
-            Utility.objectEquals(ulocale, pf.ulocale) &&
-            Utility.objectEquals(pluralRules, pf.pluralRules) &&
-            Utility.objectEquals(msgPattern, pf.msgPattern) &&
-            Utility.objectEquals(numberFormat, pf.numberFormat);
+            Objects.equals(ulocale, pf.ulocale) &&
+            Objects.equals(pluralRules, pf.pluralRules) &&
+            Objects.equals(msgPattern, pf.msgPattern) &&
+            Objects.equals(numberFormat, pf.numberFormat);
     }
 
     /**

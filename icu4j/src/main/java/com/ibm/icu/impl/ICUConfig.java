@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2008-2015, International Business Machines Corporation and
@@ -76,7 +76,7 @@ public class ICUConfig {
             val = System.getProperty(name);
         }
 
-        if (val == null) {
+        if (val == null || val.equals("")) {
             val = CONFIG_PROPS.getProperty(name, def);
         }
         return val;

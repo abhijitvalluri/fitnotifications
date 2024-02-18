@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /**
 *******************************************************************************
 * Copyright (C) 1996-2016, International Business Machines Corporation and
@@ -17,9 +17,8 @@ package com.ibm.icu.lang;
  * <p>The properties APIs are intended to reflect Unicode properties as
  * defined in the Unicode Character Database (UCD) and Unicode Technical
  * Reports (UTR).
- * <p>For details about the properties see <a href=http://www.unicode.org>
- * http://www.unicode.org</a>.
- * <p>For names of Unicode properties see the UCD file PropertyAliases.txt.
+ * <p>For details about the properties see
+ * <a href="http://www.unicode.org/reports/tr44/">UAX #44: Unicode Character Database</a>.
  *
  * <p>Important: If ICU is built with UCD files from Unicode versions below
  * 3.2, then properties marked with "new" are not or not fully
@@ -317,7 +316,7 @@ public interface UProperty
     /**
      * <p>Binary property Case_Sensitive.
      * <p>Either the source of a case
-     * mapping or _in_ the target of a case mapping. Not the same as
+     * mapping or <i>in</i> the target of a case mapping. Not the same as
      * the general category Cased_Letter.
      * @stable ICU 2.6
      */
@@ -518,41 +517,136 @@ public interface UProperty
      * Binary property Emoji.
      * See http://www.unicode.org/reports/tr51/#Emoji_Properties
      *
-     * @draft ICU 57
-     * @provisional This API might change or be removed in a future release.
+     * @stable ICU 57
      */
     public static final int EMOJI=57;
     /**
      * Binary property Emoji_Presentation.
      * See http://www.unicode.org/reports/tr51/#Emoji_Properties
      *
-     * @draft ICU 57
-     * @provisional This API might change or be removed in a future release.
+     * @stable ICU 57
      */
     public static final int EMOJI_PRESENTATION=58;
     /**
      * Binary property Emoji_Modifier.
      * See http://www.unicode.org/reports/tr51/#Emoji_Properties
      *
-     * @draft ICU 57
-     * @provisional This API might change or be removed in a future release.
+     * @stable ICU 57
      */
     public static final int EMOJI_MODIFIER=59;
     /**
      * Binary property Emoji_Modifier_Base.
      * See http://www.unicode.org/reports/tr51/#Emoji_Properties
      *
-     * @draft ICU 57
-     * @provisional This API might change or be removed in a future release.
+     * @stable ICU 57
      */
     public static final int EMOJI_MODIFIER_BASE=60;
+    /**
+     * Binary property Emoji_Component.
+     * See http://www.unicode.org/reports/tr51/#Emoji_Properties
+     *
+     * @stable ICU 60
+     */
+    public static final int EMOJI_COMPONENT=61;
+    /**
+     * Binary property Regional_Indicator.
+     *
+     * @stable ICU 60
+     */
+    public static final int REGIONAL_INDICATOR=62;
+    /**
+     * Binary property Prepended_Concatenation_Mark.
+     *
+     * @stable ICU 60
+     */
+    public static final int PREPENDED_CONCATENATION_MARK=63;
+    /**
+     * Binary property Extended_Pictographic.
+     * See http://www.unicode.org/reports/tr51/#Emoji_Properties
+     *
+     * @stable ICU 62
+     */
+    public static final int EXTENDED_PICTOGRAPHIC=64;
+    /**
+     * Binary property of strings Basic_Emoji.
+     * See https://www.unicode.org/reports/tr51/#Emoji_Sets
+     *
+     * @stable ICU 70
+     */
+    public static final int BASIC_EMOJI=65;
+    /**
+     * Binary property of strings Emoji_Keycap_Sequence.
+     * See https://www.unicode.org/reports/tr51/#Emoji_Sets
+     *
+     * @stable ICU 70
+     */
+    public static final int EMOJI_KEYCAP_SEQUENCE=66;
+    /**
+     * Binary property of strings RGI_Emoji_Modifier_Sequence.
+     * See https://www.unicode.org/reports/tr51/#Emoji_Sets
+     *
+     * @stable ICU 70
+     */
+    public static final int RGI_EMOJI_MODIFIER_SEQUENCE=67;
+    /**
+     * Binary property of strings RGI_Emoji_Flag_Sequence.
+     * See https://www.unicode.org/reports/tr51/#Emoji_Sets
+     *
+     * @stable ICU 70
+     */
+    public static final int RGI_EMOJI_FLAG_SEQUENCE=68;
+    /**
+     * Binary property of strings RGI_Emoji_Tag_Sequence.
+     * See https://www.unicode.org/reports/tr51/#Emoji_Sets
+     *
+     * @stable ICU 70
+     */
+    public static final int RGI_EMOJI_TAG_SEQUENCE=69;
+    /**
+     * Binary property of strings RGI_Emoji_ZWJ_Sequence.
+     * See https://www.unicode.org/reports/tr51/#Emoji_Sets
+     *
+     * @stable ICU 70
+     */
+    public static final int RGI_EMOJI_ZWJ_SEQUENCE=70;
+    /**
+     * Binary property of strings RGI_Emoji.
+     * See https://www.unicode.org/reports/tr51/#Emoji_Sets
+     *
+     * @stable ICU 70
+     */
+    public static final int RGI_EMOJI=71;
+
+    /**
+     * Binary property IDS_Unary_Operator.
+     * For programmatic determination of Ideographic Description Sequences.
+     *
+     * @draft ICU 74
+     */
+    public static final int IDS_UNARY_OPERATOR = 72;
+
+    /**
+     * Binary property ID_Compat_Math_Start.
+     * <p>Used in mathematical identifier profile in UAX #31.
+     *
+     * @draft ICU 74
+     */
+    public static final int ID_COMPAT_MATH_START = 73;
+
+    /**
+     * Binary property ID_Compat_Math_Continue.
+     * <p>Used in mathematical identifier profile in UAX #31.
+     *
+     * @draft ICU 74
+     */
+    public static final int ID_COMPAT_MATH_CONTINUE = 74;
 
     /**
      * One more than the last constant for binary Unicode properties.
      * @deprecated ICU 58 The numeric value may change over time, see ICU ticket #12420.
      */
     @Deprecated
-    public static final int BINARY_LIMIT = 61;
+    public static final int BINARY_LIMIT = 75;
 
     /**
      * Enumerated property Bidi_Class.
@@ -733,11 +827,36 @@ public interface UProperty
     public static final int BIDI_PAIRED_BRACKET_TYPE = 0x1015;
 
     /**
+     * Enumerated property Indic_Positional_Category.
+     * New in Unicode 6.0 as provisional property Indic_Matra_Category;
+     * renamed and changed to informative in Unicode 8.0.
+     * See http://www.unicode.org/reports/tr44/#IndicPositionalCategory.txt
+     * @stable ICU 63
+     */
+    public static final int INDIC_POSITIONAL_CATEGORY = 0x1016;
+
+    /**
+     * Enumerated property Indic_Syllabic_Category.
+     * New in Unicode 6.0 as provisional; informative since Unicode 8.0.
+     * See http://www.unicode.org/reports/tr44/#IndicSyllabicCategory.txt
+     * @stable ICU 63
+     */
+    public static final int INDIC_SYLLABIC_CATEGORY = 0x1017;
+
+    /**
+     * Enumerated property Vertical_Orientation.
+     * Used for UAX #50 Unicode Vertical Text Layout (https://www.unicode.org/reports/tr50/).
+     * New as a UCD property in Unicode 10.0.
+     * @stable ICU 63
+     */
+    public static final int VERTICAL_ORIENTATION = 0x1018;
+
+    /**
      * One more than the last constant for enumerated/integer Unicode properties.
      * @deprecated ICU 58 The numeric value may change over time, see ICU ticket #12420.
      */
     @Deprecated
-    public static final int INT_LIMIT = 0x1016;
+    public static final int INT_LIMIT = 0x1019;
 
     /**
      * Bitmask property General_Category_Mask.

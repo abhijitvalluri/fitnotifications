@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  **************************************************************************
  * Copyright (C) 2008-2014, Google, International Business Machines
@@ -9,7 +9,6 @@
 package com.ibm.icu.text;
 
 import java.io.ObjectStreamException;
-import java.text.FieldPosition;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.util.HashMap;
@@ -23,7 +22,7 @@ import java.util.TreeMap;
 import com.ibm.icu.impl.ICUData;
 import com.ibm.icu.impl.ICUResourceBundle;
 import com.ibm.icu.impl.UResource;
-import com.ibm.icu.util.Measure;
+import com.ibm.icu.number.LocalizedNumberFormatter;
 import com.ibm.icu.util.TimeUnit;
 import com.ibm.icu.util.TimeUnitAmount;
 import com.ibm.icu.util.ULocale;
@@ -85,18 +84,11 @@ public class TimeUnitFormat extends MeasureFormat {
 
     private static final long serialVersionUID = -3707773153184971529L;
 
-    // These fields are supposed to be the same as the fields in mf. They
-    // are here for serialization backward compatibility and to support parsing.
+    // Unlike MeasureFormat, this class is mutable and allows a new NumberFormat to be set after
+    // initialization. Keep a second copy of NumberFormat and use it instead of the one from the parent.
     private NumberFormat format;
     private ULocale locale;
     private int style;
-
-    // We use this field in lieu of the super class because the super class
-    // is immutable while this class is mutable. The contents of the super class
-    // is an empty shell. Every public method of the super class is overridden to
-    // delegate to this field. Each time this object mutates, it replaces this field with
-    // a new immutable instance.
-    private transient MeasureFormat mf;
 
     private transient Map<TimeUnit, Map<String, Object[]>> timeUnitToCountToPatterns;
     private transient PluralRules pluralRules;
@@ -117,9 +109,7 @@ public class TimeUnitFormat extends MeasureFormat {
      */
     @Deprecated
     public TimeUnitFormat() {
-        mf = MeasureFormat.getInstance(ULocale.getDefault(), FormatWidth.WIDE);
-        isReady = false;
-        style = FULL_NAME;
+        this(ULocale.getDefault(), FULL_NAME);
     }
 
     /**
@@ -152,16 +142,12 @@ public class TimeUnitFormat extends MeasureFormat {
      */
     @Deprecated
     public TimeUnitFormat(ULocale locale, int style) {
+        super(locale, style == FULL_NAME ? FormatWidth.WIDE : FormatWidth.SHORT);
+        format = super.getNumberFormatInternal();
         if (style < FULL_NAME || style >= TOTAL_STYLES) {
             throw new IllegalArgumentException("style should be either FULL_NAME or ABBREVIATED_NAME style");
         }
-        mf = MeasureFormat.getInstance(
-                locale, style == FULL_NAME ? FormatWidth.WIDE : FormatWidth.SHORT);
         this.style = style;
-
-        // Needed for getLocale(ULocale.VALID_LOCALE)
-        setLocale(locale, locale);
-        this.locale = locale;
         isReady = false;
     }
 
@@ -189,14 +175,8 @@ public class TimeUnitFormat extends MeasureFormat {
      */
     @Deprecated
     public TimeUnitFormat setLocale(ULocale locale) {
-        if (locale != this.locale){
-            mf = mf.withLocale(locale);
-
-            // Needed for getLocale(ULocale.VALID_LOCALE)
-            setLocale(locale, locale);
-            this.locale = locale;
-            isReady = false;
-        }
+        setLocale(locale, locale);
+        clearCache();
         return this;
     }
 
@@ -226,28 +206,34 @@ public class TimeUnitFormat extends MeasureFormat {
         if (format == null) {
             if (locale == null) {
                 isReady = false;
-                mf = mf.withLocale(ULocale.getDefault());
             } else {
                 this.format = NumberFormat.getNumberInstance(locale);
-                mf = mf.withNumberFormat(this.format);
             }
         } else {
             this.format = format;
-            mf = mf.withNumberFormat(this.format);
         }
+        clearCache();
         return this;
     }
 
-
     /**
-     * Format a TimeUnitAmount.
-     * @see java.text.Format#format(java.lang.Object, java.lang.StringBuffer, java.text.FieldPosition)
+     * {@inheritDoc}
      * @deprecated ICU 53 see {@link MeasureFormat}.
      */
+    @Override
     @Deprecated
-    public StringBuffer format(Object obj, StringBuffer toAppendTo,
-            FieldPosition pos) {
-        return mf.format(obj, toAppendTo, pos);
+    public NumberFormat getNumberFormat() {
+        return (NumberFormat) format.clone();
+    }
+
+    @Override
+    NumberFormat getNumberFormatInternal() {
+        return format;
+    }
+
+    @Override
+    LocalizedNumberFormatter getNumberFormatter() {
+        return ((DecimalFormat)format).toNumberFormatter();
     }
 
     /**
@@ -357,7 +343,7 @@ public class TimeUnitFormat extends MeasureFormat {
             format = NumberFormat.getNumberInstance(locale);
         }
         pluralRules = PluralRules.forLocale(locale);
-        timeUnitToCountToPatterns = new HashMap<TimeUnit, Map<String, Object[]>>();
+        timeUnitToCountToPatterns = new HashMap<>();
         Set<String> pluralKeywords = pluralRules.getKeywords();
         setup("units/duration", timeUnitToCountToPatterns, FULL_NAME, pluralKeywords);
         setup("unitsShort/duration", timeUnitToCountToPatterns, ABBREVIATED_NAME, pluralKeywords);
@@ -388,7 +374,7 @@ public class TimeUnitFormat extends MeasureFormat {
             } else {
                 beenHere = true;
             }
-            
+
             UResource.Table units = value.getTable();
             for (int i = 0; units.getKeyAndValue(i, key, value); ++i) {
                 String timeUnitName = key.toString();
@@ -414,7 +400,7 @@ public class TimeUnitFormat extends MeasureFormat {
 
                 Map<String, Object[]> countToPatterns = timeUnitToCountToPatterns.get(timeUnit);
                 if (countToPatterns == null) {
-                    countToPatterns = new TreeMap<String, Object[]>();
+                    countToPatterns = new TreeMap<>();
                     timeUnitToCountToPatterns.put(timeUnit, countToPatterns);
                 }
 
@@ -481,7 +467,7 @@ public class TimeUnitFormat extends MeasureFormat {
             final TimeUnit timeUnit = timeUnits[i];
             Map<String, Object[]> countToPatterns = timeUnitToCountToPatterns.get(timeUnit);
             if (countToPatterns == null) {
-                countToPatterns = new TreeMap<String, Object[]>();
+                countToPatterns = new TreeMap<>();
                 timeUnitToCountToPatterns.put(timeUnit, countToPatterns);
             }
             for (String pluralCount : keywords) {
@@ -569,41 +555,8 @@ public class TimeUnitFormat extends MeasureFormat {
     // boilerplate code to make TimeUnitFormat otherwise follow the contract of
     // MeasureFormat
 
-
     /**
-     * @internal
-     * @deprecated This API is ICU internal only.
-     */
-    @Deprecated
-    @Override
-    public StringBuilder formatMeasures(
-            StringBuilder appendTo, FieldPosition fieldPosition, Measure... measures) {
-        return mf.formatMeasures(appendTo, fieldPosition, measures);
-    }
-
-    /**
-     * @internal
-     * @deprecated This API is ICU internal only.
-     */
-    @Deprecated
-    @Override
-    public MeasureFormat.FormatWidth getWidth() {
-        return mf.getWidth();
-    }
-
-    /**
-     * @internal
-     * @deprecated This API is ICU internal only.
-     */
-    @Deprecated
-    @Override
-    public NumberFormat getNumberFormat() {
-        return mf.getNumberFormat();
-    }
-
-    /**
-     * @internal
-     * @deprecated This API is ICU internal only.
+     * @deprecated ICU 53 see {@link MeasureFormat}
      */
     @Deprecated
     @Override
@@ -617,7 +570,7 @@ public class TimeUnitFormat extends MeasureFormat {
     // Serialization
 
     private Object writeReplace() throws ObjectStreamException {
-        return mf.toTimeUnitProxy();
+        return super.toTimeUnitProxy();
     }
 
     // Preserve backward serialize backward compatibility.

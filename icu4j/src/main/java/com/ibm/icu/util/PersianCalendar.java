@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 1996-2014, International Business Machines Corporation and    *
@@ -138,7 +138,7 @@ public class PersianCalendar extends Calendar {
     @Deprecated
     public PersianCalendar(Locale aLocale)
     {
-        this(TimeZone.getDefault(), aLocale);
+        this(TimeZone.forLocaleOrDefault(aLocale), aLocale);
     }
 
     /**
@@ -153,7 +153,7 @@ public class PersianCalendar extends Calendar {
     @Deprecated
     public PersianCalendar(ULocale locale)
     {
-        this(TimeZone.getDefault(), locale);
+        this(TimeZone.forULocaleOrDefault(locale), locale);
     }
 
     /**
@@ -289,6 +289,9 @@ public class PersianCalendar extends Calendar {
         { -5000000, -5000000,  5000000,  5000000}, // EXTENDED_YEAR
         {/*                                   */}, // JULIAN_DAY
         {/*                                   */}, // MILLISECONDS_IN_DAY
+        {/*                                   */}, // IS_LEAP_MONTH
+        {        0,        0,       11,      11 }, // ORDINAL_MONTH
+
     };
 
     /**
@@ -436,6 +439,7 @@ public class PersianCalendar extends Calendar {
         internalSet(YEAR, year);
         internalSet(EXTENDED_YEAR, year);
         internalSet(MONTH, month);
+        internalSet(ORDINAL_MONTH, month);
         internalSet(DAY_OF_MONTH, dayOfMonth);
         internalSet(DAY_OF_YEAR, dayOfYear);       
     }    

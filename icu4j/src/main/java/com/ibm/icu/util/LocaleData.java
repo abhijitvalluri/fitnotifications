@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  **************************************************************************************
  * Copyright (C) 2009-2016, International Business Machines Corporation,
@@ -31,6 +31,7 @@ public final class LocaleData {
     private boolean noSubstitute;
     private ICUResourceBundle bundle;
     private ICUResourceBundle langBundle;
+    private MissingResourceException langBundleException;
 
     /**
      * EXType for {@link #getExemplarSet(int, int)}.
@@ -225,7 +226,12 @@ public final class LocaleData {
     public static final LocaleData getInstance(ULocale locale) {
         LocaleData ld = new LocaleData();
         ld.bundle = (ICUResourceBundle)UResourceBundle.getBundleInstance(ICUData.ICU_BASE_NAME, locale);
-        ld.langBundle = (ICUResourceBundle)UResourceBundle.getBundleInstance(ICUData.ICU_LANG_BASE_NAME, locale);
+        try {
+            ld.langBundle = (ICUResourceBundle)UResourceBundle.getBundleInstance(ICUData.ICU_LANG_BASE_NAME, locale);
+        } catch (MissingResourceException mre) {
+            // Expected error case: ICU-22149
+            ld.langBundleException = mre;
+        }
         ld.noSubstitute = false;
         return ld;
     }
@@ -244,7 +250,7 @@ public final class LocaleData {
     /**
      * Sets the "no substitute" behavior of this locale data object.
      *
-     * @param setting   Value for the no substitute behavior.  If TRUE,
+     * @param setting   Value for the no substitute behavior.  If true,
      *                  methods of this locale data object will return
      *                  an error when no data is available for that method,
      *                  given the locale ID supplied to the constructor.
@@ -257,7 +263,7 @@ public final class LocaleData {
     /**
      * Gets the "no substitute" behavior of this locale data object.
      *
-     * @return          Value for the no substitute behavior.  If TRUE,
+     * @return          Value for the no substitute behavior.  If true,
      *                  methods of this locale data object will return
      *                  an error when no data is available for that method,
      *                  given the locale ID supplied to the constructor.
@@ -385,7 +391,7 @@ public final class LocaleData {
             width = w;
         }
         /**
-         * Retruns the height of the paper
+         * Returns the height of the paper
          * @return the height
          * @stable ICU 2.8
          */
@@ -421,6 +427,9 @@ public final class LocaleData {
      * @stable ICU 4.2
      */
     public String getLocaleDisplayPattern() {
+        if (langBundle == null) {
+            throw langBundleException;
+        }
         ICUResourceBundle locDispBundle = (ICUResourceBundle) langBundle.get(LOCALE_DISPLAY_PATTERN);
         String localeDisplayPattern = locDispBundle.getStringWithFallback(PATTERN);
         return localeDisplayPattern;
@@ -432,6 +441,9 @@ public final class LocaleData {
      * @stable ICU 4.2
      */
     public String getLocaleSeparator() {
+        if (langBundle == null) {
+            throw langBundleException;
+        }
         String sub0 = "{0}";
         String sub1 = "{1}";
         ICUResourceBundle locDispBundle = (ICUResourceBundle) langBundle.get(LOCALE_DISPLAY_PATTERN);

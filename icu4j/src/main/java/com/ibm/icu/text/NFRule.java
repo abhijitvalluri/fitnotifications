@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 1996-2015, International Business Machines Corporation and    *
@@ -11,9 +11,9 @@ package com.ibm.icu.text;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
 import java.util.List;
+import java.util.Objects;
 
 import com.ibm.icu.impl.PatternProps;
-import com.ibm.icu.impl.Utility;
 
 /**
  * A class representing a single rule in a RuleBasedNumberFormat.  A rule
@@ -41,9 +41,9 @@ final class NFRule {
     static final int PROPER_FRACTION_RULE = -3;
 
     /**
-     * Special base value used to identify a master rule
+     * Special base value used to identify a default rule
      */
-    static final int MASTER_RULE = -4;
+    static final int DEFAULT_RULE = -4;
 
     /**
      * Special base value used to identify an infinity rule
@@ -169,7 +169,7 @@ final class NFRule {
             if ((rule1.baseValue > 0
                  && rule1.baseValue % (power(rule1.radix, rule1.exponent)) == 0)
                 || rule1.baseValue == IMPROPER_FRACTION_RULE
-                || rule1.baseValue == MASTER_RULE)
+                || rule1.baseValue == DEFAULT_RULE)
             {
 
                 // if it passes that test, new up the second rule.  If the
@@ -190,9 +190,9 @@ final class NFRule {
                     // the proper fraction rule
                     rule2.baseValue = PROPER_FRACTION_RULE;
                 }
-                else if (rule1.baseValue == MASTER_RULE) {
+                else if (rule1.baseValue == DEFAULT_RULE) {
                     // if the description began with "x.0" and contains bracketed
-                    // text, it describes both the master rule and the
+                    // text, it describes both the default rule and the
                     // improper fraction rule
                     rule2.baseValue = rule1.baseValue;
                     rule1.baseValue = IMPROPER_FRACTION_RULE;
@@ -378,7 +378,7 @@ final class NFRule {
                     decimalPoint = descriptor.charAt(1);
                 }
                 else if (firstChar == 'x' && lastChar == '0') {
-                    setBaseValue(MASTER_RULE);
+                    setBaseValue(DEFAULT_RULE);
                     decimalPoint = descriptor.charAt(1);
                 }
                 else if (descriptor.equals("NaN")) {
@@ -610,6 +610,7 @@ final class NFRule {
      * @param that The rule to compare this one against
      * @return True if the two rules are functionally equivalent
      */
+    @Override
     public boolean equals(Object that) {
         if (that instanceof NFRule) {
             NFRule that2 = (NFRule)that;
@@ -618,12 +619,13 @@ final class NFRule {
                 && radix == that2.radix
                 && exponent == that2.exponent
                 && ruleText.equals(that2.ruleText)
-                && Utility.objectEquals(sub1, that2.sub1)
-                && Utility.objectEquals(sub2, that2.sub2);
+                && Objects.equals(sub1, that2.sub1)
+                && Objects.equals(sub2, that2.sub2);
         }
         return false;
     }
-    
+
+    @Override
     public int hashCode() {
         assert false : "hashCode not designed";
         return 42;
@@ -635,6 +637,7 @@ final class NFRule {
      * was created with, but it will produce the same result.
      * @return A textual description of the rule
      */
+    @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
 
@@ -648,7 +651,7 @@ final class NFRule {
         else if (baseValue == PROPER_FRACTION_RULE) {
             result.append('0').append(decimalPoint == 0 ? '.' : decimalPoint).append("x: ");
         }
-        else if (baseValue == MASTER_RULE) {
+        else if (baseValue == DEFAULT_RULE) {
             result.append('x').append(decimalPoint == 0 ? '.' : decimalPoint).append("0: ");
         }
         else if (baseValue == INFINITY_RULE) {
@@ -719,7 +722,7 @@ final class NFRule {
     }
 
     /**
-     * Returns the rule's divisor (the value that cotrols the behavior
+     * Returns the rule's divisor (the value that controls the behavior
      * of its substitutions)
      * @return The rule's divisor
      */
@@ -903,7 +906,7 @@ final class NFRule {
      * result is an integer and Double otherwise.  The result is never null.
      */
     public Number doParse(String text, ParsePosition parsePosition, boolean isFractionRule,
-                          double upperBound) {
+                          double upperBound, int nonNumericalExecutedRuleMask) {
 
         // internally we operate on a copy of the string being parsed
         // (because we're going to change it) and use our own ParsePosition
@@ -976,7 +979,7 @@ final class NFRule {
             pp.setIndex(0);
             double partialResult = matchToDelimiter(workText, start, tempBaseValue,
                                                     ruleText.substring(sub1Pos, sub2Pos), rulePatternFormat,
-                                                    pp, sub1, upperBound).doubleValue();
+                                                    pp, sub1, upperBound, nonNumericalExecutedRuleMask).doubleValue();
 
             // if we got a successful match (or were trying to match a
             // null substitution), pp is now pointing at the first unmatched
@@ -994,7 +997,7 @@ final class NFRule {
                 // a real result
                 partialResult = matchToDelimiter(workText2, 0, partialResult,
                                                  ruleText.substring(sub2Pos), rulePatternFormat, pp2, sub2,
-                                                 upperBound).doubleValue();
+                                                 upperBound, nonNumericalExecutedRuleMask).doubleValue();
 
                 // if we got a successful match on this second
                 // matchToDelimiter() call, update the high-water mark
@@ -1121,7 +1124,8 @@ final class NFRule {
      * Double.
      */
     private Number matchToDelimiter(String text, int startPos, double baseVal,
-                                    String delimiter, PluralFormat pluralFormatDelimiter, ParsePosition pp, NFSubstitution sub, double upperBound) {
+                                    String delimiter, PluralFormat pluralFormatDelimiter, ParsePosition pp, NFSubstitution sub,
+                                    double upperBound, int nonNumericalExecutedRuleMask) {
         // if "delimiter" contains real (i.e., non-ignorable) text, search
         // it for "delimiter" beginning at "start".  If that succeeds, then
         // use "sub"'s doParse() method to match the text before the
@@ -1144,7 +1148,7 @@ final class NFRule {
                 String subText = text.substring(0, dPos);
                 if (subText.length() > 0) {
                     tempResult = sub.doParse(subText, tempPP, baseVal, upperBound,
-                                             formatter.lenientParseEnabled());
+                                             formatter.lenientParseEnabled(), nonNumericalExecutedRuleMask);
 
                     // if the substitution could match all the text up to
                     // where we found "delimiter", then this function has
@@ -1192,7 +1196,7 @@ final class NFRule {
             Number result = ZERO;
             // try to match the whole string against the substitution
             Number tempResult = sub.doParse(text, tempPP, baseVal, upperBound,
-                    formatter.lenientParseEnabled());
+                    formatter.lenientParseEnabled(), nonNumericalExecutedRuleMask);
             if (tempPP.getIndex() != 0) {
                 // if there's a successful match (or it's a null
                 // substitution), update pp to point to the first
@@ -1237,6 +1241,10 @@ final class NFRule {
 
         RbnfLenientScanner scanner = formatter.getLenientScanner();
         if (scanner != null) {
+            // Check if non-lenient rule finds the text before call lenient parsing
+            if (str.startsWith(prefix)) {
+                return prefix.length();
+            }
             return scanner.prefixLength(str, prefix);
         }
 
@@ -1286,9 +1294,14 @@ final class NFRule {
         }
 
         if (scanner != null) {
-            // if lenient parsing is turned ON, we've got some work
-            // ahead of us
-            return scanner.findText(str, key, startingAt);
+            // Check if non-lenient rule finds the text before call lenient parsing
+            int pos[] = new int[] { str.indexOf(key, startingAt), key.length() };
+            if (pos[0] >= 0) {
+                return pos;
+            } else {
+                // if lenient parsing is turned ON, we've got some work ahead of us
+                return scanner.findText(str, key, startingAt);
+            }
         }
         // if lenient parsing is turned off, this is easy. Just call
         // String.indexOf() and we're done

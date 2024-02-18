@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2008-2016, International Business Machines Corporation and
@@ -18,6 +18,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.MissingResourceException;
+import java.util.Objects;
 import java.util.Set;
 
 import com.ibm.icu.impl.ICUCache;
@@ -27,7 +28,6 @@ import com.ibm.icu.impl.SimpleCache;
 import com.ibm.icu.impl.UResource;
 import com.ibm.icu.impl.UResource.Key;
 import com.ibm.icu.impl.UResource.Value;
-import com.ibm.icu.impl.Utility;
 import com.ibm.icu.util.Calendar;
 import com.ibm.icu.util.Freezable;
 import com.ibm.icu.util.ICUCloneNotSupportedException;
@@ -119,7 +119,7 @@ import com.ibm.icu.util.UResourceBundle;
  * the first date in the interval pattern for this locale is earlier date.
  * If the fallback format is "{1} - {0}", it means the first date is the
  * later date.
- * For a particular interval pattern, the default order can be overriden
+ * For a particular interval pattern, the default order can be overridden
  * by prefixing "latestFirst:" or "earliestFirst:" to the interval pattern.
  * For example, if the fallback format is "{0}-{1}",
  * but for skeleton "yMMMd", the interval pattern when day is different is
@@ -143,7 +143,7 @@ import com.ibm.icu.util.UResourceBundle;
  * the interval patterns using setIntervalPattern function as so desired.
  * Currently, users can only set interval patterns when the following
  * calendar fields are different: ERA, YEAR, MONTH, DATE,  DAY_OF_MONTH,
- * DAY_OF_WEEK, AM_PM,  HOUR, HOUR_OF_DAY, MINUTE and SECOND.
+ * DAY_OF_WEEK, AM_PM,  HOUR, HOUR_OF_DAY, MINUTE, SECOND, and MILLISECOND.
  * Interval patterns when other calendar fields are different is not supported.
  * <P>
  * DateIntervalInfo objects are cloneable.
@@ -152,7 +152,7 @@ import com.ibm.icu.util.UResourceBundle;
  * <P>
  * DateIntervalInfo are not expected to be subclassed.
  * Data for a calendar is loaded out of resource bundles.
- * Through ICU 4.4, date interval patterns are only supported in the Gregoria
+ * Through ICU 4.4, date interval patterns are only supported in the Gregorian
  * calendar; non-Gregorian calendars are supported from ICU 4.4.1.
  *
  * @stable ICU 4.0
@@ -185,7 +185,7 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
          * Whether the first date in interval pattern is later date or not.
          * Fallback format set the default ordering.
          * And for a particular interval pattern, the order can be
-         * overriden by prefixing the interval pattern with "latestFirst:" or
+         * overridden by prefixing the interval pattern with "latestFirst:" or
          * "earliestFirst:"
          * For example, given 2 date, Jan 10, 2007 to Feb 10, 2007.
          * if the fallback format is "{0} - {1}",
@@ -247,8 +247,8 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
         public boolean equals(Object a) {
             if (a instanceof PatternInfo) {
                 PatternInfo patternInfo = (PatternInfo)a;
-                return Utility.objectEquals(fIntervalPatternFirstPart, patternInfo.fIntervalPatternFirstPart) &&
-                       Utility.objectEquals(fIntervalPatternSecondPart, patternInfo.fIntervalPatternSecondPart) &&
+                return Objects.equals(fIntervalPatternFirstPart, patternInfo.fIntervalPatternFirstPart) &&
+                       Objects.equals(fIntervalPatternSecondPart, patternInfo.fIntervalPatternSecondPart) &&
                        fFirstDateInPtnIsLaterDate == patternInfo.fFirstDateInPtnIsLaterDate;
             }
             return false;
@@ -273,10 +273,8 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
 
         /**
          * {@inheritDoc}
-         * @internal
-         * @deprecated This API is ICU internal only.
+         * @stable ICU 4.0
          */
-        @Deprecated
         @Override
         public String toString() {
             return "{first=«" + fIntervalPatternFirstPart + "», second=«" + fIntervalPatternSecondPart + "», reversed:" + fFirstDateInPtnIsLaterDate + "}";
@@ -300,7 +298,7 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
 
     private static final long serialVersionUID = 1;
     private static final int MINIMUM_SUPPORTED_CALENDAR_FIELD =
-                                                          Calendar.SECOND;
+                                                          Calendar.MILLISECOND;
     //private static boolean DEBUG = true;
 
     private static String CALENDAR_KEY = "calendar";
@@ -310,7 +308,7 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
     private static String EARLIEST_FIRST_PREFIX = "earliestFirst:";
 
     // DateIntervalInfo cache
-    private final static ICUCache<String, DateIntervalInfo> DIICACHE = new SimpleCache<String, DateIntervalInfo>();
+    private final static ICUCache<String, DateIntervalInfo> DIICACHE = new SimpleCache<>();
 
 
     // default interval pattern on the skeleton, {0} - {1}
@@ -347,7 +345,7 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
     @Deprecated
     public DateIntervalInfo()
     {
-        fIntervalPatterns = new HashMap<String, Map<String, PatternInfo>>();
+        fIntervalPatterns = new HashMap<>();
         fFallbackIntervalPattern = "{0} \u2013 {1}";
     }
 
@@ -427,8 +425,9 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
          * Calendar.HOUR_OF_DAY
          * Calendar.MINUTE
          * Calendar.SECOND
+         * Calendar.MILLISECOND
          */
-        private static final String ACCEPTED_PATTERN_LETTERS = "yMdahHms";
+        private static final String ACCEPTED_PATTERN_LETTERS = "GyMdahHmsS";
 
         // Output data
         DateIntervalInfo dateIntervalInfo;
@@ -533,13 +532,19 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
 
             // Check that the pattern letter is accepted
             char letter = patternLetter.charAt(0);
-            if (ACCEPTED_PATTERN_LETTERS.indexOf(letter) < 0) {
+            if (ACCEPTED_PATTERN_LETTERS.indexOf(letter) < 0 && letter != 'B') {
                 return null;
             }
 
             // Replace 'h' for 'H'
             if (letter == CALENDAR_FIELD_TO_PATTERN_LETTER[Calendar.HOUR_OF_DAY].charAt(0)) {
                 patternLetter = CALENDAR_FIELD_TO_PATTERN_LETTER[Calendar.HOUR];
+            }
+            
+            // Replace 'a' for 'B'
+            // TODO: Using AM/PM as a proxy for flexible day period isn’t really correct, but it’s close
+            if (letter == 'B') {
+                patternLetter = CALENDAR_FIELD_TO_PATTERN_LETTER[Calendar.AM_PM];
             }
 
             return patternLetter;
@@ -570,7 +575,7 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
      */
     private void setup(ULocale locale) {
         int DEFAULT_HASH_SIZE = 19;
-        fIntervalPatterns = new HashMap<String, Map<String, PatternInfo>>(DEFAULT_HASH_SIZE);
+        fIntervalPatterns = new HashMap<>(DEFAULT_HASH_SIZE);
         // initialize to guard if there is no interval date format defined in
         // resource files
         fFallbackIntervalPattern = "{0} \u2013 {1}";
@@ -598,7 +603,7 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
             setFallbackIntervalPattern(fallbackPattern);
 
             // Already loaded calendar types
-            Set<String> loadedCalendarTypes = new HashSet<String>();
+            Set<String> loadedCalendarTypes = new HashSet<>();
 
             while (calendarTypeToUse != null) {
                 // Throw an exception when a loop is detected
@@ -707,7 +712,7 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
      * Restriction:
      * Currently, users can only set interval patterns when the following
      * calendar fields are different: ERA, YEAR, MONTH, DATE,  DAY_OF_MONTH,
-     * DAY_OF_WEEK, AM_PM,  HOUR, HOUR_OF_DAY, MINUTE, and SECOND.
+     * DAY_OF_WEEK, AM_PM,  HOUR, HOUR_OF_DAY, MINUTE, SECOND, and MILLISECOND.
      * Interval patterns when other calendar fields are different are
      * not supported.
      *
@@ -776,7 +781,7 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
         Map<String, PatternInfo> patternsOfOneSkeleton = fIntervalPatterns.get(skeleton);
         boolean emptyHash = false;
         if (patternsOfOneSkeleton == null) {
-            patternsOfOneSkeleton = new HashMap<String, PatternInfo>();
+            patternsOfOneSkeleton = new HashMap<>();
             emptyHash = true;
         }
         boolean order = fFirstDateInPtnIsLaterDate;
@@ -852,7 +857,7 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
     public PatternInfo getIntervalPattern(String skeleton, int field)
     {
         if ( field > MINIMUM_SUPPORTED_CALENDAR_FIELD ) {
-            throw new IllegalArgumentException("no support for field less than SECOND");
+            throw new IllegalArgumentException("no support for field less than MILLISECOND");
         }
         Map<String, PatternInfo> patternsOfOneSkeleton = fIntervalPatterns.get(skeleton);
         if ( patternsOfOneSkeleton != null ) {
@@ -915,8 +920,8 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
      * Get default order -- whether the first date in pattern is later date
      *                      or not.
      *
-     * return default date ordering in interval pattern. TRUE if the first date
-     *        in pattern is later date, FALSE otherwise.
+     * return default date ordering in interval pattern. true if the first date
+     *        in pattern is later date, false otherwise.
      * @stable ICU 4.0
      */
     public boolean getDefaultOrder()
@@ -968,11 +973,11 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
 
     private static Map<String, Map<String, PatternInfo>> cloneIntervalPatterns(
             Map<String, Map<String, PatternInfo>> patterns) {
-        Map<String, Map<String, PatternInfo>> result = new HashMap<String, Map<String, PatternInfo>>();
+        Map<String, Map<String, PatternInfo>> result = new HashMap<>();
         for (Entry<String, Map<String, PatternInfo>> skeletonEntry : patterns.entrySet()) {
             String skeleton = skeletonEntry.getKey();
             Map<String, PatternInfo> patternsOfOneSkeleton = skeletonEntry.getValue();
-            Map<String, PatternInfo> oneSetPtn = new HashMap<String, PatternInfo>();
+            Map<String, PatternInfo> oneSetPtn = new HashMap<>();
             for (Entry<String, PatternInfo> calEntry : patternsOfOneSkeleton.entrySet()) {
                 String calField = calEntry.getKey();
                 PatternInfo value = calEntry.getValue();
@@ -1064,7 +1069,7 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
      * which has pre-defined interval pattern in resource file.
      *
      * TODO (xji): set field weight or
-     *             isolate the funtionality in DateTimePatternGenerator
+     *             isolate the functionality in DateTimePatternGenerator
      * @param  inputSkeleton        input skeleton
      * @return 0, if there is exact match for input skeleton
      *         1, if there is only field width difference between
@@ -1082,20 +1087,25 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
         final int STRING_NUMERIC_DIFFERENCE = 0x100;
         final int BASE = 0x41;
 
-        // TODO: this is a hack for 'v' and 'z'
-        // resource bundle only have time skeletons ending with 'v',
-        // but not for time skeletons ending with 'z'.
-        boolean replaceZWithV = false;
-        if ( inputSkeleton.indexOf('z') != -1 ) {
+        // hack for certain alternate characters
+        // resource bundles only have time skeletons containing 'v', 'h', and 'H'
+        // but not time skeletons containing 'z', 'K', or 'k'
+        // the skeleton may also include 'a' or 'b', which never occur in the resource bundles, so strip them out too
+        boolean replacedAlternateChars = false;
+        if ( inputSkeleton.indexOf('z') != -1 || inputSkeleton.indexOf('k') != -1 || inputSkeleton.indexOf('K') != -1 || inputSkeleton.indexOf('a') != -1 || inputSkeleton.indexOf('b') != -1 ) {
             inputSkeleton = inputSkeleton.replace('z', 'v');
-            replaceZWithV = true;
+            inputSkeleton = inputSkeleton.replace('k', 'H');
+            inputSkeleton = inputSkeleton.replace('K', 'h');
+            inputSkeleton = inputSkeleton.replace("a", "");
+            inputSkeleton = inputSkeleton.replace("b", "");
+            replacedAlternateChars = true;
         }
 
         parseSkeleton(inputSkeleton, inputSkeletonFieldWidth);
         int bestDistance = Integer.MAX_VALUE;
         // 0 means exact the same skeletons;
         // 1 means having the same field, but with different length,
-        // 2 means only z/v differs
+        // 2 means only z/v, h/K, or H/k differs
         // -1 means having different field.
         int bestFieldDifference = 0;
         for (String skeleton : fIntervalPatterns.keySet()) {
@@ -1136,7 +1146,7 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
                 break;
             }
         }
-        if ( replaceZWithV && bestFieldDifference != -1 ) {
+        if ( replacedAlternateChars && bestFieldDifference != -1 ) {
             bestFieldDifference = 2;
         }
         return new DateIntervalFormat.BestMatchInfo(bestSkeleton, bestFieldDifference);
@@ -1170,9 +1180,9 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
      */
     @Deprecated
     public Map<String,Set<String>> getPatterns() {
-        LinkedHashMap<String,Set<String>> result = new LinkedHashMap<String,Set<String>>();
+        LinkedHashMap<String,Set<String>> result = new LinkedHashMap<>();
         for (Entry<String, Map<String, PatternInfo>> entry : fIntervalPatterns.entrySet()) {
-            result.put(entry.getKey(), new LinkedHashSet<String>(entry.getValue().keySet()));
+            result.put(entry.getKey(), new LinkedHashSet<>(entry.getValue().keySet()));
         }
         return result;
     }
@@ -1184,9 +1194,9 @@ public class DateIntervalInfo implements Cloneable, Freezable<DateIntervalInfo>,
      */
     @Deprecated
     public Map<String, Map<String, PatternInfo>> getRawPatterns() {
-        LinkedHashMap<String, Map<String, PatternInfo>> result = new LinkedHashMap<String, Map<String, PatternInfo>>();
+        LinkedHashMap<String, Map<String, PatternInfo>> result = new LinkedHashMap<>();
         for (Entry<String, Map<String, PatternInfo>> entry : fIntervalPatterns.entrySet()) {
-            result.put(entry.getKey(), new LinkedHashMap<String, PatternInfo>(entry.getValue()));
+            result.put(entry.getKey(), new LinkedHashMap<>(entry.getValue()));
         }
         return result;
     }

@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /**
  *******************************************************************************
  * Copyright (C) 2001-2016 International Business Machines Corporation and
@@ -998,13 +998,81 @@ public final class UScript {
     public static final int SYMBOLS_EMOJI = 174; /* Zsye */
 
     /**
+     * ISO 15924 script code
+     * @stable ICU 60
+     */
+    public static final int MASARAM_GONDI = 175; /* Gonm */
+    /**
+     * ISO 15924 script code
+     * @stable ICU 60
+     */
+    public static final int SOYOMBO = 176; /* Soyo */
+    /**
+     * ISO 15924 script code
+     * @stable ICU 60
+     */
+    public static final int ZANABAZAR_SQUARE = 177; /* Zanb */
+
+    /**
+     * ISO 15924 script code
+     * @stable ICU 62
+     */
+    public static final int DOGRA = 178; /* Dogr */
+    /** @stable ICU 62 */
+    public static final int GUNJALA_GONDI = 179; /* Gong */
+    /** @stable ICU 62 */
+    public static final int MAKASAR = 180; /* Maka */
+    /** @stable ICU 62 */
+    public static final int MEDEFAIDRIN = 181; /* Medf */
+    /** @stable ICU 62 */
+    public static final int HANIFI_ROHINGYA = 182; /* Rohg */
+    /** @stable ICU 62 */
+    public static final int SOGDIAN = 183; /* Sogd */
+    /** @stable ICU 62 */
+    public static final int OLD_SOGDIAN = 184; /* Sogo */
+
+    /** @stable ICU 64 */
+    public static final int ELYMAIC = 185; /* Elym */
+    /** @stable ICU 64 */
+    public static final int NYIAKENG_PUACHUE_HMONG = 186; /* Hmnp */
+    /** @stable ICU 64 */
+    public static final int NANDINAGARI = 187; /* Nand */
+    /** @stable ICU 64 */
+    public static final int WANCHO = 188; /* Wcho */
+
+    /** @stable ICU 66 */
+    public static final int CHORASMIAN = 189; /* Chrs */
+    /** @stable ICU 66 */
+    public static final int DIVES_AKURU = 190; /* Diak */
+    /** @stable ICU 66 */
+    public static final int KHITAN_SMALL_SCRIPT = 191; /* Kits */
+    /** @stable ICU 66 */
+    public static final int YEZIDI = 192; /* Yezi */
+
+    /** @stable ICU 70 */
+    public static final int CYPRO_MINOAN = 193; /* Cpmn */
+    /** @stable ICU 70 */
+    public static final int OLD_UYGHUR = 194; /* Ougr */
+    /** @stable ICU 70 */
+    public static final int TANGSA = 195; /* Tnsa */
+    /** @stable ICU 70 */
+    public static final int TOTO = 196; /* Toto */
+    /** @stable ICU 70 */
+    public static final int VITHKUQI = 197; /* Vith */
+
+    /** @stable ICU 72 */
+    public static final int KAWI = 198; /* Kawi */
+    /** @stable ICU 72 */
+    public static final int NAG_MUNDARI = 199; /* Nagm */
+
+    /**
      * One more than the highest normal UScript code.
      * The highest value is available via UCharacter.getIntPropertyMaxValue(UProperty.SCRIPT).
      *
      * @deprecated ICU 58 The numeric value may change over time, see ICU ticket #12420.
      */
     @Deprecated
-    public static final int CODE_LIMIT   = 175;
+    public static final int CODE_LIMIT   = 200;
 
     private static int[] getCodesFromLocale(ULocale locale) {
         // Multi-script languages, equivalent to the LocaleScript data
@@ -1083,7 +1151,20 @@ public final class UScript {
      */
     public static final int[] getCode(String nameOrAbbrOrLocale) {
         boolean triedCode = false;
-        if (nameOrAbbrOrLocale.indexOf('_') < 0 && nameOrAbbrOrLocale.indexOf('-') < 0) {
+        int lastSepPos = nameOrAbbrOrLocale.indexOf('_');
+        if (lastSepPos < 0) {
+            lastSepPos = nameOrAbbrOrLocale.indexOf('-');
+        }
+        // Favor interpretation of nameOrAbbrOrLocale as a script alias if either
+        // 1. nameOrAbbrOrLocale does not contain -/_. Handles Han, Mro, Nko, etc.
+        // 2. The last instance of -/_ is at offset 3, and the portion after that is
+        //    longer than 4 characters (i.e. not a script or region code). This handles
+        //    Old_Hungarian, Old_Italic, etc. ("old" is a valid language code)
+        // 3. The last instance of -/_ is at offset 7, and the portion after that is
+        //    3 characters. This handles New_Tai_Lue ("new" is a valid language code).
+        if ( lastSepPos < 0
+                || (lastSepPos == 3 && nameOrAbbrOrLocale.length() > 8)
+                || (lastSepPos == 7 && nameOrAbbrOrLocale.length() == 11) ) {
             int propNum = UCharacter.getPropertyValueEnumNoThrow(UProperty.SCRIPT, nameOrAbbrOrLocale);
             if (propNum != UProperty.UNDEFINED) {
                 return new int[] {propNum};
@@ -1128,14 +1209,15 @@ public final class UScript {
     public static final int getScript(int codepoint){
         if (codepoint >= UCharacter.MIN_VALUE & codepoint <= UCharacter.MAX_VALUE) {
             int scriptX=UCharacterProperty.INSTANCE.getAdditional(codepoint, 0)&UCharacterProperty.SCRIPT_X_MASK;
+            int codeOrIndex=UCharacterProperty.mergeScriptCodeOrIndex(scriptX);
             if(scriptX<UCharacterProperty.SCRIPT_X_WITH_COMMON) {
-                return scriptX;
+                return codeOrIndex;
             } else if(scriptX<UCharacterProperty.SCRIPT_X_WITH_INHERITED) {
                 return UScript.COMMON;
             } else if(scriptX<UCharacterProperty.SCRIPT_X_WITH_OTHER) {
                 return UScript.INHERITED;
             } else {
-                return UCharacterProperty.INSTANCE.m_scriptExtensions_[scriptX&UCharacterProperty.SCRIPT_MASK_];
+                return UCharacterProperty.INSTANCE.m_scriptExtensions_[codeOrIndex];
             }
         }else{
             throw new IllegalArgumentException(Integer.toString(codepoint));
@@ -1157,12 +1239,13 @@ public final class UScript {
      */
     public static final boolean hasScript(int c, int sc) {
         int scriptX=UCharacterProperty.INSTANCE.getAdditional(c, 0)&UCharacterProperty.SCRIPT_X_MASK;
+        int codeOrIndex=UCharacterProperty.mergeScriptCodeOrIndex(scriptX);
         if(scriptX<UCharacterProperty.SCRIPT_X_WITH_COMMON) {
-            return sc==scriptX;
+            return sc==codeOrIndex;
         }
 
         char[] scriptExtensions=UCharacterProperty.INSTANCE.m_scriptExtensions_;
-        int scx=scriptX&UCharacterProperty.SCRIPT_MASK_;  // index into scriptExtensions
+        int scx=codeOrIndex;  // index into scriptExtensions
         if(scriptX>=UCharacterProperty.SCRIPT_X_WITH_OTHER) {
             scx=scriptExtensions[scx+1];
         }
@@ -1206,13 +1289,14 @@ public final class UScript {
     public static final int getScriptExtensions(int c, BitSet set) {
         set.clear();
         int scriptX=UCharacterProperty.INSTANCE.getAdditional(c, 0)&UCharacterProperty.SCRIPT_X_MASK;
+        int codeOrIndex=UCharacterProperty.mergeScriptCodeOrIndex(scriptX);
         if(scriptX<UCharacterProperty.SCRIPT_X_WITH_COMMON) {
-            set.set(scriptX);
-            return scriptX;
+            set.set(codeOrIndex);
+            return codeOrIndex;
         }
 
         char[] scriptExtensions=UCharacterProperty.INSTANCE.m_scriptExtensions_;
-        int scx=scriptX&UCharacterProperty.SCRIPT_MASK_;  // index into scriptExtensions
+        int scx=codeOrIndex;  // index into scriptExtensions
         if(scriptX>=UCharacterProperty.SCRIPT_X_WITH_OTHER) {
             scx=scriptExtensions[scx+1];
         }
@@ -1271,7 +1355,7 @@ public final class UScript {
         private static final int UNKNOWN = 1 << 21;
         private static final int EXCLUSION = 2 << 21;
         private static final int LIMITED_USE = 3 << 21;
-        private static final int ASPIRATIONAL = 4 << 21;
+        // vate static final int ASPIRATIONAL = 4 << 21; -- not used any more since Unicode 10
         private static final int RECOMMENDED = 5 << 21;
 
         // Bits 31..24: Single-bit flags
@@ -1310,7 +1394,7 @@ public final class UScript {
             0x0EA5 | RECOMMENDED | LB_LETTERS,  // Laoo
             0x004C | RECOMMENDED | CASED,  // Latn
             0x0D15 | RECOMMENDED,  // Mlym
-            0x1826 | ASPIRATIONAL,  // Mong
+            0x1826 | EXCLUSION,  // Mong
             0x1000 | RECOMMENDED | LB_LETTERS,  // Mymr
             0x168F | EXCLUSION,  // Ogam
             0x10300 | EXCLUSION,  // Ital
@@ -1323,8 +1407,8 @@ public final class UScript {
             0x078C | RECOMMENDED | RTL,  // Thaa
             0x0E17 | RECOMMENDED | LB_LETTERS,  // Thai
             0x0F40 | RECOMMENDED,  // Tibt
-            0x14C0 | ASPIRATIONAL,  // Cans
-            0xA288 | ASPIRATIONAL | LB_LETTERS,  // Yiii
+            0x14C0 | LIMITED_USE,  // Cans
+            0xA288 | LIMITED_USE | LB_LETTERS,  // Yiii
             0x1703 | EXCLUSION,  // Tglg
             0x1723 | EXCLUSION,  // Hano
             0x1743 | EXCLUSION,  // Buhd
@@ -1343,7 +1427,7 @@ public final class UScript {
             0x10A00 | EXCLUSION | RTL,  // Khar
             0xA800 | LIMITED_USE,  // Sylo
             0x1980 | LIMITED_USE | LB_LETTERS,  // Talu
-            0x2D30 | ASPIRATIONAL,  // Tfng
+            0x2D30 | LIMITED_USE,  // Tfng
             0x103A0 | EXCLUSION,  // Xpeo
             0x1B05 | LIMITED_USE,  // Bali
             0x1BC0 | LIMITED_USE,  // Batk
@@ -1375,7 +1459,7 @@ public final class UScript {
             0x1036B | EXCLUSION,  // Perm
             0xA840 | EXCLUSION,  // Phag
             0x10900 | EXCLUSION | RTL,  // Phnx
-            0x16F00 | ASPIRATIONAL,  // Plrd
+            0x16F00 | LIMITED_USE,  // Plrd
             0,
             0,
             0,
@@ -1433,7 +1517,7 @@ public final class UScript {
             0,
             0,
             0x16A4F | EXCLUSION,  // Mroo
-            0,
+            0x1B1C4 | EXCLUSION | LB_LETTERS,  // Nshu
             0x11183 | EXCLUSION,  // Shrd
             0x110D0 | EXCLUSION,  // Sora
             0x11680 | EXCLUSION,  // Takr
@@ -1458,6 +1542,31 @@ public final class UScript {
             0x5B57 | RECOMMENDED | LB_LETTERS,  // Hanb
             0x1112 | RECOMMENDED,  // Jamo
             0,
+            0x11D10 | EXCLUSION,  // Gonm
+            0x11A5C | EXCLUSION,  // Soyo
+            0x11A0B | EXCLUSION,  // Zanb
+            0x1180B | EXCLUSION,  // Dogr
+            0x11D71 | LIMITED_USE,  // Gong
+            0x11EE5 | EXCLUSION,  // Maka
+            0x16E40 | EXCLUSION | CASED,  // Medf
+            0x10D12 | LIMITED_USE | RTL,  // Rohg
+            0x10F42 | EXCLUSION | RTL,  // Sogd
+            0x10F19 | EXCLUSION | RTL,  // Sogo
+            0x10FF1 | EXCLUSION | RTL,  // Elym
+            0x1E108 | LIMITED_USE,  // Hmnp
+            0x119CE | EXCLUSION,  // Nand
+            0x1E2E1 | LIMITED_USE,  // Wcho
+            0x10FBF | EXCLUSION | RTL,  // Chrs
+            0x1190C | EXCLUSION,  // Diak
+            0x18C65 | EXCLUSION | LB_LETTERS,  // Kits
+            0x10E88 | EXCLUSION | RTL,  // Yezi
+            0x12FE5 | EXCLUSION,  // Cpmn
+            0x10F7C | EXCLUSION | RTL,  // Ougr
+            0x16ABC | EXCLUSION,  // Tnsa
+            0x1E290 | EXCLUSION,  // Toto
+            0x10582 | EXCLUSION | CASED,  // Vith
+            0x11F1B | EXCLUSION | LB_LETTERS,  // Kawi
+            0x1E4E6 | EXCLUSION,  // Nagm
             // End copy-paste from parsescriptmetadata.py
         };
 

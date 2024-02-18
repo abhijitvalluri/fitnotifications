@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  *   Copyright (C) 2009-2016, International Business Machines
@@ -185,9 +185,9 @@ public final class Norm2AllModes {
             return impl.isDecompYes(impl.getNorm16(c)) ? 1 : 0;
         }
         @Override
-        public boolean hasBoundaryBefore(int c) { return impl.hasDecompBoundary(c, true); }
+        public boolean hasBoundaryBefore(int c) { return impl.hasDecompBoundaryBefore(c); }
         @Override
-        public boolean hasBoundaryAfter(int c) { return impl.hasDecompBoundary(c, false); }
+        public boolean hasBoundaryAfter(int c) { return impl.hasDecompBoundaryAfter(c); }
         @Override
         public boolean isInert(int c) { return impl.isDecompInert(c); }
     }
@@ -238,11 +238,11 @@ public final class Norm2AllModes {
         public boolean hasBoundaryBefore(int c) { return impl.hasCompBoundaryBefore(c); }
         @Override
         public boolean hasBoundaryAfter(int c) {
-            return impl.hasCompBoundaryAfter(c, onlyContiguous, false);
+            return impl.hasCompBoundaryAfter(c, onlyContiguous);
         }
         @Override
         public boolean isInert(int c) {
-            return impl.hasCompBoundaryAfter(c, onlyContiguous, true);
+            return impl.isCompInert(c, onlyContiguous);
         }
 
         private final boolean onlyContiguous;
@@ -308,6 +308,9 @@ public final class Norm2AllModes {
     }
     public static Norm2AllModes getNFKC_CFInstance() {
         return getInstanceFromSingleton(NFKC_CFSingleton.INSTANCE);
+    }
+    public static Norm2AllModes getNFKC_SCFInstance() {
+        return getInstanceFromSingleton(NFKC_SCFSingleton.INSTANCE);
     }
     // For use in properties APIs.
     public static Normalizer2WithImpl getN2WithImpl(int index) {
@@ -384,5 +387,8 @@ public final class Norm2AllModes {
     }
     private static final class NFKC_CFSingleton {
         private static final Norm2AllModesSingleton INSTANCE=new Norm2AllModesSingleton("nfkc_cf");
+    }
+    private static final class NFKC_SCFSingleton {
+        private static final Norm2AllModesSingleton INSTANCE=new Norm2AllModesSingleton("nfkc_scf");
     }
 }

@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2009-2016, International Business Machines Corporation and
@@ -37,8 +37,17 @@ public class NumberingSystem {
     private static final String[] OTHER_NS_KEYWORDS = { "native", "traditional", "finance" };
 
     /**
-     * Default constructor.  Returns a numbering system that uses the Western decimal
-     * digits 0 through 9.
+     * For convenience, an instance representing the <em>latn</em> numbering system, which
+     * corresponds to digits in the ASCII range '0' through '9'.
+     *
+     * @stable ICU 60
+     */
+    public static final NumberingSystem LATIN = lookupInstanceByName("latn");
+
+    /**
+     * Default constructor.  Returns a numbering system that uses the Latin-script decimal
+     * digits 0 through 9.  This should be equivalent to NumberingSystem.LATIN.
+     *
      * @stable ICU 4.2
      */
     public NumberingSystem() {
@@ -88,7 +97,7 @@ public class NumberingSystem {
         }
 
         if ( !isAlgorithmic_in ) {
-            if ( desc_in.length() != radix_in || !isValidDigitString(desc_in)) {
+            if ( desc_in.codePointCount(0, desc_in.length()) != radix_in || !isValidDigitString(desc_in)) {
                 throw new IllegalArgumentException("Invalid digit string for numbering system");
             }
         }
@@ -214,6 +223,7 @@ public class NumberingSystem {
      * @param name The name of the desired numbering system.  Numbering system
      * names often correspond with the name of the script they are associated
      * with.  For example, "thai" for Thai digits, "hebr" for Hebrew numerals.
+     * @return The NumberingSystem instance, or null if not available.
      * @stable ICU 4.2
      */
     public static NumberingSystem getInstanceByName(String name) {
@@ -248,6 +258,8 @@ public class NumberingSystem {
     /**
      * Returns a string array containing a list of the names of numbering systems
      * currently known to ICU.
+     *
+     * @return An array of strings in alphabetical (invariant) order.
      * @stable ICU 4.2
      */
     public static String [] getAvailableNames() {
@@ -257,7 +269,7 @@ public class NumberingSystem {
             UResourceBundle temp;
 
             String nsName;
-            ArrayList<String> output = new ArrayList<String>();
+            ArrayList<String> output = new ArrayList<>();
             UResourceBundleIterator it = nsCurrent.getIterator();
             while (it.hasNext()) {
                 temp = it.next();

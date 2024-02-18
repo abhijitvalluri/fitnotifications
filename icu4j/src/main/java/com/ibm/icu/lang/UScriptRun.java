@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  *
@@ -18,7 +18,7 @@ import com.ibm.icu.text.UTF16;
  * the same script, as defined in the <code>UScript</code> class.
  * It implements a simple iterator over an array of characters.
  * The iterator will assign <code>COMMON</code> and <code>INHERITED</code>
- * characters to the same script as the preceeding characters. If the
+ * characters to the same script as the preceding characters. If the
  * COMMON and INHERITED characters are first, they will be assigned to
  * the same script as the following characters.
  *
@@ -86,7 +86,7 @@ public final class UScriptRun
     
     /**
      * Construct a <code>UScriptRun</code> object which iterates over a subrange
-     * of the characetrs in the given string.
+     * of the characters in the given string.
      *
      * @param text the string of characters over which to iterate.
      * @param start the index of the first character over which to iterate
@@ -103,7 +103,7 @@ public final class UScriptRun
 
     /**
      * Construct a <code>UScriptRun</code> object which iterates over the given
-     * characetrs.
+     * characters.
      *
      * @param chars the array of characters over which to iterate.
      *
@@ -118,7 +118,7 @@ public final class UScriptRun
 
     /**
      * Construct a <code>UScriptRun</code> object which iterates over a subrange
-     * of the given characetrs.
+     * of the given characters.
      *
      * @param chars the array of characters over which to iterate.
      * @param start the index of the first character over which to iterate

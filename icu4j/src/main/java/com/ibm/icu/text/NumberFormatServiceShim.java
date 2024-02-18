@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2003-2011, International Business Machines Corporation and    *
@@ -93,8 +93,11 @@ class NumberFormatServiceShim extends NumberFormat.NumberFormatShim {
         // If we are creating a currency type formatter, then we may have to set the currency
         // explicitly, since the actualLoc may be different than the desiredLocale        
         if ( choice == NumberFormat.CURRENCYSTYLE ||
-             choice == NumberFormat.ISOCURRENCYSTYLE || 
-             choice == NumberFormat.PLURALCURRENCYSTYLE) {
+             choice == NumberFormat.ISOCURRENCYSTYLE ||
+             choice == NumberFormat.PLURALCURRENCYSTYLE ||
+             choice == NumberFormat.ACCOUNTINGCURRENCYSTYLE ||
+             choice == NumberFormat.CASHCURRENCYSTYLE ||
+             choice == NumberFormat.STANDARDCURRENCYSTYLE) {
             fmt.setCurrency(Currency.getInstance(desiredLocale));
         }
 

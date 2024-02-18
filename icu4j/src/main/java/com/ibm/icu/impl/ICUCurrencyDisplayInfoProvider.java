@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 2009-2016, International Business Machines Corporation and
@@ -9,19 +9,17 @@
 package com.ibm.icu.impl;
 
 import java.lang.ref.SoftReference;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.Set;
-import java.util.TreeMap;
 
 import com.ibm.icu.impl.CurrencyData.CurrencyDisplayInfo;
 import com.ibm.icu.impl.CurrencyData.CurrencyDisplayInfoProvider;
 import com.ibm.icu.impl.CurrencyData.CurrencyFormatInfo;
 import com.ibm.icu.impl.CurrencyData.CurrencySpacingInfo;
 import com.ibm.icu.impl.ICUResourceBundle.OpenType;
+import com.ibm.icu.util.ICUException;
 import com.ibm.icu.util.ULocale;
 import com.ibm.icu.util.UResourceBundle;
 
@@ -29,21 +27,33 @@ public class ICUCurrencyDisplayInfoProvider implements CurrencyDisplayInfoProvid
     public ICUCurrencyDisplayInfoProvider() {
     }
 
+    /**
+     * Single-item cache for ICUCurrencyDisplayInfo keyed by locale.
+     */
+    private volatile ICUCurrencyDisplayInfo currencyDisplayInfoCache = null;
+
     @Override
     public CurrencyDisplayInfo getInstance(ULocale locale, boolean withFallback) {
-        ICUResourceBundle rb;
-        if (withFallback) {
-            rb = ICUResourceBundle.getBundleInstance(
-                    ICUData.ICU_CURR_BASE_NAME, locale, OpenType.LOCALE_DEFAULT_ROOT);
-        } else {
-            try {
+        // Make sure the locale is non-null (this can happen during deserialization):
+        if (locale == null) { locale = ULocale.ROOT; }
+        ICUCurrencyDisplayInfo instance = currencyDisplayInfoCache;
+        if (instance == null || !instance.locale.equals(locale) || instance.fallback != withFallback) {
+            ICUResourceBundle rb;
+            if (withFallback) {
                 rb = ICUResourceBundle.getBundleInstance(
-                        ICUData.ICU_CURR_BASE_NAME, locale, OpenType.LOCALE_ONLY);
-            } catch (MissingResourceException e) {
-                return null;
+                        ICUData.ICU_CURR_BASE_NAME, locale, OpenType.LOCALE_DEFAULT_ROOT);
+            } else {
+                try {
+                    rb = ICUResourceBundle.getBundleInstance(
+                            ICUData.ICU_CURR_BASE_NAME, locale, OpenType.LOCALE_ONLY);
+                } catch (MissingResourceException e) {
+                    return null;
+                }
             }
+            instance = new ICUCurrencyDisplayInfo(locale, rb, withFallback);
+            currencyDisplayInfoCache = instance;
         }
-        return new ICUCurrencyDisplayInfo(rb, withFallback);
+        return instance;
     }
 
     @Override
@@ -51,20 +61,87 @@ public class ICUCurrencyDisplayInfoProvider implements CurrencyDisplayInfoProvid
         return true;
     }
 
+    /**
+     * This class performs data loading for currencies and keeps data in lightweight cache.
+     */
     static class ICUCurrencyDisplayInfo extends CurrencyDisplayInfo {
-        private final boolean fallback;
+        final ULocale locale;
+        final boolean fallback;
         private final ICUResourceBundle rb;
-        private final ICUResourceBundle currencies;
-        private final ICUResourceBundle plurals;
-        private SoftReference<Map<String, String>> _symbolMapRef;
-        private SoftReference<Map<String, String>> _nameMapRef;
 
-        public ICUCurrencyDisplayInfo(ICUResourceBundle rb, boolean fallback) {
+        /**
+         * Single-item cache for getName(), getSymbol(), and getFormatInfo().
+         * Holds data for only one currency. If another currency is requested, the old cache item is overwritten.
+         */
+        private volatile FormattingData formattingDataCache = null;
+
+        /**
+         * Single-item cache for variant symbols.
+         * Holds data for only one currency. If another currency is requested, the old cache item is overwritten.
+         */
+        private volatile VariantSymbol variantSymbolCache = null;
+
+        /**
+         * Single-item cache for getPluralName().
+         *
+         * <p>
+         * array[0] is the ISO code.<br>
+         * array[1+p] is the plural name where p=standardPlural.ordinal().
+         *
+         * <p>
+         * Holds data for only one currency. If another currency is requested, the old cache item is overwritten.
+         */
+        private volatile String[] pluralsDataCache = null;
+
+        /**
+         * Cache for symbolMap() and nameMap().
+         */
+        private volatile SoftReference<ParsingData> parsingDataCache = new SoftReference<>(null);
+
+        /**
+         * Cache for getUnitPatterns().
+         */
+        private volatile Map<String, String> unitPatternsCache = null;
+
+        /**
+         * Cache for getSpacingInfo().
+         */
+        private volatile CurrencySpacingInfo spacingInfoCache = null;
+
+        static class FormattingData {
+            final String isoCode;
+            String displayName = null;
+            String symbol = null;
+            CurrencyFormatInfo formatInfo = null;
+
+            FormattingData(String isoCode) { this.isoCode = isoCode; }
+        }
+
+        static class VariantSymbol {
+            final String isoCode;
+            final String variant;
+            String symbol = null;
+
+            VariantSymbol(String isoCode, String variant) {
+                this.isoCode = isoCode;
+                this.variant = variant;
+            }
+        }
+
+        static class ParsingData {
+            Map<String, String> symbolToIsoCode = new HashMap<>();
+            Map<String, String> nameToIsoCode = new HashMap<>();
+        }
+
+        ////////////////////////
+        /// START PUBLIC API ///
+        ////////////////////////
+
+        public ICUCurrencyDisplayInfo(ULocale locale, ICUResourceBundle rb, boolean fallback) {
+            this.locale = locale;
             this.fallback = fallback;
             this.rb = rb;
-            this.currencies = rb.findTopLevel("Currencies");
-            this.plurals = rb.findTopLevel("CurrencyPlurals");
-       }
+        }
 
         @Override
         public ULocale getULocale() {
@@ -73,129 +150,423 @@ public class ICUCurrencyDisplayInfoProvider implements CurrencyDisplayInfoProvid
 
         @Override
         public String getName(String isoCode) {
-            return getName(isoCode, false);
+            FormattingData formattingData = fetchFormattingData(isoCode);
+
+            // Fall back to ISO Code
+            if (formattingData.displayName == null && fallback) {
+                return isoCode;
+            }
+            return formattingData.displayName;
         }
 
         @Override
         public String getSymbol(String isoCode) {
-            return getName(isoCode, true);
+            FormattingData formattingData = fetchFormattingData(isoCode);
+
+            // Fall back to ISO Code
+            if (formattingData.symbol == null && fallback) {
+                return isoCode;
+            }
+            return formattingData.symbol;
         }
 
-        private String getName(String isoCode, boolean symbolName) {
-            if (currencies != null) {
-                ICUResourceBundle result = currencies.findWithFallback(isoCode);
-                if (result != null) {
-                    if (!fallback && !rb.isRoot() && result.isRoot()) {
-                        return null;
-                    }
-                    return result.getString(symbolName ? 0 : 1);
-                }
-            }
+        @Override
+        public String getNarrowSymbol(String isoCode) {
+            VariantSymbol variantSymbol = fetchVariantSymbol(isoCode, "narrow");
 
-            return fallback ? isoCode : null;
+            // Fall back to regular symbol
+            if (variantSymbol.symbol == null && fallback) {
+                return getSymbol(isoCode);
+            }
+            return variantSymbol.symbol;
+        }
+
+        @Override
+        public String getFormalSymbol(String isoCode) {
+            VariantSymbol variantSymbol = fetchVariantSymbol(isoCode, "formal");
+
+            // Fall back to regular symbol
+            if (variantSymbol.symbol == null && fallback) {
+                return getSymbol(isoCode);
+            }
+            return variantSymbol.symbol;
+        }
+
+        @Override
+        public String getVariantSymbol(String isoCode) {
+            VariantSymbol variantSymbol = fetchVariantSymbol(isoCode, "variant");
+
+            // Fall back to regular symbol
+            if (variantSymbol.symbol == null && fallback) {
+                return getSymbol(isoCode);
+            }
+            return variantSymbol.symbol;
         }
 
         @Override
         public String getPluralName(String isoCode, String pluralKey ) {
-            // See http://unicode.org/reports/tr35/#Currencies, especially the fallback rule.
-            if (plurals != null) {
-                ICUResourceBundle pluralsBundle = plurals.findWithFallback(isoCode);
-                if (pluralsBundle != null) {
-                    String pluralName = pluralsBundle.findStringWithFallback(pluralKey);
-                    if (pluralName == null) {
-                        if (!fallback) {
-                            return null;
-                        }
-                        pluralName = pluralsBundle.findStringWithFallback("other");
-                        if (pluralName == null) {
-                            return getName(isoCode);
-                        }
-                    }
-                    return pluralName;
-                }
-            }
+            StandardPlural plural = StandardPlural.orNullFromString(pluralKey);
+            String[] pluralsData = fetchPluralsData(isoCode);
+            Set<String> pluralKeys = fetchUnitPatterns().keySet();
 
-            return fallback ? getName(isoCode) : null;
+            // See http://unicode.org/reports/tr35/#Currencies, especially the fallback rule.
+            String result = null;
+            if (plural != null) {
+                result = pluralsData[1 + plural.ordinal()];
+            }
+            if (result == null && ( fallback || pluralKeys.contains(pluralKey) ) ) {
+                // First fall back to the "other" plural variant
+                // Note: If plural is already "other", this fallback is benign
+                result = pluralsData[1 + StandardPlural.OTHER.ordinal()];
+            }
+            if (result == null && ( fallback || pluralKeys.contains(pluralKey) ) ) {
+                // If that fails, fall back to the display name
+                FormattingData formattingData = fetchFormattingData(isoCode);
+                result = formattingData.displayName;
+            }
+            if (result == null && fallback) {
+                // If all else fails, return the ISO code
+                result = isoCode;
+            }
+            return result;
         }
 
         @Override
         public Map<String, String> symbolMap() {
-            Map<String, String> map = _symbolMapRef == null ? null : _symbolMapRef.get();
-            if (map == null) {
-                map = _createSymbolMap();
-                // atomic and idempotent
-                _symbolMapRef = new SoftReference<Map<String, String>>(map);
-            }
-            return map;
+            ParsingData parsingData = fetchParsingData();
+            return parsingData.symbolToIsoCode;
         }
 
         @Override
         public Map<String, String> nameMap() {
-            Map<String, String> map = _nameMapRef == null ? null : _nameMapRef.get();
-            if (map == null) {
-                map = _createNameMap();
-                // atomic and idempotent
-                _nameMapRef = new SoftReference<Map<String, String>>(map);
-            }
-            return map;
+            ParsingData parsingData = fetchParsingData();
+            return parsingData.nameToIsoCode;
         }
 
         @Override
         public Map<String, String> getUnitPatterns() {
-            Map<String, String> result = new HashMap<String, String>();
-
-            ULocale locale = rb.getULocale();
-            for (;locale != null; locale = locale.getFallback()) {
-                ICUResourceBundle r = (ICUResourceBundle) UResourceBundle.getBundleInstance(
-                        ICUData.ICU_CURR_BASE_NAME, locale);
-                if (r == null) {
-                    continue;
-                }
-                ICUResourceBundle cr = r.findWithFallback("CurrencyUnitPatterns");
-                if (cr == null) {
-                    continue;
-                }
-                for (int index = 0, size = cr.getSize(); index < size; ++index) {
-                    ICUResourceBundle b = (ICUResourceBundle) cr.get(index);
-                    String key = b.getKey();
-                    if (result.containsKey(key)) {
-                        continue;
-                    }
-                    result.put(key, b.getString());
-                }
-            }
-
             // Default result is the empty map. Callers who require a pattern will have to
             // supply a default.
-            return Collections.unmodifiableMap(result);
+            Map<String,String> unitPatterns = fetchUnitPatterns();
+            return unitPatterns;
         }
 
         @Override
         public CurrencyFormatInfo getFormatInfo(String isoCode) {
-            ICUResourceBundle crb = currencies.findWithFallback(isoCode);
-            if (crb != null && crb.getSize() > 2) {
-                crb = crb.at(2);
-                if (crb != null) {
-                  String pattern = crb.getString(0);
-                  String separator = crb.getString(1);
-                  String groupingSeparator = crb.getString(2);
-                  return new CurrencyFormatInfo(pattern, separator, groupingSeparator);
-                }
-            }
-            return null;
+            FormattingData formattingData = fetchFormattingData(isoCode);
+            return formattingData.formatInfo;
         }
 
         @Override
         public CurrencySpacingInfo getSpacingInfo() {
-            SpacingInfoSink sink = new SpacingInfoSink();
-            rb.getAllItemsWithFallback("currencySpacing", sink);
-            return sink.getSpacingInfo(fallback);
+            CurrencySpacingInfo spacingInfo = fetchSpacingInfo();
+
+            // Fall back to DEFAULT
+            if ((!spacingInfo.hasBeforeCurrency || !spacingInfo.hasAfterCurrency) && fallback) {
+                return CurrencySpacingInfo.DEFAULT;
+            }
+            return spacingInfo;
         }
 
-        private final class SpacingInfoSink extends UResource.Sink {
-            CurrencySpacingInfo spacingInfo = new CurrencySpacingInfo();
-            boolean hasBeforeCurrency = false;
-            boolean hasAfterCurrency = false;
+        /////////////////////////////////////////////
+        /// END PUBLIC API -- START DATA FRONTEND ///
+        /////////////////////////////////////////////
+
+        FormattingData fetchFormattingData(String isoCode) {
+            FormattingData result = formattingDataCache;
+            if (result == null || !result.isoCode.equals(isoCode)) {
+                result = new FormattingData(isoCode);
+                CurrencySink sink = new CurrencySink(!fallback, CurrencySink.EntrypointTable.CURRENCIES);
+                sink.formattingData = result;
+                rb.getAllItemsWithFallbackNoFail("Currencies/" + isoCode, sink);
+                formattingDataCache = result;
+            }
+            return result;
+        }
+
+        VariantSymbol fetchVariantSymbol(String isoCode, String variant) {
+            VariantSymbol result = variantSymbolCache;
+            if (result == null || !result.isoCode.equals(isoCode) || !result.variant.equals(variant)) {
+                result = new VariantSymbol(isoCode, variant);
+                CurrencySink sink = new CurrencySink(!fallback, CurrencySink.EntrypointTable.CURRENCY_VARIANT);
+                sink.variantSymbol = result;
+                rb.getAllItemsWithFallbackNoFail("Currencies%" + variant + "/" + isoCode, sink);
+                variantSymbolCache = result;
+            }
+            return result;
+        }
+
+        String[] fetchPluralsData(String isoCode) {
+            String[] result = pluralsDataCache;
+            if (result == null || !result[0].equals(isoCode)) {
+                result = new String[1 + StandardPlural.COUNT];
+                result[0] = isoCode;
+                CurrencySink sink = new CurrencySink(!fallback, CurrencySink.EntrypointTable.CURRENCY_PLURALS);
+                sink.pluralsData = result;
+                rb.getAllItemsWithFallbackNoFail("CurrencyPlurals/" + isoCode, sink);
+                pluralsDataCache = result;
+            }
+            return result;
+        }
+
+        ParsingData fetchParsingData() {
+            ParsingData result = parsingDataCache.get();
+            if (result == null) {
+                result = new ParsingData();
+                CurrencySink sink = new CurrencySink(!fallback, CurrencySink.EntrypointTable.TOP);
+                sink.parsingData = result;
+                rb.getAllItemsWithFallback("", sink);
+                parsingDataCache = new SoftReference<>(result);
+            }
+            return result;
+        }
+
+        Map<String, String> fetchUnitPatterns() {
+            Map<String, String> result = unitPatternsCache;
+            if (result == null) {
+                result = new HashMap<>();
+                CurrencySink sink = new CurrencySink(!fallback, CurrencySink.EntrypointTable.CURRENCY_UNIT_PATTERNS);
+                sink.unitPatterns = result;
+                rb.getAllItemsWithFallback("CurrencyUnitPatterns", sink);
+                unitPatternsCache = result;
+            }
+            return result;
+        }
+
+        CurrencySpacingInfo fetchSpacingInfo() {
+            CurrencySpacingInfo result = spacingInfoCache;
+            if (result == null) {
+                result = new CurrencySpacingInfo();
+                CurrencySink sink = new CurrencySink(!fallback, CurrencySink.EntrypointTable.CURRENCY_SPACING);
+                sink.spacingInfo = result;
+                rb.getAllItemsWithFallback("currencySpacing", sink);
+                spacingInfoCache = result;
+            }
+            return result;
+        }
+
+        ////////////////////////////////////////////
+        /// END DATA FRONTEND -- START DATA SINK ///
+        ////////////////////////////////////////////
+
+        private static final class CurrencySink extends UResource.Sink {
+            final boolean noRoot;
+            final EntrypointTable entrypointTable;
+
+            // The fields to be populated on this run of the data sink will be non-null.
+            FormattingData formattingData = null;
+            String[] pluralsData = null;
+            ParsingData parsingData = null;
+            Map<String, String> unitPatterns = null;
+            CurrencySpacingInfo spacingInfo = null;
+            VariantSymbol variantSymbol = null;
+
+            enum EntrypointTable {
+                // For Parsing:
+                TOP,
+
+                // For Formatting:
+                CURRENCIES,
+                CURRENCY_PLURALS,
+                CURRENCY_VARIANT,
+                CURRENCY_SPACING,
+                CURRENCY_UNIT_PATTERNS
+            }
+
+            CurrencySink(boolean noRoot, EntrypointTable entrypointTable) {
+                this.noRoot = noRoot;
+                this.entrypointTable = entrypointTable;
+            }
+
+            /**
+             * The entrypoint method delegates to helper methods for each of the types of tables
+             * found in the currency data.
+             */
+            @Override
+            public void put(UResource.Key key, UResource.Value value, boolean isRoot) {
+                if (noRoot && isRoot) {
+                    // Don't consume the root bundle
+                    return;
+                }
+
+                switch (entrypointTable) {
+                case TOP:
+                    consumeTopTable(key, value);
+                    break;
+                case CURRENCIES:
+                    consumeCurrenciesEntry(key, value);
+                    break;
+                case CURRENCY_PLURALS:
+                    consumeCurrencyPluralsEntry(key, value);
+                    break;
+                case CURRENCY_VARIANT:
+                    consumeCurrenciesVariantEntry(key, value);
+                    break;
+                case CURRENCY_SPACING:
+                    consumeCurrencySpacingTable(key, value);
+                    break;
+                case CURRENCY_UNIT_PATTERNS:
+                    consumeCurrencyUnitPatternsTable(key, value);
+                    break;
+                }
+            }
+
+            private void consumeTopTable(UResource.Key key, UResource.Value value) {
+                UResource.Table table = value.getTable();
+                for (int i = 0; table.getKeyAndValue(i, key, value); i++) {
+                    if (key.contentEquals("Currencies")) {
+                        consumeCurrenciesTable(key, value);
+                    } else if (key.contentEquals("Currencies%variant")) {
+                        consumeCurrenciesVariantTable(key, value);
+                    } else if (key.contentEquals("CurrencyPlurals")) {
+                        consumeCurrencyPluralsTable(key, value);
+                    }
+                }
+            }
+
+            /*
+             *  Currencies{
+             *      ...
+             *      USD{
+             *          "US$",        => symbol
+             *          "US Dollar",  => display name
+             *      }
+             *      ...
+             *      ESP{
+             *          "₧",                  => symbol
+             *          "pesseta espanyola",  => display name
+             *          {
+             *              "¤ #,##0.00",     => currency-specific pattern
+             *              ",",              => currency-specific grouping separator
+             *              ".",              => currency-specific decimal separator
+             *          }
+             *      }
+             *      ...
+             *  }
+             */
+            void consumeCurrenciesTable(UResource.Key key, UResource.Value value) {
+                // The full Currencies table is consumed for parsing only.
+                assert parsingData != null;
+                UResource.Table table = value.getTable();
+                for (int i = 0; table.getKeyAndValue(i, key, value); i++) {
+                    String isoCode = key.toString();
+                    if (value.getType() != UResourceBundle.ARRAY) {
+                        throw new ICUException("Unexpected data type in Currencies table for " + isoCode);
+                    }
+                    UResource.Array array = value.getArray();
+
+                    parsingData.symbolToIsoCode.put(isoCode, isoCode); // Add the ISO code itself as a symbol
+                    array.getValue(0, value);
+                    parsingData.symbolToIsoCode.put(value.getString(), isoCode);
+                    array.getValue(1, value);
+                    parsingData.nameToIsoCode.put(value.getString(), isoCode);
+                }
+            }
+
+            void consumeCurrenciesEntry(UResource.Key key, UResource.Value value) {
+                assert formattingData != null;
+                String isoCode = key.toString();
+                if (value.getType() != UResourceBundle.ARRAY) {
+                    throw new ICUException("Unexpected data type in Currencies table for " + isoCode);
+                }
+                UResource.Array array = value.getArray();
+
+                if (formattingData.symbol == null) {
+                    array.getValue(0, value);
+                    formattingData.symbol = value.getString();
+                }
+                if (formattingData.displayName == null) {
+                    array.getValue(1, value);
+                    formattingData.displayName = value.getString();
+                }
+
+                // If present, the third element is the currency format info.
+                // TODO: Write unit test to ensure that this data is being used by number formatting.
+                if (array.getSize() > 2 && formattingData.formatInfo == null) {
+                    array.getValue(2, value);
+                    UResource.Array formatArray = value.getArray();
+                    formatArray.getValue(0, value);
+                    String formatPattern = value.getString();
+                    formatArray.getValue(1, value);
+                    String decimalSeparator = value.getString();
+                    formatArray.getValue(2, value);
+                    String groupingSeparator = value.getString();
+                    formattingData.formatInfo = new CurrencyFormatInfo(
+                            isoCode, formatPattern, decimalSeparator, groupingSeparator);
+                }
+            }
+
+            /*
+             *  Currencies%narrow{
+             *      AOA{"Kz"}
+             *      ARS{"$"}
+             *      ...
+             *  }
+             */
+            void consumeCurrenciesVariantEntry(UResource.Key key, UResource.Value value) {
+                assert variantSymbol != null;
+                // No extra structure to traverse.
+                if (variantSymbol.symbol == null) {
+                    variantSymbol.symbol = value.getString();
+                }
+            }
+
+            /*
+             *  Currencies%variant{
+             *      TRY{"TL"}
+             *  }
+             */
+            void consumeCurrenciesVariantTable(UResource.Key key, UResource.Value value) {
+                // Note: This data is used for parsing but not formatting.
+                assert parsingData != null;
+                UResource.Table table = value.getTable();
+                for (int i = 0; table.getKeyAndValue(i, key, value); i++) {
+                    String isoCode = key.toString();
+                    parsingData.symbolToIsoCode.put(value.getString(), isoCode);
+                }
+            }
+
+            /*
+             *  CurrencyPlurals{
+             *      BYB{
+             *          one{"Belarusian new rouble (1994–1999)"}
+             *          other{"Belarusian new roubles (1994–1999)"}
+             *      }
+             *      ...
+             *  }
+             */
+            void consumeCurrencyPluralsTable(UResource.Key key, UResource.Value value) {
+                // The full CurrencyPlurals table is consumed for parsing only.
+                assert parsingData != null;
+                UResource.Table table = value.getTable();
+                for (int i = 0; table.getKeyAndValue(i, key, value); i++) {
+                    String isoCode = key.toString();
+                    UResource.Table pluralsTable = value.getTable();
+                    for (int j=0; pluralsTable.getKeyAndValue(j, key, value); j++) {
+                        StandardPlural plural = StandardPlural.orNullFromString(key.toString());
+                        if (plural == null) {
+                            throw new ICUException("Could not make StandardPlural from keyword " + key);
+                        }
+
+                        parsingData.nameToIsoCode.put(value.getString(), isoCode);
+                    }
+                }
+            }
+
+            void consumeCurrencyPluralsEntry(UResource.Key key, UResource.Value value) {
+                assert pluralsData != null;
+                UResource.Table pluralsTable = value.getTable();
+                for (int j=0; pluralsTable.getKeyAndValue(j, key, value); j++) {
+                    StandardPlural plural = StandardPlural.orNullFromString(key.toString());
+                    if (plural == null) {
+                        throw new ICUException("Could not make StandardPlural from keyword " + key);
+                    }
+
+                    if (pluralsData[1 + plural.ordinal()] == null) {
+                        pluralsData[1 + plural.ordinal()] = value.getString();
+                    }
+                }
+            }
 
             /*
              *  currencySpacing{
@@ -211,17 +582,17 @@ public class ICUCurrencyDisplayInfoProvider implements CurrencyDisplayInfoProvid
              *      }
              *  }
              */
-            @Override
-            public void put(UResource.Key key, UResource.Value value, boolean noFallback) {
+            void consumeCurrencySpacingTable(UResource.Key key, UResource.Value value) {
+                assert spacingInfo != null;
                 UResource.Table spacingTypesTable = value.getTable();
                 for (int i = 0; spacingTypesTable.getKeyAndValue(i, key, value); ++i) {
                     CurrencySpacingInfo.SpacingType type;
                     if (key.contentEquals("beforeCurrency")) {
                         type = CurrencySpacingInfo.SpacingType.BEFORE;
-                        hasBeforeCurrency = true;
+                        spacingInfo.hasBeforeCurrency = true;
                     } else if (key.contentEquals("afterCurrency")) {
                         type = CurrencySpacingInfo.SpacingType.AFTER;
-                        hasAfterCurrency = true;
+                        spacingInfo.hasAfterCurrency = true;
                     } else {
                         continue;
                     }
@@ -244,90 +615,22 @@ public class ICUCurrencyDisplayInfoProvider implements CurrencyDisplayInfoProvid
                 }
             }
 
-            CurrencySpacingInfo getSpacingInfo(boolean fallback) {
-                if (hasBeforeCurrency && hasAfterCurrency) {
-                    return spacingInfo;
-                } else if (fallback) {
-                    return CurrencySpacingInfo.DEFAULT;
-                } else {
-                    return null;
-                }
-            }
-        }
-
-        private Map<String, String> _createSymbolMap() {
-            Map<String, String> result = new HashMap<String, String>();
-
-            for (ULocale locale = rb.getULocale(); locale != null; locale = locale.getFallback()) {
-                ICUResourceBundle bundle = (ICUResourceBundle)
-                    UResourceBundle.getBundleInstance(ICUData.ICU_CURR_BASE_NAME, locale);
-                ICUResourceBundle curr = bundle.findTopLevel("Currencies");
-                if (curr == null) {
-                    continue;
-                }
-                for (int i = 0; i < curr.getSize(); ++i) {
-                    ICUResourceBundle item = curr.at(i);
-                    String isoCode = item.getKey();
-                    if (!result.containsKey(isoCode)) {
-                        // put the code itself
-                        result.put(isoCode, isoCode);
-                        // 0 == symbol element
-                        String symbol = item.getString(0);
-                        result.put(symbol, isoCode);
+            /*
+             *  CurrencyUnitPatterns{
+             *      other{"{0} {1}"}
+             *      ...
+             *  }
+             */
+            void consumeCurrencyUnitPatternsTable(UResource.Key key, UResource.Value value) {
+                assert unitPatterns != null;
+                UResource.Table table = value.getTable();
+                for (int i = 0; table.getKeyAndValue(i, key, value); i++) {
+                    String pluralKeyword = key.toString();
+                    if (unitPatterns.get(pluralKeyword) == null) {
+                        unitPatterns.put(pluralKeyword, value.getString());
                     }
                 }
             }
-
-            return Collections.unmodifiableMap(result);
-        }
-
-        private Map<String, String> _createNameMap() {
-            // ignore case variants
-            Map<String, String> result = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-
-            Set<String> visited = new HashSet<String>();
-            Map<String, Set<String>> visitedPlurals = new HashMap<String, Set<String>>();
-            for (ULocale locale = rb.getULocale(); locale != null; locale = locale.getFallback()) {
-                ICUResourceBundle bundle = (ICUResourceBundle)
-                    UResourceBundle.getBundleInstance(ICUData.ICU_CURR_BASE_NAME, locale);
-                ICUResourceBundle curr = bundle.findTopLevel("Currencies");
-                if (curr != null) {
-                    for (int i = 0; i < curr.getSize(); ++i) {
-                        ICUResourceBundle item = curr.at(i);
-                        String isoCode = item.getKey();
-                        if (!visited.contains(isoCode)) {
-                            visited.add(isoCode);
-                            // 1 == name element
-                            String name = item.getString(1);
-                            result.put(name, isoCode);
-                        }
-                    }
-                }
-
-                ICUResourceBundle plurals = bundle.findTopLevel("CurrencyPlurals");
-                if (plurals != null) {
-                    for (int i = 0; i < plurals.getSize(); ++i) {
-                        ICUResourceBundle item = plurals.at(i);
-                        String isoCode = item.getKey();
-                        Set<String> pluralSet = visitedPlurals.get(isoCode);
-                        if (pluralSet == null) {
-                            pluralSet = new HashSet<String>();
-                            visitedPlurals.put(isoCode, pluralSet);
-                        }
-                        for (int j = 0; j < item.getSize(); ++j) {
-                            ICUResourceBundle plural = item.at(j);
-                            String pluralType = plural.getKey();
-                            if (!pluralSet.contains(pluralType)) {
-                                String pluralName = plural.getString();
-                                result.put(pluralName, isoCode);
-                                pluralSet.add(pluralType);
-                            }
-                        }
-                    }
-                }
-            }
-
-            return Collections.unmodifiableMap(result);
         }
     }
 }

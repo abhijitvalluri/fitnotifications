@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  ********************************************************************************
  * Copyright (C) 2006-2016, Google, International Business Machines Corporation
@@ -37,6 +37,7 @@ import com.ibm.icu.impl.UResource;
 import com.ibm.icu.util.Calendar;
 import com.ibm.icu.util.Freezable;
 import com.ibm.icu.util.ICUCloneNotSupportedException;
+import com.ibm.icu.util.Region;
 import com.ibm.icu.util.ULocale;
 import com.ibm.icu.util.ULocale.Category;
 import com.ibm.icu.util.UResourceBundle;
@@ -124,7 +125,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
         }
 
         result = new DateTimePatternGenerator();
-        result.initData(uLocale);
+        result.initData(uLocale, false);
 
         // freeze and cache
         result.freeze();
@@ -132,16 +133,39 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
         return result;
     }
 
-    private void initData(ULocale uLocale) {
+    /**
+     * Construct a non-frozen instance of DateTimePatternGenerator for a
+     * given locale that skips using the standard date and time patterns.
+     * Because this is different than the normal instance for the locale,
+     * it does not set or use the cache.
+     * @param uLocale The locale to pass.
+     * @internal
+     * @deprecated This API is ICU internal only.
+     */
+    @Deprecated
+    public static DateTimePatternGenerator getInstanceNoStdPat(ULocale uLocale) {
+        DateTimePatternGenerator result = new DateTimePatternGenerator();
+        result.initData(uLocale, true);
+        return result;
+    }
+
+    private void initData(ULocale uLocale, boolean skipStdPatterns) {
         // This instance of PatternInfo is required for calling some functions.  It is used for
         // passing additional information to the caller.  We won't use this extra information, but
         // we still need to make a temporary instance.
         PatternInfo returnInfo = new PatternInfo();
 
         addCanonicalItems();
-        addICUPatterns(returnInfo, uLocale);
+        if (!skipStdPatterns) { // skip to prevent circular dependency when used by Calendar
+            addICUPatterns(returnInfo, uLocale);
+        }
         addCLDRData(returnInfo, uLocale);
-        setDateTimeFromCalendar(uLocale);
+        if (!skipStdPatterns) { // also skip to prevent circular dependency from Calendar
+            setDateTimeFromCalendar(uLocale);
+        } else {
+            // instead, since from Calendar we do not care about dateTimePattern, use a fallback
+            setDateTimeFormat("{1} {0}");
+        }
         setDecimalSymbols(uLocale);
         getAllowedHourFormats(uLocale);
         fillInMissing();
@@ -178,21 +202,9 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
     private void consumeShortTimePattern(String shortTimePattern, PatternInfo returnInfo) {
         // keep this pattern to populate other time field
         // combination patterns by hackTimes later in this method.
-        // use hour style in SHORT time pattern as the default
-        // hour style for the locale
-        FormatParser fp = new FormatParser();
-        fp.set(shortTimePattern);
-        List<Object> items = fp.getItems();
-        for (int idx = 0; idx < items.size(); idx++) {
-            Object item = items.get(idx);
-            if (item instanceof VariableField) {
-                VariableField fld = (VariableField)item;
-                if (fld.getType() == HOUR) {
-                    defaultHourFormatChar = fld.toString().charAt(0);
-                    break;
-                }
-            }
-        }
+        // ICU-20383 No longer set defaultHourFormatChar to the hour format character from
+        // this pattern; instead it is set from LOCALE_TO_ALLOWED_HOUR which now
+        // includes entries for both preferred and allowed formats.
 
         // some languages didn't add mm:ss or HH:mm, so put in a hack to compute that from the short time.
         hackTimes(returnInfo, shortTimePattern);
@@ -201,13 +213,10 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
     private class AppendItemFormatsSink extends UResource.Sink {
         @Override
         public void put(UResource.Key key, UResource.Value value, boolean noFallback) {
-            UResource.Table itemsTable = value.getTable();
-            for (int i = 0; itemsTable.getKeyAndValue(i, key, value); ++i) {
-                int field = getAppendFormatNumber(key);
-                assert field != -1;
-                if (getAppendItemFormat(field) == null) {
-                    setAppendItemFormat(field, value.toString());
-                }
+            int field = getAppendFormatNumber(key);
+            if (field < 0) { return; }
+            if (getAppendItemFormat(field) == null) {
+                setAppendItemFormat(field, value.toString());
             }
         }
     }
@@ -215,17 +224,14 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
     private class AppendItemNamesSink extends UResource.Sink {
         @Override
         public void put(UResource.Key key, UResource.Value value, boolean noFallback) {
-            UResource.Table itemsTable = value.getTable();
-            for (int i = 0; itemsTable.getKeyAndValue(i, key, value); ++i) {
-                int field = getCLDRFieldNumber(key);
-                if (field == -1) { continue; }
-                UResource.Table detailsTable = value.getTable();
-                for (int j = 0; detailsTable.getKeyAndValue(j, key, value); ++j) {
-                    if (!key.contentEquals("dn")) continue;
-                    if (getAppendItemName(field) == null) {
-                        setAppendItemName(field, value.toString());
-                    }
-                    break;
+            int fieldAndWidth = getCLDRFieldAndWidthNumber(key);
+            if (fieldAndWidth == -1) { return; }
+            int field = fieldAndWidth / DisplayWidth.COUNT;
+            DisplayWidth width = CLDR_FIELD_WIDTH[fieldAndWidth % DisplayWidth.COUNT];
+            UResource.Table detailsTable = value.getTable();
+            if (detailsTable.findValue("dn", value)) {
+                if (getFieldDisplayName(field, width) == null) {
+                    setFieldDisplayName(field, width, value.toString());
                 }
             }
         }
@@ -236,10 +242,16 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
             if (getAppendItemFormat(i) == null) {
                 setAppendItemFormat(i, "{0} \u251C{2}: {1}\u2524");
             }
-            if (getAppendItemName(i) == null) {
-                setAppendItemName(i, "F" + i);
+            if (getFieldDisplayName(i, DisplayWidth.WIDE) == null) {
+                setFieldDisplayName(i, DisplayWidth.WIDE, "F" + i);
             }
-        }
+            if (getFieldDisplayName(i, DisplayWidth.ABBREVIATED) == null) {
+                setFieldDisplayName(i, DisplayWidth.ABBREVIATED, getFieldDisplayName(i, DisplayWidth.WIDE));
+            }
+            if (getFieldDisplayName(i, DisplayWidth.NARROW) == null) {
+                setFieldDisplayName(i, DisplayWidth.NARROW, getFieldDisplayName(i, DisplayWidth.ABBREVIATED));
+            }
+       }
     }
 
     private class AvailableFormatsSink extends UResource.Sink {
@@ -250,16 +262,13 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
 
         @Override
         public void put(UResource.Key key, UResource.Value value, boolean isRoot) {
-            UResource.Table formatsTable = value.getTable();
-            for (int i = 0; formatsTable.getKeyAndValue(i, key, value); ++i) {
-                String formatKey = key.toString();
-                if (!isAvailableFormatSet(formatKey)) {
-                    setAvailableFormat(formatKey);
-                    // Add pattern with its associated skeleton. Override any duplicate derived from std patterns,
-                    // but not a previous availableFormats entry:
-                    String formatValue = value.toString();
-                    addPatternWithSkeleton(formatValue, formatKey, !isRoot, returnInfo);
-                }
+            String formatKey = key.toString();
+            if (!isAvailableFormatSet(formatKey)) {
+                setAvailableFormat(formatKey);
+                // Add pattern with its associated skeleton. Override any duplicate derived from std patterns,
+                // but not a previous availableFormats entry:
+                String formatValue = value.toString();
+                addPatternWithSkeleton(formatValue, formatKey, true, returnInfo);
             }
         }
     }
@@ -278,7 +287,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
         // Load append item formats.
         AppendItemFormatsSink appendItemFormatsSink = new AppendItemFormatsSink();
         try {
-            rb.getAllItemsWithFallback(
+            rb.getAllChildrenWithFallback(
                     "calendar/" + calendarTypeToUse + "/appendItems",
                     appendItemFormatsSink);
         }catch(MissingResourceException e) {
@@ -287,7 +296,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
         // Load CLDR item names.
         AppendItemNamesSink appendItemNamesSink = new AppendItemNamesSink();
         try {
-            rb.getAllItemsWithFallback(
+            rb.getAllChildrenWithFallback(
                     "fields",
                     appendItemNamesSink);
         }catch(MissingResourceException e) {
@@ -296,7 +305,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
         // Load the available formats from CLDR.
         AvailableFormatsSink availableFormatsSink = new AvailableFormatsSink(returnInfo);
         try {
-            rb.getAllItemsWithFallback(
+            rb.getAllChildrenWithFallback(
                     "calendar/" + calendarTypeToUse + "/availableFormats",
                     availableFormatsSink);
         } catch (MissingResourceException e) {
@@ -304,8 +313,11 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
     }
 
     private void setDateTimeFromCalendar(ULocale uLocale) {
-        String dateTimeFormat = Calendar.getDateTimePattern(Calendar.getInstance(uLocale), uLocale, DateFormat.MEDIUM);
-        setDateTimeFormat(dateTimeFormat);
+        Calendar cal = Calendar.getInstance(uLocale);
+        for (int style = DateFormat.FULL; style <= DateFormat.SHORT; style++) {
+            String dateTimeFormat = Calendar.getDateAtTimePattern(cal, uLocale, style);
+            setDateTimeFormat(style, dateTimeFormat);
+        }
     }
 
     private void setDecimalSymbols(ULocale uLocale) {
@@ -315,6 +327,15 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
     }
 
     private static final String[] LAST_RESORT_ALLOWED_HOUR_FORMAT = {"H"};
+
+    private String[] getAllowedHourFormatsLangCountry(String language, String country) {
+        String langCountry = language + "_" + country;
+        String[] list = LOCALE_TO_ALLOWED_HOUR.get(langCountry);
+        if (list == null) {
+            list = LOCALE_TO_ALLOWED_HOUR.get(country);
+        }
+        return list;
+    }
 
     private void getAllowedHourFormats(ULocale uLocale) {
         // key can be either region or locale (lang_region)
@@ -335,20 +356,65 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
         //            preferred{"h"}
         //        }
 
-        ULocale max = ULocale.addLikelySubtags(uLocale);
-        String country = max.getCountry();
+        String language = uLocale.getLanguage();
+        String country = ULocale.getRegionForSupplementalData(uLocale, false);
+        
+        if (language.isEmpty() || country.isEmpty()) {
+            // Note: addLikelySubtags is documented not to throw in Java,
+            // unlike in C++.
+            ULocale max = ULocale.addLikelySubtags(uLocale);
+            language = max.getLanguage();
+            country = max.getCountry();
+        }
+
+        if (language.isEmpty()) {
+            // Unexpected, but fail gracefully
+            language = "und";
+        }
         if (country.isEmpty()) {
             country = "001";
         }
-        String langCountry = max.getLanguage() + "_" + country;
-        String[] list = LOCALE_TO_ALLOWED_HOUR.get(langCountry);
-        if (list == null) {
-            list = LOCALE_TO_ALLOWED_HOUR.get(country);
-            if (list == null) {
-                list = LAST_RESORT_ALLOWED_HOUR_FORMAT;
+
+        String[] list = getAllowedHourFormatsLangCountry(language, country);
+
+        // We need to check if there is an hour cycle on locale
+        Character defaultCharFromLocale = null;
+        String hourCycle = uLocale.getKeywordValue("hours");
+        if (hourCycle != null) {
+            switch(hourCycle) {
+                case "h24":
+                    defaultCharFromLocale = 'k';
+                    break;
+                case "h23":
+                    defaultCharFromLocale = 'H';
+                    break;
+                case "h12":
+                    defaultCharFromLocale = 'h';
+                    break;
+                case "h11":
+                    defaultCharFromLocale = 'K';
+                    break;
             }
         }
-        allowedHourFormats = list;
+
+        // Check if the region has an alias
+        if (list == null) {
+            try {
+                Region region = Region.getInstance(country);
+                country = region.toString();
+                list = getAllowedHourFormatsLangCountry(language, country);
+            } catch (IllegalArgumentException e) {
+                // invalid region; fall through
+            }
+        }
+
+        if (list != null) {
+            defaultHourFormatChar = defaultCharFromLocale != null ? defaultCharFromLocale : list[0].charAt(0);
+            allowedHourFormats = Arrays.copyOfRange(list, 1, list.length - 1);
+        } else {
+            allowedHourFormats = LAST_RESORT_ALLOWED_HOUR_FORMAT;
+            defaultHourFormatChar = (defaultCharFromLocale != null) ? defaultCharFromLocale : allowedHourFormats[0].charAt(0);
+        }
     }
 
     private static class DayPeriodAllowedHoursSink extends UResource.Sink {
@@ -364,11 +430,29 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
             for (int i = 0; timeData.getKeyAndValue(i, key, value); ++i) {
                 String regionOrLocale = key.toString();
                 UResource.Table formatList = value.getTable();
+                String[] allowed = null;
+                String preferred = null;
                 for (int j = 0; formatList.getKeyAndValue(j, key, value); ++j) {
-                    if (key.contentEquals("allowed")) {  // Ignore "preferred" list.
-                        tempMap.put(regionOrLocale, value.getStringArrayOrStringAsArray());
+                    if (key.contentEquals("allowed")) {
+                        allowed = value.getStringArrayOrStringAsArray();
+                    } else if (key.contentEquals("preferred")) {
+                        preferred = value.getString();
                     }
                 }
+                // below we construct a list[] that has an entry for the "preferred" value at [0],
+                 // followed by 1 or more entries for the "allowed" values.
+                String[] list = null;
+                if (allowed!=null && allowed.length > 0) {
+                    list = new String[allowed.length + 1];
+                    list[0] = (preferred != null)? preferred:  allowed[0];
+                    System.arraycopy(allowed, 0, list, 1, allowed.length);
+                } else {
+                    // fallback handling for missing data
+                    list = new String[2];
+                    list[0] = (preferred != null)? preferred: LAST_RESORT_ALLOWED_HOUR_FORMAT[0];
+                    list[1] = list[0];
+                }
+                tempMap.put(regionOrLocale, list);
             }
         }
     }
@@ -376,7 +460,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
     // Get the data for dayperiod C.
     static final Map<String, String[]> LOCALE_TO_ALLOWED_HOUR;
     static {
-        HashMap<String, String[]> temp = new HashMap<String, String[]>();
+        HashMap<String, String[]> temp = new HashMap<>();
         ICUResourceBundle suppData = (ICUResourceBundle)ICUResourceBundle.getBundleInstance(
                 ICUData.ICU_BASE_NAME,
                 "supplementalData",
@@ -505,10 +589,13 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
         return -1;
     }
 
-    private static int getCLDRFieldNumber(UResource.Key key) {
+    private static int getCLDRFieldAndWidthNumber(UResource.Key key) {
         for (int i = 0; i < CLDR_FIELD_NAME.length; ++i) {
-            if (key.contentEquals(CLDR_FIELD_NAME[i])) {
-                return i;
+            for (int j = 0; j < DisplayWidth.COUNT; ++j) {
+                String fullKey = CLDR_FIELD_NAME[i].concat(CLDR_FIELD_WIDTH[j].cldrKey());
+                if (key.contentEquals(fullKey)) {
+                    return i * DisplayWidth.COUNT + j;
+                }
             }
         }
         return -1;
@@ -549,34 +636,10 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
     private String getBestPattern(String skeleton, DateTimeMatcher skipMatcher, int options) {
         EnumSet<DTPGflags> flags = EnumSet.noneOf(DTPGflags.class);
         // Replace hour metacharacters 'j', 'C', and 'J', set flags as necessary
-        StringBuilder skeletonCopy = new StringBuilder(skeleton);
-        boolean inQuoted = false;
-        for (int patPos = 0; patPos < skeleton.length(); patPos++) {
-            char patChr = skeleton.charAt(patPos);
-            if (patChr == '\'') {
-                inQuoted = !inQuoted;
-            } else if (!inQuoted) {
-                if (patChr == 'j') {
-                    skeletonCopy.setCharAt(patPos, defaultHourFormatChar);
-                } else if (patChr == 'C') {
-                    String preferred = allowedHourFormats[0];
-                    skeletonCopy.setCharAt(patPos, preferred.charAt(0));
-                    final DTPGflags alt = DTPGflags.getFlag(preferred);
-                    if (alt != null) {
-                        flags.add(alt);
-                    }
-                } else if (patChr == 'J') {
-                    // Get pattern for skeleton with H, then (in adjustFieldTypes)
-                    // replace H or k with defaultHourFormatChar
-                    skeletonCopy.setCharAt(patPos, 'H');
-                    flags.add(DTPGflags.SKELETON_USES_CAP_J);
-                }
-            }
-        }
-
+        String skeletonMapped = mapSkeletonMetacharacters(skeleton, flags);
         String datePattern, timePattern;
         synchronized(this) {
-            current.set(skeletonCopy.toString(), fp, false);
+            current.set(skeletonMapped, fp, false);
             PatternWithMatcher bestWithMatcher = getBestRaw(current, -1, _distanceInfo, skipMatcher);
             if (_distanceInfo.missingFieldMask == 0 && _distanceInfo.extraFieldMask == 0) {
                 // we have a good item. Adjust the field types
@@ -591,8 +654,90 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
 
         if (datePattern == null) return timePattern == null ? "" : timePattern;
         if (timePattern == null) return datePattern;
+        // determine which dateTimeFormat to use
+        String canonicalSkeleton = current.toCanonicalString(); // month fields use M, weekday fields use E
+        int style = DateFormat.SHORT;
+        int monthFieldLen = 0;
+        int monthFieldOffset = canonicalSkeleton.indexOf('M');
+        if (monthFieldOffset >= 0) {
+            monthFieldLen = 1 + canonicalSkeleton.lastIndexOf('M') - monthFieldOffset;
+        }
+        if (monthFieldLen == 4) {
+            if (canonicalSkeleton.indexOf('E') >= 0) {
+                style = DateFormat.FULL;
+            } else {
+                style = DateFormat.LONG;
+            }
+        } else if (monthFieldLen == 3) {
+            style = DateFormat.MEDIUM;
+        }
+        // and now use it to compose date and time
         return SimpleFormatterImpl.formatRawPattern(
-                getDateTimeFormat(), 2, 2, timePattern, datePattern);
+                getDateTimeFormat(style), 2, 2, timePattern, datePattern);
+    }
+
+    /*
+     * Map a skeleton that may have metacharacters jJC to one without, by replacing
+     * the metacharacters with locale-appropriate fields of of h/H/k/K and of a/b/B
+     * (depends on defaultHourFormatChar and allowedHourFormats being set, which in
+     * turn depends on initData having been run). This method also updates the flags
+     * as necessary. Returns the updated skeleton.
+     */
+    private String mapSkeletonMetacharacters(String skeleton, EnumSet<DTPGflags> flags) {
+        StringBuilder skeletonCopy = new StringBuilder();
+        boolean inQuoted = false;
+        for (int patPos = 0; patPos < skeleton.length(); patPos++) {
+            char patChr = skeleton.charAt(patPos);
+            if (patChr == '\'') {
+                inQuoted = !inQuoted;
+            } else if (!inQuoted) {
+                // Handle special mappings for 'j' and 'C' in which fields lengths
+                // 1,3,5 => hour field length 1
+                // 2,4,6 => hour field length 2
+                // 1,2 => abbreviated dayPeriod (field length 1..3)
+                // 3,4 => long dayPeriod (field length 4)
+                // 5,6 => narrow dayPeriod (field length 5)
+                if (patChr == 'j' || patChr == 'C') {
+                    int extraLen = 0; // 1 less than total field length
+                    while (patPos+1 < skeleton.length() && skeleton.charAt(patPos+1) == patChr) {
+                        extraLen++;
+                        patPos++;
+                    }
+                    int hourLen = 1 + (extraLen & 1);
+                    int dayPeriodLen = (extraLen < 2)? 1: 3 + (extraLen >> 1);
+                    char hourChar = 'h';
+                    char dayPeriodChar = 'a';
+                    if (patChr == 'j') {
+                        hourChar = defaultHourFormatChar;
+                    } else { // patChr == 'C'
+                        String bestAllowed = allowedHourFormats[0];
+                        hourChar = bestAllowed.charAt(0);
+                        // in #13183 just add b/B to skeleton, no longer need to set special flags
+                        char last = bestAllowed.charAt(bestAllowed.length()-1);
+                        if (last=='b' || last=='B') {
+                            dayPeriodChar = last;
+                        }
+                    }
+                    if (hourChar=='H' || hourChar=='k') {
+                        dayPeriodLen = 0;
+                    }
+                    while (dayPeriodLen-- > 0) {
+                        skeletonCopy.append(dayPeriodChar);
+                    }
+                     while (hourLen-- > 0) {
+                        skeletonCopy.append(hourChar);
+                    }
+                } else if (patChr == 'J') {
+                    // Get pattern for skeleton with H, then (in adjustFieldTypes)
+                    // replace H or k with defaultHourFormatChar
+                    skeletonCopy.append('H');
+                    flags.add(DTPGflags.SKELETON_USES_CAP_J);
+                } else {
+                    skeletonCopy.append(patChr);
+                }
+            }
+        }
+        return skeletonCopy.toString();
     }
 
     /**
@@ -798,7 +943,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
      */
     public Map<String, String> getSkeletons(Map<String, String> result) {
         if (result == null) {
-            result = new LinkedHashMap<String, String>();
+            result = new LinkedHashMap<>();
         }
         for (DateTimeMatcher item : skeleton2pattern.keySet()) {
             PatternWithSkeletonFlag patternWithSkelFlag = skeleton2pattern.get(item);
@@ -817,7 +962,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
      */
     public Set<String> getBaseSkeletons(Set<String> result) {
         if (result == null) {
-            result = new HashSet<String>();
+            result = new HashSet<>();
         }
         result.addAll(basePattern_pattern.keySet());
         return result;
@@ -875,23 +1020,79 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
      * for those two skeletons, so the result is put together with this pattern,
      * resulting in "d-MMM h:mm".
      *
+     * There are four DateTimeFormats in a DateTimePatternGenerator object,
+     * corresponding to date styles DateFormat.FULL..DateFormat.SHORT. This method sets
+     * all of them to the specified pattern. To set them individually, see
+     * setDateTimeFormat(int style, ...).
+     *
      * @param dateTimeFormat message format pattern, where {1} will be replaced by the date
      *            pattern and {0} will be replaced by the time pattern.
      * @stable ICU 3.6
      */
     public void setDateTimeFormat(String dateTimeFormat) {
         checkFrozen();
-        this.dateTimeFormat = dateTimeFormat;
+        for (int style = DateFormat.FULL; style <= DateFormat.SHORT; style++) {
+            setDateTimeFormat(style, dateTimeFormat);
+        }
     }
 
     /**
      * Getter corresponding to setDateTimeFormat.
      *
+     * There are four DateTimeFormats in a DateTimePatternGenerator object,
+     * corresponding to date styles DateFormat.FULL..DateFormat.SHORT. This method gets
+     * the style for DateFormat.MEDIUM (the default). To get them individually, see
+     * getDateTimeFormat(int style).
+     *
      * @return pattern
      * @stable ICU 3.6
      */
     public String getDateTimeFormat() {
-        return dateTimeFormat;
+        return getDateTimeFormat(DateFormat.MEDIUM);
+    }
+
+    /**
+     * dateTimeFormats are message patterns used to compose combinations of date
+     * and time patterns. There are four length styles, corresponding to the
+     * inferred style of the date pattern:
+     *  - DateFormat.FULL (for date pattern with weekday and long month), else
+     *  - DateFormat.LONG (for a date pattern with long month), else
+     *  - DateFormat.MEDIUM (for a date pattern with abbreviated month), else
+     *  - DateFormat.SHORT (for any other date pattern).
+     * For details on dateTimeFormats, see
+     * https://www.unicode.org/reports/tr35/tr35-dates.html#dateTimeFormats.
+     * The default pattern in the root locale for all styles is "{1} {0}".
+     *
+     * @param style
+     *              one of DateFormat.FULL..DateFormat.SHORT. An exception will
+     *              be thrown if out of range.
+     * @param dateTimeFormat
+     *              the new dateTimeFormat to set for the specified style
+     * @stable ICU 71
+     */
+    public void setDateTimeFormat(int style, String dateTimeFormat) {
+        if (style < DateFormat.FULL || style > DateFormat.SHORT) {
+            throw new IllegalArgumentException("Illegal style here: " + style);
+        }
+        checkFrozen();
+        this.dateTimeFormats[style] = dateTimeFormat;
+    }
+
+    /**
+     * Getter corresponding to setDateTimeFormat.
+     *
+     * @param style
+     *              one of DateFormat.FULL..DateFormat.SHORT. An exception will
+     *              be thrown if out of range.
+     * @return
+     *              the current dateTimeFormat for the specified style.
+     * @stable ICU 71
+     */
+    public String getDateTimeFormat(int style) {
+        if (style < DateFormat.FULL || style > DateFormat.SHORT) {
+            throw new IllegalArgumentException("Illegal style here: " + style);
+        }
+        return dateTimeFormats[style];
     }
 
     /**
@@ -935,7 +1136,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
     public Collection<String> getRedundants(Collection<String> output) {
         synchronized (this) { // synchronized since a getter must be thread-safe
             if (output == null) {
-                output = new LinkedHashSet<String>();
+                output = new LinkedHashSet<>();
             }
             for (DateTimeMatcher cur : skeleton2pattern.keySet()) {
                 PatternWithSkeletonFlag patternWithSkelFlag = skeleton2pattern.get(cur);
@@ -1062,6 +1263,51 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
     @Deprecated
     public static final int TYPE_LIMIT = 16;
 
+    /**
+     * Field display name width constants for getFieldDisplayName
+     * @stable ICU 61
+     */
+    public enum DisplayWidth {
+        /**
+         * The full field name
+         * @stable ICU 61
+         */
+        WIDE(""),
+        /**
+         * An abbreviated field name
+         * (may be the same as the wide version, if short enough)
+         * @stable ICU 61
+         */
+        ABBREVIATED("-short"),
+        /**
+         * The shortest possible field name
+         * (may be the same as the abbreviated version)
+         * @stable ICU 61
+         */
+        NARROW("-narrow");
+        /**
+         * The count of available widths
+         * @internal
+         * @deprecated This API is ICU internal only.
+         */
+        @Deprecated
+        private static int COUNT = DisplayWidth.values().length;
+        private final String cldrKey;
+        DisplayWidth(String cldrKey) {
+            this.cldrKey = cldrKey;
+        }
+        private String cldrKey() {
+            return cldrKey;
+        }
+    }
+
+    /**
+     * The field name width for use in appendItems
+     */
+    private static final DisplayWidth APPENDITEM_WIDTH = DisplayWidth.WIDE;
+    private static final int APPENDITEM_WIDTH_INT = APPENDITEM_WIDTH.ordinal();
+    private static final DisplayWidth[] CLDR_FIELD_WIDTH = DisplayWidth.values();
+
     // Option masks for getBestPattern, replaceFieldTypes (individual masks may be ORed together)
 
     /**
@@ -1152,20 +1398,69 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
      * @stable ICU 3.6
      */
     public void setAppendItemName(int field, String value) {
-        checkFrozen();
-        appendItemNames[field] = value;
+        setFieldDisplayName(field, APPENDITEM_WIDTH, value);
     }
 
     /**
-     * Getter corresponding to setAppendItemNames. Values below 0 or at or above
-     * TYPE_LIMIT are illegal arguments.
+     * Getter corresponding to setAppendItemName. Values below 0 or at or above
+     * TYPE_LIMIT are illegal arguments. Note: The more general method
+     * for getting date/time field display names is getFieldDisplayName.
      *
      * @param field The index to get the append item name.
      * @return name for field
+     * @see #getFieldDisplayName(int, DisplayWidth)
      * @stable ICU 3.6
      */
     public String getAppendItemName(int field) {
-        return appendItemNames[field];
+        return getFieldDisplayName(field, APPENDITEM_WIDTH);
+    }
+
+    /**
+     * Return the default hour cycle.
+     * @stable ICU 67
+     */
+    public DateFormat.HourCycle getDefaultHourCycle() {
+      switch(getDefaultHourFormatChar()) {
+        case 'h': return DateFormat.HourCycle.HOUR_CYCLE_12;
+        case 'H': return DateFormat.HourCycle.HOUR_CYCLE_23;
+        case 'k': return DateFormat.HourCycle.HOUR_CYCLE_24;
+        case 'K': return DateFormat.HourCycle.HOUR_CYCLE_11;
+        default: throw new AssertionError("should be unreachable");
+      }
+    }
+
+    /**
+     * The private interface to set a display name for a particular date/time field,
+     * in one of several possible display widths.
+     *
+     * @param field The field type, such as ERA.
+     * @param width The desired DisplayWidth, such as DisplayWidth.ABBREVIATED.
+     * @param value The display name to set
+     * @internal
+     * @deprecated This API is ICU internal only.
+     */
+    @Deprecated
+    private void setFieldDisplayName(int field, DisplayWidth width, String value) {
+        checkFrozen();
+        if (field < TYPE_LIMIT && field >= 0) {
+            fieldDisplayNames[field][width.ordinal()] = value;
+        }
+    }
+
+    /**
+     * The general interface to get a display name for a particular date/time field,
+     * in one of several possible display widths.
+     *
+     * @param field The field type, such as ERA.
+     * @param width The desired DisplayWidth, such as DisplayWidth.ABBREVIATED.
+     * @return      The display name for the field
+     * @stable ICU 61
+     */
+    public String getFieldDisplayName(int field, DisplayWidth width) {
+        if (field >= TYPE_LIMIT || field < 0) {
+            return "";
+        }
+        return fieldDisplayNames[field][width.ordinal()];
     }
 
     /**
@@ -1203,7 +1498,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
      * the pattern map from parent locales.
      *
      * @param key of the availableFormatMask in CLDR
-     * @return TRUE if the corresponding slot of CLDR_AVAIL_FORMAT_KEY[]
+     * @return true if the corresponding slot of CLDR_AVAIL_FORMAT_KEY[]
      * has been added to DateTimePatternGenerator.
      * @stable ICU 3.6
      */
@@ -1253,8 +1548,9 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
             DateTimePatternGenerator result = (DateTimePatternGenerator) (super.clone());
             result.skeleton2pattern = (TreeMap<DateTimeMatcher, PatternWithSkeletonFlag>) skeleton2pattern.clone();
             result.basePattern_pattern = (TreeMap<String, PatternWithSkeletonFlag>) basePattern_pattern.clone();
+            result.dateTimeFormats = dateTimeFormats.clone();
             result.appendItemFormats = appendItemFormats.clone();
-            result.appendItemNames = appendItemNames.clone();
+            result.fieldDisplayNames = fieldDisplayNames.clone();
             result.current = new DateTimeMatcher();
             result.fp = new FormatParser();
             result._distanceInfo = new DistanceInfo();
@@ -1400,7 +1696,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
         .setSyntaxCharacters(SYNTAX_CHARS)
         .setExtraQuotingCharacters(QUOTING_CHARS)
         .setUsingQuote(true);
-        private List<Object> items = new ArrayList<Object>();
+        private List<Object> items = new ArrayList<>();
 
         /**
          * Construct an empty date format parser, to which strings and variables can be added with set(...).
@@ -1716,7 +2012,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
 
     private TreeSet<String> getSet(String id) {
         final List<Object> items = fp.set(id).getItems();
-        TreeSet<String> result = new TreeSet<String>();
+        TreeSet<String> result = new TreeSet<>();
         for (Object obj : items) {
             final String item = obj.toString();
             if (item.startsWith("G") || item.startsWith("a")) {
@@ -1751,12 +2047,19 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
             return pattern + "," + skeletonWasSpecified;
         }
     }
-    private TreeMap<DateTimeMatcher, PatternWithSkeletonFlag> skeleton2pattern = new TreeMap<DateTimeMatcher, PatternWithSkeletonFlag>(); // items are in priority order
-    private TreeMap<String, PatternWithSkeletonFlag> basePattern_pattern = new TreeMap<String, PatternWithSkeletonFlag>(); // items are in priority order
+    private TreeMap<DateTimeMatcher, PatternWithSkeletonFlag> skeleton2pattern = new TreeMap<>(); // items are in priority order
+    private TreeMap<String, PatternWithSkeletonFlag> basePattern_pattern = new TreeMap<>(); // items are in priority order
     private String decimal = "?";
-    private String dateTimeFormat = "{1} {0}";
+    // For the following, need fallback patterns in case an empty instance 
+    // of DateTimePatterngenerator is used for formatting.
+    private String[] dateTimeFormats = {
+        "{1} {0}",
+        "{1} {0}",
+        "{1} {0}",
+        "{1} {0}"
+    };
     private String[] appendItemFormats = new String[TYPE_LIMIT];
-    private String[] appendItemNames = new String[TYPE_LIMIT];
+    private String[][] fieldDisplayNames = new String[TYPE_LIMIT][DisplayWidth.COUNT];
     private char defaultHourFormatChar = 'H';
     //private boolean chineseMonthHack = false;
     //private boolean isComplete = false;
@@ -1772,7 +2075,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
     private static final int SECOND_AND_FRACTIONAL_MASK = (1<<SECOND) | (1<<FRACTIONAL_SECOND);
 
     // Cache for DateTimePatternGenerator
-    private static ICUCache<String, DateTimePatternGenerator> DTPNG_CACHE = new SimpleCache<String, DateTimePatternGenerator>();
+    private static ICUCache<String, DateTimePatternGenerator> DTPNG_CACHE = new SimpleCache<>();
 
     private void checkFrozen() {
         if (isFrozen()) {
@@ -1817,7 +2120,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
     }
 
     private String getAppendName(int foundMask) {
-        return "'" + appendItemNames[foundMask] + "'";
+        return "'" + fieldDisplayNames[foundMask][APPENDITEM_WIDTH_INT] + "'";
     }
     private String getAppendFormat(int foundMask) {
         return appendItemFormats[foundMask];
@@ -1856,6 +2159,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
         //      if (SHOW_DISTANCE) System.out.println("Searching for: " + source.pattern
         //      + ", mask: " + showMask(includeMask));
         int bestDistance = Integer.MAX_VALUE;
+        int bestMissingFieldMask = Integer.MIN_VALUE;
         PatternWithMatcher bestPatternWithMatcher = new PatternWithMatcher("", null);
         DistanceInfo tempInfo = new DistanceInfo();
         for (DateTimeMatcher trial : skeleton2pattern.keySet()) {
@@ -1865,8 +2169,16 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
             int distance = source.getDistance(trial, includeMask, tempInfo);
             //          if (SHOW_DISTANCE) System.out.println("\tDistance: " + trial.pattern + ":\t"
             //          + distance + ",\tmissing fields: " + tempInfo);
-            if (distance < bestDistance) {
+
+            // Because we iterate over a map the order is undefined. Can change between implementations,
+            // versions, and will very likely be different between Java and C/C++.
+            // So if we have patterns with the same distance we also look at the missingFieldMask,
+            // and we favour the smallest one. Because the field is a bitmask this technically means we
+            // favour differences in the "least significant fields". For example we prefer the one with differences
+            // in seconds field vs one with difference in the hours field.
+            if (distance < bestDistance || (distance == bestDistance && bestMissingFieldMask < tempInfo.missingFieldMask)) {
                 bestDistance = distance;
+                bestMissingFieldMask = tempInfo.missingFieldMask;
                 PatternWithSkeletonFlag patternWithSkelFlag = skeleton2pattern.get(trial);
                 bestPatternWithMatcher.pattern = patternWithSkelFlag.pattern;
                 // If the best raw match had a specified skeleton then return it too.
@@ -1892,18 +2204,8 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
     private enum DTPGflags {
         FIX_FRACTIONAL_SECONDS,
         SKELETON_USES_CAP_J,
-        SKELETON_USES_b,
-        SKELETON_USES_B,
+        // with #13183, no longer need flags for b, B
         ;
-
-        public static DTPGflags getFlag(String preferred) {
-            char last = preferred.charAt(preferred.length()-1);
-            switch (last) {
-            case 'b' : return SKELETON_USES_b;
-            case 'B' : return SKELETON_USES_B;
-            default: return null;
-            }
-        }
     };
 
     private String adjustFieldTypes(PatternWithMatcher patternWithMatcher, DateTimeMatcher inputRequest, EnumSet<DTPGflags> flags, int options) {
@@ -1923,18 +2225,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
                 //                int type = types[canonicalIndex][1];
                 int type = variableField.getType();
 
-                // handle special day periods
-                if (type == DAYPERIOD
-                        && !flags.isEmpty()) {
-                    char c = flags.contains(DTPGflags.SKELETON_USES_b) ? 'b' : flags.contains(DTPGflags.SKELETON_USES_B) ? 'B' : '0';
-                    if (c != '0') {
-                        int len = fieldBuilder.length();
-                        fieldBuilder.setLength(0);
-                        for (int i = len; i > 0; --i) {
-                            fieldBuilder.append(c);
-                        }
-                    }
-                }
+                // handle day periods - with #13183, no longer need special handling here, integrated with normal types
 
                 if (flags.contains(DTPGflags.FIX_FRACTIONAL_SECONDS) && type == SECOND) {
                     fieldBuilder.append(decimal);
@@ -1946,8 +2237,10 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
                     // - "field" is the field from the found pattern.
                     //
                     // The adjusted field should consist of characters from the originally requested
-                    // skeleton, except in the case of HOUR or MONTH or WEEKDAY or YEAR, in which case it
-                    // should consist of characters from the found pattern.
+                    // skeleton, except in the case of MONTH or WEEKDAY or YEAR, in which case it
+                    // should consist of characters from the found pattern. There is some adjustment
+                    // in some cases of HOUR to "defaultHourFormatChar". There is explanation
+                    // how it is done below.
                     //
                     // The length of the adjusted field (adjFieldLen) should match that in the originally
                     // requested skeleton, except that in the following cases the length of the adjusted field
@@ -1975,7 +2268,11 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
                             (type == MINUTE && (options & MATCH_MINUTE_FIELD_LENGTH)==0) ||
                             (type == SECOND && (options & MATCH_SECOND_FIELD_LENGTH)==0) ) {
                         adjFieldLen = fieldBuilder.length();
-                    } else if (matcherWithSkeleton != null) {
+                    } else if (matcherWithSkeleton != null && reqFieldChar != 'c' && reqFieldChar != 'e') {
+                        // (we skip this section for 'c' and 'e' because unlike the other characters considered in this function,
+                        // they have no minimum field length-- 'E' and 'EE' are equivalent to 'EEE', but 'e' and 'ee' are not
+                        // equivalent to 'eee' -- see the entries for "week day" in
+                        // https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table for more info)
                         int skelFieldLen = matcherWithSkeleton.original.getFieldLength(type);
                         boolean patFieldIsNumeric = variableField.isNumeric();
                         boolean skelFieldIsNumeric = matcherWithSkeleton.fieldIsNumeric(type);
@@ -1992,8 +2289,31 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
                             && (type != YEAR || reqFieldChar=='Y'))
                             ? reqFieldChar
                             : fieldBuilder.charAt(0);
-                    if (type == HOUR && flags.contains(DTPGflags.SKELETON_USES_CAP_J)) {
-                        c = defaultHourFormatChar;
+                    if (c == 'E' && adjFieldLen < 3) {
+                        // see https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table:
+                        // If we want a numeric day-of-week field, we have to use 'e'-- 'E' doesn't support
+                        // numeric day-of-week abbreivations
+                        c = 'e';
+                    }
+                    if (type == HOUR) {
+                        // The adjustment here is required to match spec (https://www.unicode.org/reports/tr35/tr35-dates.html#dfst-hour).
+                        // It is necessary to match the hour-cycle preferred by the Locale.
+                        // Given that, we need to do the following adjustments:
+                        // 1. When hour-cycle is h11 it should replace 'h' by 'K'.
+                        // 2. When hour-cycle is h23 it should replace 'H' by 'k'.
+                        // 3. When hour-cycle is h24 it should replace 'k' by 'H'.
+                        // 4. When hour-cycle is h12 it should replace 'K' by 'h'.
+                        if (flags.contains(DTPGflags.SKELETON_USES_CAP_J) || reqFieldChar == defaultHourFormatChar) {
+                            c = defaultHourFormatChar;
+                        } else if (reqFieldChar == 'h' && defaultHourFormatChar == 'K') {
+                            c = 'K';
+                        } else if (reqFieldChar == 'H' && defaultHourFormatChar == 'k') {
+                            c = 'k';
+                        } else if (reqFieldChar == 'k' && defaultHourFormatChar == 'H') {
+                            c = 'H';
+                        } else if (reqFieldChar == 'K' && defaultHourFormatChar == 'h') {
+                            c = 'h';
+                        }
                     }
                     fieldBuilder = new StringBuilder();
                     for (int i = adjFieldLen; i > 0; --i) fieldBuilder.append(c);
@@ -2054,8 +2374,8 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
     };
 
     private static final String[] CLDR_FIELD_NAME = {
-        "era", "year", "*", "month", "week", "*", "weekday",
-        "day", "*", "*", "dayperiod",
+        "era", "year", "quarter", "month", "week", "weekOfMonth", "weekday",
+        "day", "dayOfYear", "weekdayOfMonth", "dayperiod",
         "hour", "minute", "second", "*", "zone"
     };
 
@@ -2068,12 +2388,32 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
 
     private static final String[] CANONICAL_ITEMS = {
         "G", "y", "Q", "M", "w", "W", "E",
-        "d", "D", "F",
+        "d", "D", "F", "a",
         "H", "m", "s", "S", "v"
     };
 
-    private static final Set<String> CANONICAL_SET = new HashSet<String>(Arrays.asList(CANONICAL_ITEMS));
-    private Set<String> cldrAvailableFormatKeys = new HashSet<String>(20);
+    // canon    DateTimePatternGen      CLDR fields
+    // char     field                   bundle key
+    // ----     --------------------    ----------------
+    // 'G', //  0 ERA                   "era"
+    // 'y', //  1 YEAR                  "year"
+    // 'Q', //  2 QUARTER               "quarter"
+    // 'M', //  3 MONTH                 "month"
+    // 'w', //  4 WEEK_OF_YEAR,         "week"
+    // 'W', //  5 WEEK_OF_MONTH         "weekOfMonth"
+    // 'E', //  6 WEEKDAY               "weekday"
+    // 'd', //  7 DAY                   "day"
+    // 'D', //  8 DAY_OF_YEAR           "dayOfYear"
+    // 'F', //  9 DAY_OF_WEEK_IN_MONTH  "weekdayOfMonth"
+    // 'a', // 10 DAYPERIOD             "dayperiod"
+    // 'H', // 11 HOUR                  "hour"
+    // 'm', // 12 MINUTE                "minute"
+    // 's', // 13 SECOND                "second"
+    // 'S', // 14 FRACTIONAL_SECOND
+    // 'v', // 15 ZONE                  "zone"
+
+    private static final Set<String> CANONICAL_SET = new HashSet<>(Arrays.asList(CANONICAL_ITEMS));
+    private Set<String> cldrAvailableFormatKeys = new HashSet<>(20);
 
     private static final int
     DATE_MASK = (1<<DAYPERIOD) - 1,
@@ -2084,8 +2424,9 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
     NUMERIC = 0x100,
     NONE = 0,
     NARROW = -0x101,
-    SHORT = -0x102,
-    LONG = -0x103,
+    SHORTER = -0x102,
+    SHORT = -0x103,
+    LONG = -0x104,
     EXTRA_FIELD =   0x10000,
     MISSING_FIELD = 0x1000;
 
@@ -2156,6 +2497,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
         // pattern character, main type, weight, min length, weight
         {'G', ERA, SHORT, 1, 3},
         {'G', ERA, LONG, 4},
+        {'G', ERA, NARROW, 5},
 
         {'y', YEAR, NUMERIC, 1, 20},
         {'Y', YEAR, NUMERIC + DELTA, 1, 20},
@@ -2168,10 +2510,11 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
         {'Q', QUARTER, NUMERIC, 1, 2},
         {'Q', QUARTER, SHORT, 3},
         {'Q', QUARTER, LONG, 4},
-
+        {'Q', QUARTER, NARROW, 5},
         {'q', QUARTER, NUMERIC + DELTA, 1, 2},
-        {'q', QUARTER, SHORT + DELTA, 3},
-        {'q', QUARTER, LONG + DELTA, 4},
+        {'q', QUARTER, SHORT - DELTA, 3},
+        {'q', QUARTER, LONG - DELTA, 4},
+        {'q', QUARTER, NARROW - DELTA, 5},
 
         {'M', MONTH, NUMERIC, 1, 2},
         {'M', MONTH, SHORT, 3},
@@ -2181,30 +2524,44 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
         {'L', MONTH, SHORT - DELTA, 3},
         {'L', MONTH, LONG - DELTA, 4},
         {'L', MONTH, NARROW - DELTA, 5},
-
         {'l', MONTH, NUMERIC + DELTA, 1, 1},
 
         {'w', WEEK_OF_YEAR, NUMERIC, 1, 2},
-        {'W', WEEK_OF_MONTH, NUMERIC + DELTA, 1},
+
+        {'W', WEEK_OF_MONTH, NUMERIC, 1},
 
         {'E', WEEKDAY, SHORT, 1, 3},
         {'E', WEEKDAY, LONG, 4},
         {'E', WEEKDAY, NARROW, 5},
+        {'E', WEEKDAY, SHORTER, 6},
         {'c', WEEKDAY, NUMERIC + 2*DELTA, 1, 2},
         {'c', WEEKDAY, SHORT - 2*DELTA, 3},
         {'c', WEEKDAY, LONG - 2*DELTA, 4},
         {'c', WEEKDAY, NARROW - 2*DELTA, 5},
+        {'c', WEEKDAY, SHORTER - 2*DELTA, 6},
         {'e', WEEKDAY, NUMERIC + DELTA, 1, 2}, // 'e' is currently not used in CLDR data, should not be canonical
         {'e', WEEKDAY, SHORT - DELTA, 3},
         {'e', WEEKDAY, LONG - DELTA, 4},
         {'e', WEEKDAY, NARROW - DELTA, 5},
+        {'e', WEEKDAY, SHORTER - DELTA, 6},
 
         {'d', DAY, NUMERIC, 1, 2},
-        {'D', DAY_OF_YEAR, NUMERIC + DELTA, 1, 3},
-        {'F', DAY_OF_WEEK_IN_MONTH, NUMERIC + 2*DELTA, 1},
-        {'g', DAY, NUMERIC + 3*DELTA, 1, 20}, // really internal use, so we don't care
+        {'g', DAY, NUMERIC + DELTA, 1, 20}, // really internal use, so we don't care
 
-        {'a', DAYPERIOD, SHORT, 1},
+        {'D', DAY_OF_YEAR, NUMERIC, 1, 3},
+
+        {'F', DAY_OF_WEEK_IN_MONTH, NUMERIC, 1},
+
+        {'a', DAYPERIOD, SHORT, 1, 3},
+        {'a', DAYPERIOD, LONG, 4},
+        {'a', DAYPERIOD, NARROW, 5},
+        {'b', DAYPERIOD, SHORT - DELTA, 1, 3},
+        {'b', DAYPERIOD, LONG - DELTA, 4},
+        {'b', DAYPERIOD, NARROW - DELTA, 5},
+        // b needs to be closer to a than to B, so we make this 3*DELTA
+        {'B', DAYPERIOD, SHORT - 3*DELTA, 1, 3},
+        {'B', DAYPERIOD, LONG - 3*DELTA, 4},
+        {'B', DAYPERIOD, NARROW - 3*DELTA, 5},
 
         {'H', HOUR, NUMERIC + 10*DELTA, 1, 2}, // 24 hour
         {'k', HOUR, NUMERIC + 11*DELTA, 1, 2},
@@ -2214,8 +2571,9 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
         {'m', MINUTE, NUMERIC, 1, 2},
 
         {'s', SECOND, NUMERIC, 1, 2},
-        {'S', FRACTIONAL_SECOND, NUMERIC + DELTA, 1, 1000},
-        {'A', SECOND, NUMERIC + 2*DELTA, 1, 1000},
+        {'A', SECOND, NUMERIC + DELTA, 1, 1000},
+
+        {'S', FRACTIONAL_SECOND, NUMERIC, 1, 1000},
 
         {'v', ZONE, SHORT - 2*DELTA, 1},
         {'v', ZONE, LONG - 2*DELTA, 4},
@@ -2228,6 +2586,8 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
         {'O', ZONE, LONG - DELTA, 4},
         {'V', ZONE, SHORT - DELTA, 1},
         {'V', ZONE, LONG - DELTA, 2},
+        {'V', ZONE, LONG-1 - DELTA, 3},
+        {'V', ZONE, LONG-2 - DELTA, 4},
         {'X', ZONE, NARROW - DELTA, 1},
         {'X', ZONE, SHORT - DELTA, 2},
         {'X', ZONE, LONG - DELTA, 4},
@@ -2294,19 +2654,32 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
 
         @Override
         public String toString() {
-            return appendTo(new StringBuilder()).toString();
+            return appendTo(new StringBuilder(), false, false).toString();
         }
 
+        public String toString(boolean skipDayPeriod) {
+            return appendTo(new StringBuilder(), false, skipDayPeriod).toString();
+        }
+
+        @SuppressWarnings("unused")
         public String toCanonicalString() {
-            return appendTo(new StringBuilder(), true).toString();
+            return appendTo(new StringBuilder(), true, false).toString();
         }
 
+        public String toCanonicalString(boolean skipDayPeriod) {
+            return appendTo(new StringBuilder(), true, skipDayPeriod).toString();
+        }
+
+        @SuppressWarnings("unused")
         public StringBuilder appendTo(StringBuilder sb) {
-            return appendTo(sb, false);
+            return appendTo(sb, false, false);
         }
 
-        private StringBuilder appendTo(StringBuilder sb, boolean canonical) {
+        private StringBuilder appendTo(StringBuilder sb, boolean canonical, boolean skipDayPeriod) {
             for (int i=0; i<TYPE_LIMIT; ++i) {
+                if (skipDayPeriod && i == DAYPERIOD) {
+                    continue;
+                }
                 appendFieldTo(i, sb, canonical);
             }
             return sb;
@@ -2362,6 +2735,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
         private int[] type = new int[TYPE_LIMIT];
         private SkeletonFields original = new SkeletonFields();
         private SkeletonFields baseOriginal = new SkeletonFields();
+        private boolean addedDefaultDayPeriod = false;
 
         // just for testing; fix to make multi-threaded later
         // private static FormatParser fp = new FormatParser();
@@ -2372,18 +2746,27 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
 
         @Override
         public String toString() {
-            return original.toString();
+            // for backward compatibility: addedDefaultDayPeriod true => DateTimeMatcher.set
+            // added a single 'a' that was not in the provided skeleton, and it will be
+            // removed when generating the skeleton to return.
+            return original.toString(addedDefaultDayPeriod);
         }
 
         // returns a string like toString but using the canonical character for most types,
         // e.g. M for M or L, E for E or c, y for y or U, etc. The hour field is canonicalized
         // to 'H' (for 24-hour types) or 'h' (for 12-hour types)
         public String toCanonicalString() {
-            return original.toCanonicalString();
+            // for backward compatibility: addedDefaultDayPeriod true => DateTimeMatcher.set
+            // added a single 'a' that was not in the provided skeleton, and it will be
+            // removed when generating the skeleton to return.
+            return original.toCanonicalString(addedDefaultDayPeriod);
         }
 
         String getBasePattern() {
-            return baseOriginal.toString();
+            // for backward compatibility: addedDefaultDayPeriod true => DateTimeMatcher.set
+            // added a single 'a' that was not in the provided skeleton, and it will be
+            // removed when generating the skeleton to return.
+            return baseOriginal.toString(addedDefaultDayPeriod);
         }
 
         DateTimeMatcher set(String pattern, FormatParser fp, boolean allowDuplicateFields) {
@@ -2391,6 +2774,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
             Arrays.fill(type, NONE);
             original.clear();
             baseOriginal.clear();
+            addedDefaultDayPeriod = false;
 
             fp.set(pattern);
             for (Object obj : fp.getItems()) {
@@ -2399,7 +2783,7 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
                 }
                 VariableField item = (VariableField)obj;
                 String value = item.toString();
-                if (value.charAt(0) == 'a') continue; // skip day period, special case
+                // don't skip 'a' anymore, dayPeriod handled specially below
                 int canonicalIndex = item.getCanonicalIndex();
                 //                if (canonicalIndex < 0) {
                 //                    throw new IllegalArgumentException("Illegal field:\t"
@@ -2411,8 +2795,8 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
                     char ch1 = original.getFieldChar(field);
                     char ch2 = value.charAt(0);
                     if ( allowDuplicateFields ||
-                            (ch1 == 'r' && ch2 == 'U') ||
-                            (ch1 == 'U' && ch2 == 'r') ) {
+                            (ch1 == 'r' && (ch2 == 'U' || ch2 == 'y')) ||
+                            ((ch1 == 'U' || ch1 == 'y') && ch2 == 'r') ) {
                         continue;
                     }
                     throw new IllegalArgumentException("Conflicting fields:\t"
@@ -2421,12 +2805,62 @@ public class DateTimePatternGenerator implements Freezable<DateTimePatternGenera
                 original.populate(field, value);
                 char repeatChar = (char)row[0];
                 int repeatCount = row[3];
-                // #7930 removes hack to cap repeatCount at 3
                 if ("GEzvQ".indexOf(repeatChar) >= 0) repeatCount = 1;
                 baseOriginal.populate(field, repeatChar, repeatCount);
                 int subField = row[2];
                 if (subField > 0) subField += value.length();
                 type[field] = subField;
+            }
+
+            // #20739, we have a skeleton with minutes and milliseconds, but no seconds
+            //
+            // Theoretically we would need to check and fix all fields with "gaps":
+            // for example year-day (no month), month-hour (no day), and so on, All the possible field combinations.
+            // Plus some smartness: year + hour => should we add month, or add day-of-year?
+            // What about month + day-of-week, or month + am/pm indicator.
+            // I think beyond a certain point we should not try to fix bad developer input and try guessing what they mean.
+            // Garbage in, garbage out.
+            if (!original.isFieldEmpty(MINUTE) && !original.isFieldEmpty(FRACTIONAL_SECOND) && original.isFieldEmpty(SECOND)) {
+                // Force the use of seconds
+                for (int i = 0; i < types.length; ++i) {
+                    int[] row = types[i];
+                    if (row[1] == SECOND) {
+                        // first entry for SECOND
+                        original.populate(SECOND, (char)row[0], row[3]);
+                        baseOriginal.populate(SECOND, (char)row[0], row[3]);
+                        // We add value.length, same as above, when type is first initialized.
+                        // The value we want to "fake" here is "s", and 1 means "s".length()
+                        int subField = row[2];
+                        type[SECOND] = (subField > 0) ? subField + 1 : subField;
+                        break;
+                    }
+                }
+            }
+
+            // #13183, handle special behavior for day period characters (a, b, B)
+            if (!original.isFieldEmpty(HOUR)) {
+                if (original.getFieldChar(HOUR)=='h' || original.getFieldChar(HOUR)=='K') {
+                    // We have a skeleton with 12-hour-cycle format
+                    if (original.isFieldEmpty(DAYPERIOD)) {
+                        // But we do not have a day period in the skeleton; add the default DAYPERIOD (currently "a")
+                        for (int i = 0; i < types.length; ++i) {
+                            int[] row = types[i];
+                            if (row[1] == DAYPERIOD) {
+                                // first entry for DAYPERIOD
+                                original.populate(DAYPERIOD, (char)row[0], row[3]);
+                                baseOriginal.populate(DAYPERIOD, (char)row[0], row[3]);
+                                type[DAYPERIOD] = row[2];
+                                addedDefaultDayPeriod = true;
+                                break;
+                            }
+                        }
+                    }
+                } else if (!original.isFieldEmpty(DAYPERIOD)) {
+                    // Skeleton has 24-hour-cycle hour format and has dayPeriod, delete dayPeriod (i.e. ignore it)
+                    original.clearField(DAYPERIOD);
+                    baseOriginal.clearField(DAYPERIOD);
+                    type[DAYPERIOD] = NONE;
+                }
             }
             return this;
         }

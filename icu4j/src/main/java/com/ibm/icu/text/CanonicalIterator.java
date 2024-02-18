@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  *******************************************************************************
  * Copyright (C) 1996-2014, International Business Machines Corporation and    *
@@ -132,7 +132,7 @@ public final class CanonicalIterator {
         int start = 0;
 
         // i should be the end of the first code point
-        // break up the string into segements
+        // break up the string into segments
 
         int i = UTF16.findOffsetFromCodePoint(source, 1);
 

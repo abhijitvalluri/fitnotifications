@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*
  * *****************************************************************************
  * Copyright (C) 2005-2016, International Business Machines Corporation and
@@ -16,6 +16,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -132,7 +134,8 @@ public  class ICUResourceBundle extends UResourceBundle {
         r = (ICUResourceBundle) UResourceBundle.getBundleInstance(baseName, parent);
         if (isAvailable != null) {
             isAvailable[0] = false;
-            ULocale[] availableULocales = getAvailEntry(baseName, loader).getULocaleList();
+            ULocale[] availableULocales = getAvailEntry(baseName, loader)
+                    .getULocaleList(ULocale.AvailableType.DEFAULT);
             for (int i = 0; i < availableULocales.length; i++) {
                 if (parent.equals(availableULocales[i])) {
                     isAvailable[0] = true;
@@ -248,8 +251,9 @@ public  class ICUResourceBundle extends UResourceBundle {
      * @internal ICU 3.0
      */
     public static final String[] getKeywordValues(String baseName, String keyword) {
-        Set<String> keywords = new HashSet<String>();
-        ULocale locales[] = getAvailEntry(baseName, ICU_DATA_CLASS_LOADER).getULocaleList();
+        Set<String> keywords = new HashSet<>();
+        ULocale locales[] = getAvailEntry(baseName, ICU_DATA_CLASS_LOADER)
+                .getULocaleList(ULocale.AvailableType.DEFAULT);
         int i;
 
         for (i = 0; i < locales.length; i++) {
@@ -364,6 +368,41 @@ public  class ICUResourceBundle extends UResourceBundle {
         return result;
     }
 
+    public UResource.Value getValueWithFallback(String path) throws MissingResourceException {
+        ICUResourceBundle rb;
+        if (path.isEmpty()) {
+            rb = this;
+        } else {
+            rb = findResourceWithFallback(path, this, null);
+            if (rb == null) {
+                throw new MissingResourceException(
+                    "Can't find resource for bundle "
+                    + this.getClass().getName() + ", key " + getType(),
+                    path, getKey());
+            }
+        }
+        ReaderValue readerValue = new ReaderValue();
+        ICUResourceBundleImpl impl = (ICUResourceBundleImpl)rb;
+        readerValue.reader = impl.wholeBundle.reader;
+        readerValue.res = impl.getResource();
+        return readerValue;
+    }
+
+    public void getAllItemsWithFallbackNoFail(String path, UResource.Sink sink) {
+        try {
+            getAllItemsWithFallback(path, sink);
+        } catch (MissingResourceException e) {
+            // Quietly ignore the exception.
+        }
+    }
+
+    /**
+     * Locates the resource specified by {@code path} in this resource bundle (performing any necessary fallback
+     * and following any aliases) and calls the specified {@code sink}'s {@code put()} method with that resource.
+     * Then walks the bundle's parent chain, calling {@code put()} on the sink for each item in the parent chain.
+     * @param path The path of the desired resource
+     * @param sink A {@code UResource.Sink} that gets called for each resource in the parent chain
+     */
     public void getAllItemsWithFallback(String path, UResource.Sink sink)
             throws MissingResourceException {
         // Collect existing and parsed key objects into an array of keys,
@@ -387,11 +426,88 @@ public  class ICUResourceBundle extends UResourceBundle {
         }
         UResource.Key key = new UResource.Key();
         ReaderValue readerValue = new ReaderValue();
-        rb.getAllItemsWithFallback(key, readerValue, sink);
+        rb.getAllItemsWithFallback(key, readerValue, sink, this);
+    }
+
+    /**
+     * Locates the resource specified by {@code path} in this resource bundle (performing any necessary fallback and
+     * following any aliases) and, if the resource is a table resource, iterates over its immediate child resources (again,
+     * following any aliases to get the individual resource values), and calls the specified {@code sink}'s {@code put()}
+     * method for each child resource (passing it that resource's key and either its actual value or, if that value is an
+     * alias, the value you get by following the alias).  Then walks back over the bundle's parent chain,
+     * similarly iterating over each parent table resource's child resources.
+     * Does not descend beyond one level of table children.
+     * @param path The path of the desired resource
+     * @param sink A {@code UResource.Sink} that gets called for each child resource of the specified resource (and each
+     * child of the resources in its parent chain).
+     */
+    public void getAllChildrenWithFallback(final String path, final UResource.Sink sink)
+            throws MissingResourceException {
+        class AllChildrenSink extends UResource.Sink {
+            @Override
+            public void put(UResource.Key key, UResource.Value value, boolean noFallback) {
+                UResource.Table itemsTable = value.getTable();
+                for (int i = 0; itemsTable.getKeyAndValue(i, key, value); ++i) {
+                    if (value.getType() == ALIAS) {
+                        // if the current entry in the table is an alias, re-fetch it using getAliasedResource():
+                        // this will follow the alias (and any aliases it points to) and bring back the real value
+                        String aliasPath = value.getAliasString();
+                        ICUResourceBundle aliasedResource = getAliasedResource(aliasPath, wholeBundle.loader,
+                                "", null, 0, null,
+                                null, ICUResourceBundle.this);
+                        ICUResourceBundleImpl aliasedResourceImpl = (ICUResourceBundleImpl)aliasedResource;
+                        ReaderValue aliasedValue = new ReaderValue();
+                        aliasedValue.reader = aliasedResourceImpl.wholeBundle.reader;
+                        aliasedValue.res = aliasedResourceImpl.getResource();
+
+                        if (aliasedValue.getType() != TABLE) {
+                            sink.put(key, aliasedValue, noFallback);
+                        } else {
+                            // if the resource we're aliasing over to is a table, the sink might iterate over its contents.
+                            // If it does, it'll get only the things defined in the actual alias target, not the things
+                            // the target inherits from its parent resources.  So we walk the parent chain for the *alias target*,
+                            // calling sink.put() for each of the parent tables we could be inheriting from.  This means
+                            // that sink.put() has to iterate over the children of multiple tables to get all of the inherited
+                            // resource values, but it already has to do that to handle normal vertical inheritance.
+                            int aliasedValueType = TABLE;
+                            String tablePath = aliasPath.substring("/LOCALE/".length());
+                            UResource.Key keyCopy = key.clone(); // sink.put() changes the key
+                            sink.put(keyCopy, aliasedValue, noFallback);
+                            while (aliasedValueType == TABLE && aliasedResource.getParent() != null) {
+                                ICUResourceBundle newAliasedResource = aliasedResource.getParent().findWithFallback(tablePath);
+                                if (newAliasedResource.key.equals(aliasedResource.key)) {
+                                    aliasedResource = newAliasedResource;
+                                } else {
+                                    // the findWithFallback() call above might follow an alias.  If it does, we'll get
+                                    // back the alias target at the wrong level (e.g., if we're in en_CA, we're calling
+                                    // findWithFallback() on en, and if it follows an alias, we get back the alias target
+                                    // in en, even if it also exists in en_CA).  So we check the keys to see if we followed
+                                    // an alias, and if we did, we re-fetch the alias target from our original resource bundle
+                                    tablePath = tablePath.substring(0, tablePath.lastIndexOf('/'));
+                                    tablePath += "/" + newAliasedResource.key;
+                                    aliasedResource = ICUResourceBundle.this.findWithFallback(tablePath);
+                                }
+                                aliasedResourceImpl = (ICUResourceBundleImpl) aliasedResource;
+                                aliasedValue = new ReaderValue();
+                                aliasedValue.reader = aliasedResourceImpl.wholeBundle.reader;
+                                aliasedValue.res = aliasedResourceImpl.getResource();
+                                aliasedValueType = aliasedValue.getType(); // sink.put() messes up the value
+                                keyCopy = key.clone(); // sink.put() messes up the key
+                                sink.put(keyCopy, aliasedValue, noFallback);
+                            }
+                        }
+                    } else {
+                        sink.put(key, value, noFallback);
+                    }
+                }
+            }
+        }
+
+        getAllItemsWithFallback(path, new AllChildrenSink());
     }
 
     private void getAllItemsWithFallback(
-            UResource.Key key, ReaderValue readerValue, UResource.Sink sink) {
+            UResource.Key key, ReaderValue readerValue, UResource.Sink sink, UResourceBundle requested) {
         // We recursively enumerate child-first,
         // only storing parent items in the absence of child items.
         // The sink needs to store a placeholder value for the no-fallback/no-inheritance marker
@@ -420,10 +536,10 @@ public  class ICUResourceBundle extends UResourceBundle {
                 // if we had followed an alias.
                 String[] pathKeys = new String[depth];
                 getResPathKeys(pathKeys, depth);
-                rb = findResourceWithFallback(pathKeys, 0, parentBundle, null);
+                rb = findResourceWithFallback(pathKeys, 0, parentBundle, requested);
             }
             if (rb != null) {
-                rb.getAllItemsWithFallback(key, readerValue, sink);
+                rb.getAllItemsWithFallback(key, readerValue, sink, requested);
             }
         }
     }
@@ -465,11 +581,12 @@ public  class ICUResourceBundle extends UResourceBundle {
     }
 
     /**
-     * Get the set of Locales installed in the specified bundles.
+     * Get the set of Locales installed in the specified bundles, for the specified type.
      * @return the list of available locales
      */
-    public static final ULocale[] getAvailableULocales(String baseName, ClassLoader loader) {
-        return getAvailEntry(baseName, loader).getULocaleList();
+    public static final ULocale[] getAvailableULocales(String baseName, ClassLoader loader,
+            ULocale.AvailableType type) {
+        return getAvailEntry(baseName, loader).getULocaleList(type);
     }
 
     /**
@@ -477,7 +594,48 @@ public  class ICUResourceBundle extends UResourceBundle {
      * @return the list of available locales
      */
     public static final ULocale[] getAvailableULocales() {
-        return getAvailableULocales(ICUData.ICU_BASE_NAME, ICU_DATA_CLASS_LOADER);
+        return getAvailableULocales(ICUData.ICU_BASE_NAME, ICU_DATA_CLASS_LOADER, ULocale.AvailableType.DEFAULT);
+    }
+
+    /**
+     * Get the set of ULocales installed the base bundle, for the specified type.
+     * @return the list of available locales for the specified type
+     */
+    public static final ULocale[] getAvailableULocales(ULocale.AvailableType type) {
+        return getAvailableULocales(ICUData.ICU_BASE_NAME, ICU_DATA_CLASS_LOADER, type);
+    }
+
+    /**
+     * Get the set of Locales installed in the specified bundles.
+     * @return the list of available locales
+     */
+    public static final ULocale[] getAvailableULocales(String baseName, ClassLoader loader) {
+        return getAvailableULocales(baseName, loader, ULocale.AvailableType.DEFAULT);
+    }
+
+    /**
+     * Get the set of Locales installed in the specified bundles, for the specified type.
+     * @return the list of available locales
+     */
+    public static final Locale[] getAvailableLocales(String baseName, ClassLoader loader,
+            ULocale.AvailableType type) {
+        return getAvailEntry(baseName, loader).getLocaleList(type);
+    }
+
+    /**
+     * Get the set of ULocales installed the base bundle.
+     * @return the list of available locales
+     */
+    public static final Locale[] getAvailableLocales() {
+        return getAvailableLocales(ICUData.ICU_BASE_NAME, ICU_DATA_CLASS_LOADER, ULocale.AvailableType.DEFAULT);
+    }
+
+    /**
+     * Get the set of Locales installed the base bundle, for the specified type.
+     * @return the list of available locales
+     */
+    public static final Locale[] getAvailableLocales(ULocale.AvailableType type) {
+        return getAvailableLocales(ICUData.ICU_BASE_NAME, ICU_DATA_CLASS_LOADER, type);
     }
 
     /**
@@ -485,15 +643,7 @@ public  class ICUResourceBundle extends UResourceBundle {
      * @return the list of available locales
      */
     public static final Locale[] getAvailableLocales(String baseName, ClassLoader loader) {
-        return getAvailEntry(baseName, loader).getLocaleList();
-    }
-
-   /**
-     * Get the set of Locales installed the base bundle.
-     * @return the list of available locales
-     */
-    public static final Locale[] getAvailableLocales() {
-        return getAvailEntry(ICUData.ICU_BASE_NAME, ICU_DATA_CLASS_LOADER).getLocaleList();
+        return getAvailableLocales(baseName, loader, ULocale.AvailableType.DEFAULT);
     }
 
     /**
@@ -504,8 +654,8 @@ public  class ICUResourceBundle extends UResourceBundle {
      * @return the list of converted ULocales
      */
     public static final Locale[] getLocaleList(ULocale[] ulocales) {
-        ArrayList<Locale> list = new ArrayList<Locale>(ulocales.length);
-        HashSet<Locale> uniqueSet = new HashSet<Locale>();
+        ArrayList<Locale> list = new ArrayList<>(ulocales.length);
+        HashSet<Locale> uniqueSet = new HashSet<>();
         for (int i = 0; i < ulocales.length; i++) {
             Locale loc = ulocales[i].toLocale();
             if (!uniqueSet.contains(loc)) {
@@ -541,31 +691,50 @@ public  class ICUResourceBundle extends UResourceBundle {
     // Flag for enabling/disabling debugging code
     private static final boolean DEBUG = ICUDebug.enabled("localedata");
 
-    private static final ULocale[] createULocaleList(String baseName,
-            ClassLoader root) {
+    private static final class AvailableLocalesSink extends UResource.Sink {
+
+        EnumMap<ULocale.AvailableType, ULocale[]> output;
+
+        public AvailableLocalesSink(EnumMap<ULocale.AvailableType, ULocale[]> output) {
+            this.output = output;
+        }
+
+        @Override
+        public void put(UResource.Key key, UResource.Value value, boolean noFallback) {
+            UResource.Table resIndexTable = value.getTable();
+            for (int i = 0; resIndexTable.getKeyAndValue(i, key, value); ++i) {
+                ULocale.AvailableType type;
+                if (key.contentEquals("InstalledLocales")) {
+                    type = ULocale.AvailableType.DEFAULT;
+                } else if (key.contentEquals("AliasLocales")) {
+                    type = ULocale.AvailableType.ONLY_LEGACY_ALIASES;
+                } else {
+                    // CLDRVersion, etc.
+                    continue;
+                }
+                UResource.Table availableLocalesTable = value.getTable();
+                ULocale[] locales = new ULocale[availableLocalesTable.getSize()];
+                for (int j = 0; availableLocalesTable.getKeyAndValue(j, key, value); ++j) {
+                    locales[j] = new ULocale(key.toString());
+                }
+                output.put(type, locales);
+            }
+        }
+    }
+
+    private static final EnumMap<ULocale.AvailableType, ULocale[]> createULocaleList(
+            String baseName, ClassLoader root) {
         // the canned list is a subset of all the available .res files, the idea
         // is we don't export them
         // all. gotta be a better way to do this, since to add a locale you have
         // to update this list,
         // and it's embedded in our binary resources.
-        ICUResourceBundle bundle = (ICUResourceBundle) UResourceBundle.instantiateBundle(baseName, ICU_RESOURCE_INDEX, root, true);
+        ICUResourceBundle rb = (ICUResourceBundle) UResourceBundle.instantiateBundle(baseName, ICU_RESOURCE_INDEX, root, true);
 
-        bundle = (ICUResourceBundle)bundle.get(INSTALLED_LOCALES);
-        int length = bundle.getSize();
-        int i = 0;
-        ULocale[] locales = new ULocale[length];
-        UResourceBundleIterator iter = bundle.getIterator();
-        iter.reset();
-        while (iter.hasNext()) {
-            String locstr = iter.next().getKey();
-            if (locstr.equals("root")) {
-                locales[i++] = ULocale.ROOT;
-            } else {
-                locales[i++] = new ULocale(locstr);
-            }
-        }
-        bundle = null;
-        return locales;
+        EnumMap<ULocale.AvailableType, ULocale[]> result = new EnumMap<>(ULocale.AvailableType.class);
+        AvailableLocalesSink sink = new AvailableLocalesSink(result);
+        rb.getAllItemsWithFallback("", sink);
+        return result;
     }
 
     // Same as createULocaleList() but catches the MissingResourceException
@@ -654,7 +823,7 @@ public  class ICUResourceBundle extends UResourceBundle {
 
     private static Set<String> createFullLocaleNameSet(String baseName, ClassLoader loader) {
         String bn = baseName.endsWith("/") ? baseName : baseName + "/";
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         String skipScan = ICUConfig.get("com.ibm.icu.impl.ICUResourceBundle.skipRuntimeLocaleResourceScan", "false");
         if (!skipScan.equalsIgnoreCase("true")) {
             // scan available locale resources under the base url first
@@ -699,7 +868,7 @@ public  class ICUResourceBundle extends UResourceBundle {
     }
 
     private static Set<String> createLocaleNameSet(String baseName, ClassLoader loader) {
-        HashSet<String> set = new HashSet<String>();
+        HashSet<String> set = new HashSet<>();
         addLocaleIDsFromIndexBundle(baseName, loader, set);
         return Collections.unmodifiableSet(set);
     }
@@ -711,7 +880,7 @@ public  class ICUResourceBundle extends UResourceBundle {
     private static final class AvailEntry {
         private String prefix;
         private ClassLoader loader;
-        private volatile ULocale[] ulocales;
+        private volatile EnumMap<ULocale.AvailableType, ULocale[]> ulocales;
         private volatile Locale[] locales;
         private volatile Set<String> nameSet;
         private volatile Set<String> fullNameSet;
@@ -721,7 +890,9 @@ public  class ICUResourceBundle extends UResourceBundle {
             this.loader = loader;
         }
 
-        ULocale[] getULocaleList() {
+        ULocale[] getULocaleList(ULocale.AvailableType type) {
+            // Direct data is available for DEFAULT and ONLY_LEGACY_ALIASES
+            assert type != ULocale.AvailableType.WITH_LEGACY_ALIASES;
             if (ulocales == null) {
                 synchronized(this) {
                     if (ulocales == null) {
@@ -729,14 +900,14 @@ public  class ICUResourceBundle extends UResourceBundle {
                     }
                 }
             }
-            return ulocales;
+            return ulocales.get(type);
         }
-        Locale[] getLocaleList() {
+        Locale[] getLocaleList(ULocale.AvailableType type) {
             if (locales == null) {
-                getULocaleList();
+                getULocaleList(type);
                 synchronized(this) {
                     if (locales == null) {
-                        locales = ICUResourceBundle.getLocaleList(ulocales);
+                        locales = ICUResourceBundle.getLocaleList(ulocales.get(type));
                     }
                 }
             }
@@ -1110,10 +1281,10 @@ public  class ICUResourceBundle extends UResourceBundle {
         localeID = ULocale.getBaseName(localeID);
         ICUResourceBundle b;
         if (openType == OpenType.LOCALE_DEFAULT_ROOT) {
-            b = instantiateBundle(baseName, localeID, ULocale.getDefault().getBaseName(),
+            b = instantiateBundle(baseName, localeID, null, ULocale.getDefault().getBaseName(),
                     root, openType);
         } else {
-            b = instantiateBundle(baseName, localeID, null, root, openType);
+            b = instantiateBundle(baseName, localeID, null, null, root, openType);
         }
         if(b==null){
             throw new MissingResourceException(
@@ -1127,8 +1298,99 @@ public  class ICUResourceBundle extends UResourceBundle {
                 (localeID.length() == lang.length() || localeID.charAt(lang.length()) == '_');
     }
 
+    private static final Comparator<String[]> COMPARE_FIRST_ELEMENT = new Comparator<String[]>() {
+        @Override
+        public int compare(String[] pair1, String[] pair2) {
+            return pair1[0].compareTo(pair2[0]);
+        }
+    };
+
+    private static String getExplicitParent(String localeID) {
+        return LocaleFallbackData.PARENT_LOCALE_TABLE.get(localeID);
+    }
+
+    private static String getDefaultScript(String language, String region) {
+        String localeID = language + "_" + region;
+        String result = LocaleFallbackData.DEFAULT_SCRIPT_TABLE.get(localeID);
+        if (result == null) {
+            result = LocaleFallbackData.DEFAULT_SCRIPT_TABLE.get(language);
+        }
+        if (result == null) {
+            result = "Latn";
+        }
+        return result;
+    }
+
+    public static String getParentLocaleID(String name, String origName, OpenType openType) {
+        // early out if the locale ID has a variant code or ends with _
+        if (name.endsWith("_") || !ULocale.getVariant(name).isEmpty()) {
+            int lastUnderbarPos = name.lastIndexOf('_');
+            if (lastUnderbarPos >= 0) {
+                return name.substring(0, lastUnderbarPos);
+            } else {
+                return null;
+            }
+        }
+
+        // TODO: Is there a better way to break the locale ID up into its consituent parts?
+        ULocale nameLocale = new ULocale(name);
+        String language = nameLocale.getLanguage();
+        String script = nameLocale.getScript();
+        String region = nameLocale.getCountry();
+
+        // if our open type is LOCALE_DEFAULT_ROOT, first look the locale ID up in the parent locale table; if that
+        // table specifies a parent for it, return that (we don't do this for the other open types-- if we're not
+        // falling back through the system default locale, we also want to do straight truncation fallback instead
+        // of looking things up in the parent locale table-- see https://www.unicode.org/reports/tr35/tr35.html#Parent_Locales:
+        // "Collation data, however, is an exception...")
+        if (openType == OpenType.LOCALE_DEFAULT_ROOT) {
+            String parentID = getExplicitParent(name);
+            if (parentID != null) {
+                return parentID.equals("root") ? null : parentID;
+            }
+        }
+
+        // if it's not in the parent locale table, figure out the fallback script algorithmically
+        // (see CLDR-15265 for an explanation of the algorithm)
+        if (!script.isEmpty() && !region.isEmpty()) {
+            // if "name" has both script and region, is the script the default script?
+            // - if so, remove it and keep the region
+            // - if not, remove the region and keep the script
+            if (getDefaultScript(language, region).equals(script)) {
+                return language + "_" + region;
+            } else {
+                return language + "_" + script;
+            }
+        } else if (!region.isEmpty()) {
+            // if "name" has region but not script, did the original locale ID specify a script?
+            // - if yes, replace the region with the script from the original locale ID
+            // - if no, replace the region with the default script for that language and region
+            String origNameScript = ULocale.getScript(origName);
+            if (!origNameScript.isEmpty()) {
+                return language + "_" + origNameScript;
+            } else {
+                return language + "_" + getDefaultScript(language, region);
+            }
+        } else if (!script.isEmpty()) {
+            // if "name" has script but not region (and our open type is LOCALE_DEFAULT_ROOT), is the script the
+            // default script for the language?
+            // - if so, remove it from the locale ID
+            // - if not, return "root" (bypassing the system default locale ID)
+            // (we don't do this for other open types for the same reason we don't look things up in the parent
+            // locale table for other open types-- see the reference to UTS #35 above)
+            if (openType != OpenType.LOCALE_DEFAULT_ROOT || getDefaultScript(language, null).equals(script)) {
+                return language;
+            } else {
+                return /*"root"*/null;
+            }
+        } else {
+            // if "name" just contains a language code, return null so the calling code falls back to "root"
+            return null;
+        }
+    }
+
     private static ICUResourceBundle instantiateBundle(
-            final String baseName, final String localeID, final String defaultID,
+            final String baseName, final String localeID, final String origLocaleID, final String defaultID,
             final ClassLoader root, final OpenType openType) {
         assert localeID.indexOf('@') < 0;
         assert defaultID == null || defaultID.indexOf('@') < 0;
@@ -1170,18 +1432,20 @@ public  class ICUResourceBundle extends UResourceBundle {
 
             // fallback to locale ID parent
             if(b == null){
-                int i = localeName.lastIndexOf('_');
-                if (i != -1) {
-                    // Chop off the last underscore and the subtag after that.
-                    String temp = localeName.substring(0, i);
-                    b = instantiateBundle(baseName, temp, defaultID, root, openType);
+                OpenType localOpenType = openType;
+                if (openType == OpenType.LOCALE_DEFAULT_ROOT && localeName.equals(defaultID)) {
+                    localOpenType = OpenType.LOCALE_ROOT;
+                }
+                String origLocaleName = (origLocaleID != null) ? origLocaleID : localeName;
+                String fallbackLocaleID = getParentLocaleID(localeName, origLocaleName, openType);
+                if (fallbackLocaleID != null) {
+                    b = instantiateBundle(baseName, fallbackLocaleID, origLocaleName, defaultID, root, localOpenType);
                 }else{
-                    // No underscore, only a base language subtag.
-                    if(openType == OpenType.LOCALE_DEFAULT_ROOT &&
+                    if(localOpenType == OpenType.LOCALE_DEFAULT_ROOT &&
                             !localeIDStartsWithLangSubtag(defaultID, localeName)) {
                         // Go to the default locale before root.
-                        b = instantiateBundle(baseName, defaultID, defaultID, root, openType);
-                    } else if(openType != OpenType.LOCALE_ONLY && !rootLocale.isEmpty()) {
+                        b = instantiateBundle(baseName, defaultID, null, defaultID, root, localOpenType);
+                    } else if(localOpenType != OpenType.LOCALE_ONLY && !rootLocale.isEmpty()) {
                         // Ultimately go to root.
                         b = ICUResourceBundle.createBundle(baseName, rootLocale, root);
                     }
@@ -1194,11 +1458,11 @@ public  class ICUResourceBundle extends UResourceBundle {
                 // TODO: C++ uresbund.cpp also checks for %%ParentIsRoot. Why not Java?
                 String parentLocaleName = ((ICUResourceBundleImpl.ResourceTable)b).findString("%%Parent");
                 if (parentLocaleName != null) {
-                    parent = instantiateBundle(baseName, parentLocaleName, defaultID, root, openType);
+                    parent = instantiateBundle(baseName, parentLocaleName, null, defaultID, root, openType);
                 } else if (i != -1) {
-                    parent = instantiateBundle(baseName, localeName.substring(0, i), defaultID, root, openType);
+                    parent = instantiateBundle(baseName, localeName.substring(0, i), null, defaultID, root, openType);
                 } else if (!localeName.equals(rootLocale)){
-                    parent = instantiateBundle(baseName, rootLocale, defaultID, root, openType);
+                    parent = instantiateBundle(baseName, rootLocale, null, defaultID, root, openType);
                 }
 
                 if (!b.equals(parent)){
@@ -1395,12 +1659,29 @@ public  class ICUResourceBundle extends UResourceBundle {
             UResourceBundle requested) {
         WholeBundle wholeBundle = base.wholeBundle;
         ClassLoader loaderToUse = wholeBundle.loader;
+        String rpath = wholeBundle.reader.getAlias(_resource);
+        String baseName = wholeBundle.baseName;
+
+        // TODO: We need not build the baseKeyPath array if the rpath includes a keyPath
+        // (except for an exception message string).
+        // Try to avoid unnecessary work+allocation.
+        int baseDepth = base.getResDepth();
+        String[] baseKeyPath = new String[baseDepth + 1];
+        base.getResPathKeys(baseKeyPath, baseDepth);
+        baseKeyPath[baseDepth] = key;
+        return getAliasedResource(rpath, loaderToUse, baseName, keys, depth, baseKeyPath, aliasesVisited, requested);
+    }
+
+    protected static ICUResourceBundle getAliasedResource(
+            String rpath, ClassLoader loaderToUse, String baseName,
+            String[] keys, int depth, String[] baseKeyPath,
+            HashMap<String, String> aliasesVisited,
+            UResourceBundle requested) {
         String locale;
         String keyPath = null;
         String bundleName;
-        String rpath = wholeBundle.reader.getAlias(_resource);
         if (aliasesVisited == null) {
-            aliasesVisited = new HashMap<String, String>();
+            aliasesVisited = new HashMap<>();
         }
         if (aliasesVisited.get(rpath) != null) {
             throw new IllegalArgumentException(
@@ -1437,12 +1718,12 @@ public  class ICUResourceBundle extends UResourceBundle {
             } else {
                 locale = rpath;
             }
-            bundleName = wholeBundle.baseName;
+            bundleName = baseName;
         }
         ICUResourceBundle bundle = null;
         ICUResourceBundle sub = null;
         if(bundleName.equals(LOCALE)){
-            bundleName = wholeBundle.baseName;
+            bundleName = baseName;
             keyPath = rpath.substring(LOCALE.length() + 2/* prepending and appending / */, rpath.length());
 
             // Get the top bundle of the requested bundle
@@ -1464,11 +1745,8 @@ public  class ICUResourceBundle extends UResourceBundle {
             } else if (keys != null) {
                 numKeys = depth;
             } else {
-                depth = base.getResDepth();
-                numKeys = depth + 1;
-                keys = new String[numKeys];
-                base.getResPathKeys(keys, depth);
-                keys[depth] = key;
+                keys = baseKeyPath;
+                numKeys = baseKeyPath.length;
             }
             if (numKeys > 0) {
                 sub = bundle;
@@ -1478,7 +1756,7 @@ public  class ICUResourceBundle extends UResourceBundle {
             }
         }
         if (sub == null) {
-            throw new MissingResourceException(wholeBundle.localeID, wholeBundle.baseName, key);
+            throw new MissingResourceException(locale, baseName, baseKeyPath[baseKeyPath.length - 1]);
         }
         // TODO: If we know that sub is not cached,
         // then we should set its container and key to the alias' location,

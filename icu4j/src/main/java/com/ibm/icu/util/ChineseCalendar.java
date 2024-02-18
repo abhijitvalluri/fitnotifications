@@ -1,5 +1,5 @@
 // © 2016 and later: Unicode, Inc. and others.
-// License & terms of use: http://www.unicode.org/copyright.html#License
+// License & terms of use: http://www.unicode.org/copyright.html
 /*********************************************************************
  * Copyright (C) 2000-2014, International Business Machines
  * Corporation and others. All Rights Reserved.
@@ -62,10 +62,6 @@ import com.ibm.icu.util.ULocale.Category;
  * <li>Dershowitz and Reingold, <i>Calendrical Calculations</i>,
  * Cambridge University Press, 1997</li>
  * 
- * <li>Helmer Aslaksen's
- * <a href="http://www.math.nus.edu.sg/aslaksen/calendar/chinese.shtml">
- * Chinese Calendar page</a></li>
- *
  * <li>The <a href="http://www.tondering.dk/claus/calendar.html">
  * Calendar FAQ</a></li>
  *
@@ -133,11 +129,14 @@ public class ChineseCalendar extends Calendar {
     private transient CalendarCache newYearCache = new CalendarCache();
 
     /**
-     * True if the current year is a leap year.  Updated with each time to
-     * fields resolution.
+     * True if there is a leap month between the Winter Solstice before and after the
+     * current date.This is different from leap year because in some year, such as
+     * 1813 and 2033, the leap month is after the Winter Solstice of that year. So
+     * this value could be false for a date prior to the Winter Solstice of that
+     * year but that year still has a leap month and therefor is a leap year.
      * @see #computeChineseFields
      */
-    private transient boolean isLeapYear;
+    private transient boolean hasLeapMonthBetweenWinterSolstices;
 
     //------------------------------------------------------------------
     // Constructors
@@ -169,7 +168,7 @@ public class ChineseCalendar extends Calendar {
      * @param year      The value used to set the calendar's {@link #YEAR YEAR} time field.
      * @param month     The value used to set the calendar's {@link #MONTH MONTH} time field.
      *                  The value is 0-based. e.g., 0 for January.
-     * @param isLeapMonth The value used to set the Chinese calendar's (@link #IS_LEAP_MONTH)
+     * @param isLeapMonth The value used to set the Chinese calendar's {@link #IS_LEAP_MONTH}
      *                  time field.
      * @param date      The value used to set the calendar's {@link #DATE DATE} time field.
      * @see Category#FORMAT
@@ -227,7 +226,7 @@ public class ChineseCalendar extends Calendar {
      * @param year      The value used to set the calendar's {@link #YEAR YEAR} time field. 
      * @param month     The value used to set the calendar's {@link #MONTH MONTH} time field. 
      *                  The value is 0-based. e.g., 0 for January. 
-     * @param isLeapMonth The value used to set the Chinese calendar's (@link #IS_LEAP_MONTH) 
+     * @param isLeapMonth The value used to set the Chinese calendar's {@link #IS_LEAP_MONTH}
      *                  time field. 
      * @param date      The value used to set the calendar's {@link #DATE DATE} time field.
      * @see Category#FORMAT
@@ -284,7 +283,7 @@ public class ChineseCalendar extends Calendar {
      * @stable ICU 4.0
      */
     public ChineseCalendar(Locale aLocale) {
-        this(TimeZone.getDefault(), ULocale.forLocale(aLocale), CHINESE_EPOCH_YEAR, CHINA_ZONE);
+        this(TimeZone.forLocaleOrDefault(aLocale), ULocale.forLocale(aLocale), CHINESE_EPOCH_YEAR, CHINA_ZONE);
     }
 
     /**
@@ -317,7 +316,7 @@ public class ChineseCalendar extends Calendar {
      * @stable ICU 4.0
      */
     public ChineseCalendar(ULocale locale) {
-        this(TimeZone.getDefault(), locale, CHINESE_EPOCH_YEAR, CHINA_ZONE);
+        this(TimeZone.forULocaleOrDefault(locale), locale, CHINESE_EPOCH_YEAR, CHINA_ZONE);
     }
 
     /**
@@ -424,6 +423,7 @@ public class ChineseCalendar extends Calendar {
         {/*                                  */}, // JULIAN_DAY
         {/*                                  */}, // MILLISECONDS_IN_DAY
         {        0,        0,       1,       1 }, // IS_LEAP_MONTH
+        {        0,        0,      11,      12 }, // ORDINAL_MONTH
     };
 
     /**
@@ -561,6 +561,7 @@ public class ChineseCalendar extends Calendar {
     public void add(int field, int amount) {
         switch (field) {
         case MONTH:
+        case ORDINAL_MONTH:
             if (amount != 0) {
                 int dom = get(DAY_OF_MONTH);
                 int day = get(JULIAN_DAY) - EPOCH_JULIAN_DAY; // Get local day
@@ -581,6 +582,7 @@ public class ChineseCalendar extends Calendar {
     public void roll(int field, int amount) {
         switch (field) {
         case MONTH:
+        case ORDINAL_MONTH:
             if (amount != 0) {
                 int dom = get(DAY_OF_MONTH);
                 int day = get(JULIAN_DAY) - EPOCH_JULIAN_DAY; // Get local day
@@ -593,7 +595,7 @@ public class ChineseCalendar extends Calendar {
                 // value from 0..11 in a non-leap year, and from 0..12 in a
                 // leap year.
                 int m = get(MONTH); // 0-based month
-                if (isLeapYear) { // (member variable)
+                if (hasLeapMonthBetweenWinterSolstices) { // (member variable)
                     if (get(IS_LEAP_MONTH) == 1) {
                         ++m;
                     } else {
@@ -615,7 +617,7 @@ public class ChineseCalendar extends Calendar {
 
                 // Now do the standard roll computation on m, with the
                 // allowed range of 0..n-1, where n is 12 or 13.
-                int n = isLeapYear ? 13 : 12; // Months in this year
+                int n = hasLeapMonthBetweenWinterSolstices ? 13 : 12; // Months in this year
                 int newM = (m + amount) % n;
                 if (newM < 0) {
                     newM += n;
@@ -841,7 +843,7 @@ public class ChineseCalendar extends Calendar {
      * IS_LEAP_MONTH fields, as required by
      * <code>handleComputeMonthStart()</code>.
      *
-     * <p>As a side effect, this method sets {@link #isLeapYear}.
+     * <p>As a side effect, this method sets {@link #hasLeapMonthBetweenWinterSolstices}.
      * @param days days after January 1, 1970 0:00 astronomical base zone of the
      * date to compute fields for
      * @param gyear the Gregorian year of the given date
@@ -872,22 +874,31 @@ public class ChineseCalendar extends Calendar {
         int firstMoon = newMoonNear(solsticeBefore + 1, true);
         int lastMoon = newMoonNear(solsticeAfter + 1, false);
         int thisMoon = newMoonNear(days + 1, false); // Start of this month
-        // Note: isLeapYear is a member variable
-        isLeapYear = synodicMonthsBetween(firstMoon, lastMoon) == 12;
+        // Note: hasLeapMonthBetweenWinterSolstices is a member variable
+        hasLeapMonthBetweenWinterSolstices = synodicMonthsBetween(firstMoon, lastMoon) == 12;
 
         int month = synodicMonthsBetween(firstMoon, thisMoon);
-        if (isLeapYear && isLeapMonthBetween(firstMoon, thisMoon)) {
+        int theNewYear = newYear(gyear);
+        if (days < theNewYear) {
+            theNewYear = newYear(gyear-1);
+        }
+        if (hasLeapMonthBetweenWinterSolstices && isLeapMonthBetween(firstMoon, thisMoon)) {
             month--;
         }
         if (month < 1) {
             month += 12;
         }
+        int ordinalMonth = synodicMonthsBetween(theNewYear, thisMoon);
+        if (ordinalMonth < 0) {
+            ordinalMonth += 12;
+        }
 
-        boolean isLeapMonth = isLeapYear &&
+        boolean isLeapMonth = hasLeapMonthBetweenWinterSolstices &&
             hasNoMajorSolarTerm(thisMoon) &&
             !isLeapMonthBetween(firstMoon, newMoonNear(thisMoon - SYNODIC_GAP, false));
 
         internalSet(MONTH, month-1); // Convert from 1-based to 0-based
+        internalSet(ORDINAL_MONTH, ordinalMonth);
         internalSet(IS_LEAP_MONTH, isLeapMonth?1:0);
 
         if (setAllFields) {
@@ -989,6 +1000,7 @@ public class ChineseCalendar extends Calendar {
 
         // Save fields for later restoration
         int saveMonth = internalGet(MONTH);
+        int saveOrdinalMonth = internalGet(ORDINAL_MONTH);
         int saveIsLeapMonth = internalGet(IS_LEAP_MONTH);
 
         // Ignore IS_LEAP_MONTH field if useMonth is false
@@ -1007,6 +1019,7 @@ public class ChineseCalendar extends Calendar {
         }
 
         internalSet(MONTH, saveMonth);
+        internalSet(ORDINAL_MONTH, saveOrdinalMonth);
         internalSet(IS_LEAP_MONTH, saveIsLeapMonth);
 
         return julianDay - 1;
@@ -1046,7 +1059,121 @@ public class ChineseCalendar extends Calendar {
         winterSolsticeCache = new CalendarCache();
         newYearCache = new CalendarCache();
     }
-    
+
+    //-------------------------------------------------------------------------
+    // Temporal Calendar API.
+    //-------------------------------------------------------------------------
+    /**
+     * {@icu} Returns true if the date is in a leap year. Recalculate the current time
+     * field values if the time value has been changed by a call to setTime().
+     * This method is semantically const, but may alter the object in memory.
+     * A "leap year" is a year that contains more days than other years (for
+     * solar or lunar calendars) or more months than other years (for lunisolar
+     * calendars like Hebrew or Chinese), as defined in the ECMAScript Temporal
+     * proposal.
+     * @return true if the date in the fields is in a Temporal proposal
+     *               defined leap year. False otherwise.
+     * @draft ICU 74
+     */
+    public boolean inTemporalLeapYear() {
+        return getActualMaximum(DAY_OF_YEAR) > 360;
+    }
+
+    private static String [] gTemporalLeapMonthCodes = {
+        "M01L", "M02L", "M03L", "M04L", "M05L", "M06L", "M07L", "M08L", "M09L", "M10L", "M11L", "M12L"
+    };
+
+    /**
+     * Gets The Temporal monthCode value corresponding to the month for the date.
+     * The value is a string identifier that starts with the literal grapheme
+     * "M" followed by two graphemes representing the zero-padded month number
+     * of the current month in a normal (non-leap) year and suffixed by an
+     * optional literal grapheme "L" if this is a leap month in a lunisolar
+     * calendar. For the Chinese calendar, the values are "M01" .. "M12" for
+     * non-leap year and * in leap year with another monthCode in "M01L" .. "M12L".
+     *
+     * @return       One of 24 possible strings in {"M01".."M12", "M01L".."M12L"}.
+     * @draft ICU 74
+     */
+    public String getTemporalMonthCode() {
+        // We need to call get, not internalGet, to force the calculation
+        // from ORDINAL_MONTH.
+        int is_leap = get(IS_LEAP_MONTH);
+        if (is_leap != 0) {
+            return gTemporalLeapMonthCodes[get(MONTH)];
+        }
+        return super.getTemporalMonthCode();
+    }
+
+    /**
+     * Sets The Temporal monthCode which is a string identifier that starts
+     * with the literal grapheme "M" followed by two graphemes representing
+     * the zero-padded month number of the current month in a normal
+     * (non-leap) year and suffixed by an optional literal grapheme "L" if this
+     * is a leap month in a lunisolar calendar.
+     * For the Chinese calendar, the values are "M01" .. "M12" for non-leap year and
+     * in leap year with another monthCode in "M01L" .. "M12L".
+     * @param temporalMonth One of 25 possible strings in {"M01".. "M12", "M13", "M01L",
+     *  "M12L"}.
+     * @draft ICU 74
+     */
+    public void setTemporalMonthCode( String temporalMonth ) {
+        if (temporalMonth.length() != 4 || temporalMonth.charAt(0) != 'M' || temporalMonth.charAt(3) != 'L') {
+            set(IS_LEAP_MONTH, 0);
+            super.setTemporalMonthCode(temporalMonth);
+            return;
+        }
+        for (int m = 0; m < gTemporalLeapMonthCodes.length; m++) {
+            if (temporalMonth.equals(gTemporalLeapMonthCodes[m])) {
+                set(MONTH, m);
+                set(IS_LEAP_MONTH, 1);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Incorrect temporal Month code: " + temporalMonth);
+    }
+
+    //-------------------------------------------------------------------------
+    // End of Temporal Calendar API
+    //-------------------------------------------------------------------------
+
+    /**
+     * {@inheritDoc}
+     * @internal
+     * @deprecated This API is ICU internal only.
+     */
+    @Deprecated
+    protected int internalGetMonth()
+    {
+        if (resolveFields(MONTH_PRECEDENCE) == MONTH) {
+            return internalGet(MONTH);
+        }
+        Calendar temp = (Calendar) clone();
+        temp.set(Calendar.MONTH, 0);
+        temp.set(Calendar.IS_LEAP_MONTH, 0);
+        temp.set(Calendar.DATE, 1);
+        // Calculate the MONTH and IS_LEAP_MONTH by adding number of months.
+        temp.roll(Calendar.MONTH, internalGet(Calendar.ORDINAL_MONTH));
+        internalSet(Calendar.IS_LEAP_MONTH, temp.get(Calendar.IS_LEAP_MONTH));
+        int month = temp.get(Calendar.MONTH);
+        internalSet(Calendar.MONTH, month);
+        return month;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @internal
+     * @deprecated This API is ICU internal only.
+     */
+    @Deprecated
+    protected int internalGetMonth(int defaultValue)
+    {
+        if (resolveFields(MONTH_PRECEDENCE) == MONTH) {
+            return internalGet(MONTH, defaultValue);
+        }
+        return internalGetMonth();
+    }
+
     /*
     private static CalendarFactory factory;
     public static CalendarFactory factory() {
