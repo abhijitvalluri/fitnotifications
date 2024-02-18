@@ -228,8 +228,12 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.POST_NOTIFICATIONS) !=
-                PackageManager.PERMISSION_GRANTED
+        boolean isInitialSetupDone = mPreferences.getBoolean(getString(R.string.done_first_launch_key), false);
+        if (isInitialSetupDone
+                && ContextCompat.checkSelfPermission(
+                        mContext,
+                        Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
         ) {
             Toast.makeText(mContext, getString(R.string.notification_permission_toast), Toast.LENGTH_LONG).show();
             startActivity(AppIntroActivity.newIntentForRequestingNotificationPermission(mContext), LAUNCH_ACTIVITY_ANIM_BUNDLE);

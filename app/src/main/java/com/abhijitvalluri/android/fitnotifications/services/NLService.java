@@ -139,7 +139,7 @@ public class NLService extends NotificationListenerService {
 
         try {
             translitUtil = new TranslitUtil(res);
-        } catch (Throwable e) { // FIXME: Ugly hack for now. Next app update should update the ICU4J lib, and/or clean up the transliteration code to fix these horrible errors! :)
+        } catch (Throwable e) {
             if (mDebugLog.isEnabled()) {
                 mDebugLog.writeLog("Failed to initialize TranslitUtil class. icu4j Transliterator threw: " + e);
             }

@@ -34,4 +34,9 @@
         <item name="android:colorBackgroundFloating" tools:targetApi="23">@color/white</item>
     </style>
 
+    <style name="TimePickerAlertDialogTheme" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="android:background">@color/normal_background</item>
+    </style>
+
+
 </resources>

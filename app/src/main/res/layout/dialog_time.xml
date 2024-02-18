@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TimePicker xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/dialog_time_time_picker"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:calendarViewShown="false">
-
-</TimePicker>
+    android:id="@+id/dialog_time_time_picker"
+    android:background="@color/normal_background"
+    android:headerBackground="@color/colorAccentDark"
+    android:numbersSelectorColor="@color/colorAccent"
+    android:numbersBackgroundColor="@color/normal_border"
+    android:numbersTextColor="@color/normal_text"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:calendarViewShown="false" />

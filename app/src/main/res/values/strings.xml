@@ -464,19 +464,16 @@
        killers or at least allow them to keep the \"Fit Notifications\" service running.</p>
     ]]></string>
     <string name="whats_new_text"><![CDATA[
-    <p style=\"font-size: 140%;\">Changes in <b>version 2.11.1:</b></p>
+    <p style=\"font-size: 140%;\">Changes in <b>version 2.12:</b></p>
     <ul>
-        <li>Updated app to support Android 11 platform, general stability improvements, bug fixes, and UI tweaks.<br /><br /></li>
-        <li>Updated placeholder notification message and added an FAQ entry to explain the importance of placeholder
-            notifications, and clarify potential issues when using the \"Dismiss placeholder notification\" setting in the app.<br /><br /></li>
-        <li>Implemented a proper dark theme! Now the app should look even better when you use a system-wide dark/night theme!<br /><br /></li>
-        <li><b>Emergency update:</b> Fixed a crash observed in the previous update (2.11.0) that occurs on older Android devices.
-            This crash was due to the transliteration feature not initializing correctly on phones running Android 9 or lower.<br /></li>
+        <li>Updated app to support Android 14 platform, general stability improvements, bug fixes, and UI tweaks.<br /><br /></li>
+        <li>Updated library used for transliteration feature to improve functionality and fix bugs.<br /><br /></li>
+        <li>Updated the app to request notifications permission on newer versions of Android (version 13 and above).<br /></li>
     </ul>
     <p><b>Note: </b>If your Fitbit device does not vibrate but still receives notifications, then
        try enabling the \"Always Vibrate\" setting in the Fitbit app, under the \"Notifications\"
-       settings for your Fitbit device.</p>
-    <p><b>Support the developer!</b> You can <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer by visiting the donation web page! More details on the website.</p>
+       settings for your Fitbit device. Please note that this setting may have been removed in the newer versions of the Fitbit app.</p>
+    <p><b>Support the developer, if you like to!</b> You can <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer by visiting the donation web page! This is voluntary, and not required. :)</p>
 
     ]]></string>
     <string name="opensource_text"><![CDATA[
@@ -498,48 +495,97 @@
         limitations under the License.
     </p>
     <hr /><hr />
-    <p><b>Library: </b>International Components for Unicode for Java (ICU4J) 57.1</p>
-    <p>ICU License - ICU 1.8.1 and later
-<br /><br />
-<br />COPYRIGHT AND PERMISSION NOTICE
-<br />
-<br />Copyright &#169; 1995-2016 International Business Machines Corporation and others
-<br /><br />
-All rights reserved.
-<br /><br />
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \\"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, provided that the above copyright notice(s) and this permission notice appear in all copies of the Software and that both the above copyright notice(s) and this permission notice appear in supporting documentation.
-<br /><br />
-THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-<br /><br />
-Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization of the copyright holder.
-<br /><br />
-All trademarks and registered trademarks mentioned herein are the property of their respective owners.
-<br /><br />
----------------------
-<br /><br />
-Third-Party Software Licenses
-<br /><br />
-This section contains third-party software notices and/or additional terms for licensed third-party software components included within ICU libraries.
-<br /><br />
-1. Unicode Data Files and Software
-<br /><br />
-COPYRIGHT AND PERMISSION NOTICE
-<br /><br />
-Copyright &#169; 1991-2016 Unicode, Inc. All rights reserved.
-<br />Distributed under the Terms of Use in
-<br />http://www.unicode.org/copyright.html.
-<br /><br />
-Permission is hereby granted, free of charge, to any person obtaining a copy of the Unicode data files and any associated documentation (the \"Data Files\") or Unicode software and any associated documentation (the \"Software\") to deal in the Data Files or Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, and/or sell copies of the Data Files or Software, and to permit persons to whom the Data Files or Software are furnished to do so, provided that
-<br />( a ) this copyright and permission notice appear with all copies of the Data Files or Software,
-<br />( b ) this copyright and permission notice appear in associated documentation, and
-<br />( c ) there is clear notice in each modified Data File or in the Software as well as in the documentation associated with the Data File(s) or Software that the data or software has been modified.
-<br /><br />
-THE DATA FILES AND SOFTWARE ARE PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THE DATA FILES OR SOFTWARE.
-<br /><br />
-Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other dealings in these Data Files or Software without prior written authorization of the copyright holder.
-<br /><br />
-2. Chinese/Japanese Word Break Dictionary Data (cjdict.txt)
-<br /><br />
+    <p><b>Library: </b>International Components for Unicode for Java (ICU4J) 74.2</p>
+    <p>
+        UNICODE LICENSE V3<br /><br />
+
+        COPYRIGHT AND PERMISSION NOTICE<br /><br />
+
+        Copyright &#169; 2016-2023 Unicode, Inc.<br /><br />
+
+        NOTICE TO USER: Carefully read the following legal agreement. BY
+        DOWNLOADING, INSTALLING, COPYING OR OTHERWISE USING DATA FILES, AND/OR
+        SOFTWARE, YOU UNEQUIVOCALLY ACCEPT, AND AGREE TO BE BOUND BY, ALL OF THE
+        TERMS AND CONDITIONS OF THIS AGREEMENT. IF YOU DO NOT AGREE, DO NOT
+        DOWNLOAD, INSTALL, COPY, DISTRIBUTE OR USE THE DATA FILES OR SOFTWARE.<br /><br />
+
+        Permission is hereby granted, free of charge, to any person obtaining a
+        copy of data files and any associated documentation (the "Data Files") or
+        software and any associated documentation (the "Software") to deal in the
+        Data Files or Software without restriction, including without limitation
+        the rights to use, copy, modify, merge, publish, distribute, and/or sell
+        copies of the Data Files or Software, and to permit persons to whom the
+        Data Files or Software are furnished to do so, provided that either (a)
+        this copyright and permission notice appear with all copies of the Data
+        Files or Software, or (b) this copyright and permission notice appear in
+        associated Documentation.<br /><br />
+
+        THE DATA FILES AND SOFTWARE ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+        KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+        MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF
+        THIRD PARTY RIGHTS.<br /><br />
+
+        IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS NOTICE
+        BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES,
+        OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+        WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+        ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THE DATA
+        FILES OR SOFTWARE.<br /><br />
+
+        Except as contained in this notice, the name of a copyright holder shall
+        not be used in advertising or otherwise to promote the sale, use or other
+        dealings in these Data Files or Software without prior written
+        authorization of the copyright holder.<br /><br />
+
+        ----------------------------------------------------------------------<br /><br />
+
+        Third-Party Software Licenses<br /><br />
+
+        This section contains third-party software notices and/or additional
+        terms for licensed third-party software components included within ICU
+        libraries.<br /><br />
+
+        ----------------------------------------------------------------------<br /><br />
+
+        ICU License - ICU 1.8.1 to ICU 57.1<br /><br />
+
+        COPYRIGHT AND PERMISSION NOTICE<br /><br />
+
+        Copyright &#169; 1995-2016 International Business Machines Corporation and others<br />
+        All rights reserved.<br /><br />
+
+        Permission is hereby granted, free of charge, to any person obtaining
+        a copy of this software and associated documentation files (the
+        "Software"), to deal in the Software without restriction, including
+        without limitation the rights to use, copy, modify, merge, publish,
+        distribute, and/or sell copies of the Software, and to permit persons
+        to whom the Software is furnished to do so, provided that the above
+        copyright notice(s) and this permission notice appear in all copies of
+        the Software and that both the above copyright notice(s) and this
+        permission notice appear in supporting documentation.<br /><br />
+
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+        EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+        MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+        OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+        HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY
+        SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER
+        RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
+        CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+        CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.<br /><br />
+
+        Except as contained in this notice, the name of a copyright holder
+        shall not be used in advertising or otherwise to promote the sale, use
+        or other dealings in this Software without prior written authorization
+        of the copyright holder.<br /><br />
+
+        All trademarks and registered trademarks mentioned herein are the
+        property of their respective owners.<br /><br />
+
+        ----------------------------------------------------------------------<br /><br />
+
+        Chinese/Japanese Word Break Dictionary Data (cjdict.txt)<br /><br />
+
  #     The Google Chrome software developed by Google is licensed under
 <br /> # the BSD license. Other software included in this distribution is
 <br /> # provided under other licenses, as set forth below.
@@ -742,7 +788,8 @@ Except as contained in this notice, the name of a copyright holder shall not be 
 <br /> #
 <br /> #  ---------------COPYING.ipadic-----END----------------------------------
 <br /><br />
-3. Lao Word Break Dictionary Data (laodict.txt)
+----------------------------------------------------------------------<br /><br />
+Lao Word Break Dictionary Data (laodict.txt)
 <br /><br />
  #  Copyright &#169; 2013 International Business Machines Corporation
 <br /> #  and others. All Rights Reserved.
@@ -784,7 +831,8 @@ Except as contained in this notice, the name of a copyright holder shall not be 
 <br /> # OF THE POSSIBILITY OF SUCH DAMAGE.
 <br /> #  --------------------------------------------------------------------------
 <br /><br />
-4. Burmese Word Break Dictionary Data (burmesedict.txt)
+----------------------------------------------------------------------<br /><br />
+Burmese Word Break Dictionary Data (burmesedict.txt)
 <br /><br />
  #  Copyright &#169; 2014 International Business Machines Corporation
 <br /> #  and others. All Rights Reserved.
@@ -824,7 +872,8 @@ Except as contained in this notice, the name of a copyright holder shall not be 
 <br /> #  SUCH DAMAGE.
 <br /> #  --------------------------------------------------------------------------
 <br /><br />
-5. Time Zone Database
+----------------------------------------------------------------------<br /><br />
+Time Zone Database
 <br /><br />
   ICU uses the public domain data and code derived from Time Zone Database for its time zone support. The ownership of the TZ database is explained in BCP 175: Procedure for Maintaining the Time Zone Database section 7.
 <br /><br />
@@ -842,7 +891,34 @@ Except as contained in this notice, the name of a copyright holder shall not be 
 <br /> #    with all competent court orders.  No ownership claims will be made
 <br /> #    by ICANN or the IETF Trust on the database or the code.  Any person
 <br /> #    making a contribution to the database or code waives all rights to
-<br /> #    future claims in that contribution or in the TZ Database.</p>
+<br /> #    future claims in that contribution or in the TZ Database.
+<br /><br />
+----------------------------------------------------------------------<br /><br />
+Google double-conversion
+<br /><br />
+Copyright 2006-2011, the V8 project authors. All rights reserved. Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+<br /><br />
+<br />     * Redistributions of source code must retain the above copyright
+<br />       notice, this list of conditions and the following disclaimer.
+<br />     * Redistributions in binary form must reproduce the above
+<br />       copyright notice, this list of conditions and the following
+<br />       disclaimer in the documentation and/or other materials provided
+<br />       with the distribution.
+<br />     * Neither the name of Google Inc. nor the names of its
+<br />       contributors may be used to endorse or promote products derived
+<br />       from this software without specific prior written permission.
+<br />
+<br /> THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+<br /> "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+<br /> LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+<br /> A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+<br /> OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+<br /> SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+<br /> LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+<br /> DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+<br /> THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+<br /> (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+<br /> OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
     <hr /><hr />
     ]]>
 

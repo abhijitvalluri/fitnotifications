@@ -95,7 +95,7 @@ public class TimePickerFragment extends DialogFragment {
         @StringRes int titleStringId = mRequestCode == AppSettingsActivity.START_TIME_REQUEST ?
                 R.string.start_time_heading : R.string.stop_time_heading;
 
-        final AlertDialog dialog = new AlertDialog.Builder(mContext)
+        final AlertDialog dialog = new AlertDialog.Builder(mContext, R.style.TimePickerAlertDialogTheme)
                 .setView(v)
                 .setTitle(titleStringId)
                 .setNegativeButton(android.R.string.cancel, null)
