@@ -1,2 +1,2 @@
 include ':app'
-//include ':icu4j'
+include ':icu4j'

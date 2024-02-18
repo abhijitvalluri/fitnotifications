@@ -5,7 +5,7 @@ android {
 
     defaultConfig {
         applicationId "com.abhijitvalluri.android.fitnotifications"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 34
         versionCode 46
         versionName "2.11.1"
@@ -21,7 +21,8 @@ android {
             versionNameSuffix "-DEBUG"
         }
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -39,7 +40,7 @@ android {
 
 dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    //implementation project(':icu4j')
+    implementation project(':icu4j')
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     testImplementation 'junit:junit:4.12'
@@ -52,5 +53,4 @@ dependencies {
     implementation 'androidx.webkit:webkit:1.10.0'
     implementation 'com.heinrichreimersoftware:material-intro:2.0.0'
     implementation 'com.google.android.material:material:1.6.0'
-    implementation 'com.ibm.icu:icu4j:74.2'
 }
