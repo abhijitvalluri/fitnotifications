@@ -464,16 +464,11 @@
        killers or at least allow them to keep the \"Fit Notifications\" service running.</p>
     ]]></string>
     <string name="whats_new_text"><![CDATA[
-    <p style=\"font-size: 140%;\">Changes in <b>version 2.12:</b></p>
+    <p style=\"font-size: 140%;\">Changes in <b>version 2.13:</b></p>
     <ul>
-        <li>Updated app to support Android 14 platform, general stability improvements, bug fixes, and UI tweaks.<br /><br /></li>
-        <li>Updated library used for transliteration feature to improve functionality and fix bugs.<br /><br /></li>
-        <li>Updated the app to request notifications permission on newer versions of Android (version 13 and above).<br /></li>
+        <li>Updated app to support Android 16 platform, general stability improvements, bug fixes.<br /><br /></li>
     </ul>
-    <p><b>Note: </b>If your Fitbit device does not vibrate but still receives notifications, then
-       try enabling the \"Always Vibrate\" setting in the Fitbit app, under the \"Notifications\"
-       settings for your Fitbit device. Please note that this setting may have been removed in the newer versions of the Fitbit app.</p>
-    <p><b>Support the developer, if you like to!</b> You can <a href="https://abhijitvalluri.com/android/donate/">donate</a> to the app developer by visiting the donation web page! This is voluntary, and not required. :)</p>
+    <p><b>Note: </b>This app is currently in maintenance mode (deprecated). No new features will be implemented. It may no longer work with the new Google Health app.</p>
 
     ]]></string>
     <string name="opensource_text"><![CDATA[
@@ -495,7 +490,7 @@
         limitations under the License.
     </p>
     <hr /><hr />
-    <p><b>Library: </b>International Components for Unicode for Java (ICU4J) 74.2</p>
+    <p><b>Library: </b>International Components for Unicode for Java (ICU4J) 78.3</p>
     <p>
         UNICODE LICENSE V3<br /><br />
 

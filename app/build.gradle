@@ -1,19 +1,19 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 34
+    compileSdkVersion 36
 
     defaultConfig {
         applicationId "com.abhijitvalluri.android.fitnotifications"
         minSdkVersion 21
-        targetSdkVersion 34
-        versionCode 46
-        versionName "2.12"
+        targetSdkVersion 36
+        versionCode 47
+        versionName "2.13"
     }
     compileOptions {
         encoding "UTF-8"
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     buildTypes {
         debug {
@@ -23,7 +23,7 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     testOptions {
@@ -34,13 +34,14 @@ android {
     }
     buildFeatures {
         dataBinding = true
+        buildConfig = true
     }
     namespace 'com.abhijitvalluri.android.fitnotifications'
 }
 
 dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation project(':icu4j')
+    implementation 'com.ibm.icu:icu4j:78.3'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     testImplementation 'junit:junit:4.12'

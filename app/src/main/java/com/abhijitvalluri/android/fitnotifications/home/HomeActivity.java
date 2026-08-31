@@ -16,7 +16,6 @@
 
 package com.abhijitvalluri.android.fitnotifications.home;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.NotificationChannel;
@@ -251,7 +250,6 @@ public class HomeActivity extends AppCompatActivity {
         return i;
     }
 
-    @SuppressLint("NonConstantResourceId")
     private void selectDrawerItem(MenuItem menuItem) {
         // Create a new fragment and specify the fragment to show based on nav item clicked
         final Fragment frag;
@@ -263,71 +261,64 @@ public class HomeActivity extends AppCompatActivity {
             setTitle(menuItem.getTitle());
         }
 
-        switch (menuItem.getItemId()) {
-            case R.id.nav_donate:
-                startActivity(userDonationIntent());
-                mDrawerLayout.closeDrawers();
-                return;
-            case R.id.send_feedback:
-                sendFeedback();
-                mDrawerLayout.closeDrawers();
-                return;
-            case R.id.nav_home:
-                setTitle(R.string.app_name);
-                frag = new HomeFragment();
-                break;
-            case R.id.nav_about_app:
-                if (isInfoFragment) {
-                    ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.about_app_text));
-                    frag = null;
-                } else {
-                    frag = InfoFragment.newInstance(getString(R.string.about_app_text));
-                }
-                break;
-            case R.id.nav_whats_new:
-                if (isInfoFragment) {
-                    ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.whats_new_text));
-                    frag = null;
-                } else {
-                    frag = InfoFragment.newInstance(getString(R.string.whats_new_text));
-                }
-                break;
-            case R.id.nav_faqs:
-                if (isInfoFragment) {
-                    ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.faqs_text));
-                    frag = null;
-                } else {
-                    frag = InfoFragment.newInstance(getString(R.string.faqs_text));
-                }
-                break;
-            case R.id.nav_manual_setup:
-                if (isInfoFragment) {
-                    ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.instructions_text));
-                    frag = null;
-                } else {
-                    frag = InfoFragment.newInstance(getString(R.string.instructions_text));
-                }
-                break;
-            case R.id.nav_opensource:
-                if (isInfoFragment) {
-                    ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.opensource_text));
-                    frag = null;
-                } else {
-                    frag = InfoFragment.newInstance(getString(R.string.opensource_text));
-                }
-                break;
-            case R.id.nav_contact:
-                setTitle(menuItem.getTitle());
-                if (isInfoFragment) {
-                    ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.smart_dino_text));
-                    frag = null;
-                } else {
-                    frag = InfoFragment.newInstance(getString(R.string.smart_dino_text));
-                }
-                break;
-            default:
-                // something unexpected has happened Log it may be?
-                return;
+        final int itemId = menuItem.getItemId();
+        if (itemId == R.id.nav_donate) {
+            startActivity(userDonationIntent());
+            mDrawerLayout.closeDrawers();
+            return;
+        } else if (itemId == R.id.send_feedback) {
+            sendFeedback();
+            mDrawerLayout.closeDrawers();
+            return;
+        } else if (itemId == R.id.nav_home) {
+            setTitle(R.string.app_name);
+            frag = new HomeFragment();
+        } else if (itemId == R.id.nav_about_app) {
+            if (isInfoFragment) {
+                ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.about_app_text));
+                frag = null;
+            } else {
+                frag = InfoFragment.newInstance(getString(R.string.about_app_text));
+            }
+        } else if (itemId == R.id.nav_whats_new) {
+            if (isInfoFragment) {
+                ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.whats_new_text));
+                frag = null;
+            } else {
+                frag = InfoFragment.newInstance(getString(R.string.whats_new_text));
+            }
+        } else if (itemId == R.id.nav_faqs) {
+            if (isInfoFragment) {
+                ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.faqs_text));
+                frag = null;
+            } else {
+                frag = InfoFragment.newInstance(getString(R.string.faqs_text));
+            }
+        } else if (itemId == R.id.nav_manual_setup) {
+            if (isInfoFragment) {
+                ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.instructions_text));
+                frag = null;
+            } else {
+                frag = InfoFragment.newInstance(getString(R.string.instructions_text));
+            }
+        } else if (itemId == R.id.nav_opensource) {
+            if (isInfoFragment) {
+                ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.opensource_text));
+                frag = null;
+            } else {
+                frag = InfoFragment.newInstance(getString(R.string.opensource_text));
+            }
+        } else if (itemId == R.id.nav_contact) {
+            setTitle(menuItem.getTitle());
+            if (isInfoFragment) {
+                ((InfoFragment) currFrag).updateWebViewContent(getString(R.string.smart_dino_text));
+                frag = null;
+            } else {
+                frag = InfoFragment.newInstance(getString(R.string.smart_dino_text));
+            }
+        } else {
+            // something unexpected has happened Log it may be?
+            return;
         }
 
         // Highlight the selected item has been done by NavigationView
